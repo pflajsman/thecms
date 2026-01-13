@@ -1,0 +1,25 @@
+{
+  "name": "thecms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Headless CMS hosted on Azure with free tiers",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./packages/*\" dev",
+    "build": "pnpm --filter \"./packages/*\" build",
+    "test": "pnpm --filter \"./packages/*\" test",
+    "lint": "pnpm --filter \"./packages/*\" lint"
+  },
+  "keywords": [
+    "cms",
+    "headless-cms",
+    "azure",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

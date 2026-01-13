@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MongoDB for local development
+  # In production, use Cosmos DB with MongoDB API
+  mongodb:
+    image: mongo:7-jammy
+    container_name: thecms-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: thecms
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - thecms-network
+
+  # Azurite - Azure Storage Emulator for local development
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: thecms-azurite
+    restart: unless-stopped
+    ports:
+      - "10000:10000"  # Blob service
+      - "10001:10001"  # Queue service
+      - "10002:10002"  # Table service
+    volumes:
+      - azurite_data:/data
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose"
+    networks:
+      - thecms-network
+
+  # Backend API (optional - for testing Docker build)
+  # backend:
+  #   build:
+  #     context: ./packages/backend
+  #     dockerfile: Dockerfile
+  #   container_name: thecms-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3000
+  #     MONGODB_URI: mongodb://admin:password123@mongodb:27017/thecms?authSource=admin
+  #     AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+  #   depends_on:
+  #     - mongodb
+  #     - azurite
+  #   networks:
+  #     - thecms-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  azurite_data:
+    driver: local
+
+networks:
+  thecms-network:
+    driver: bridge
