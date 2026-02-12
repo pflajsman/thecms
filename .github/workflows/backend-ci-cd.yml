@@ -61,6 +61,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Copy lockfile into backend context
+        run: cp pnpm-lock.yaml packages/backend/
+
       - name: Build and push Docker image
         working-directory: packages/backend
         run: |
