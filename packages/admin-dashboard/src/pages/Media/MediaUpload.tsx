@@ -73,7 +73,7 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
       // Create a fake event to reuse the file select handler
       const fakeEvent = {
         target: { files: [droppedFile] },
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
       handleFileSelect(fakeEvent);
     }
   }, [handleFileSelect]);

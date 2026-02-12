@@ -20,7 +20,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  TextField,
 } from '@mui/material';
 import { Add, Edit, Delete, Publish, Archive, Unpublished } from '@mui/icons-material';
 import { contentEntriesService } from '../../services/contentEntries';

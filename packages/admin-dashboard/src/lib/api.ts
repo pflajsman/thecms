@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { PublicClientApplication } from '@azure/msal-browser';
-import { msalConfig, loginRequest, isEntraConfigured } from '../config/msalConfig';
+import { loginRequest, isEntraConfigured } from '../config/msalConfig';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 

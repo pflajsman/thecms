@@ -34,7 +34,7 @@ export function MediaLibrary() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
 
   const [editForm, setEditForm] = useState({
     altText: '',
@@ -170,7 +170,7 @@ export function MediaLibrary() {
           ) : (
             <Grid container spacing={2}>
               {data.data.map((media) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={media.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={media.id}>
                   <Card>
                     <Box
                       sx={{
@@ -208,8 +208,8 @@ export function MediaLibrary() {
                         {media.tags?.slice(0, 2).map((tag: string) => (
                           <Chip key={tag} label={tag} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
                         ))}
-                        {media.tags?.length > 2 && (
-                          <Chip label={`+${media.tags.length - 2}`} size="small" />
+                        {(media.tags?.length ?? 0) > 2 && (
+                          <Chip label={`+${media.tags!.length - 2}`} size="small" />
                         )}
                       </Box>
                     </CardContent>

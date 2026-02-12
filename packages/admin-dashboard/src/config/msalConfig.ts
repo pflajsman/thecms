@@ -1,4 +1,4 @@
-import { Configuration, LogLevel } from '@azure/msal-browser';
+import { type Configuration, LogLevel } from '@azure/msal-browser';
 
 const tenantName = import.meta.env.VITE_AZURE_ENTRA_TENANT_NAME || '';
 const clientId = import.meta.env.VITE_AZURE_ENTRA_CLIENT_ID || '';
@@ -14,7 +14,6 @@ export const msalConfig: Configuration = {
   },
   cache: {
     cacheLocation: 'localStorage',
-    storeAuthStateInCookie: false,
   },
   system: {
     loggerOptions: {
