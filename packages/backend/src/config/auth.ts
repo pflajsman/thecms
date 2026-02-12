@@ -12,12 +12,11 @@ const isDev = process.env.NODE_ENV !== 'production';
 export function getAuthConfig(): AuthConfig {
   const tenantId = process.env.AZURE_ENTRA_TENANT_ID || '';
   const clientId = process.env.AZURE_ENTRA_CLIENT_ID || '';
-  const tenantName = process.env.AZURE_ENTRA_TENANT_NAME || '';
 
-  if (!isDev && (!tenantId || !clientId || !tenantName)) {
+  if (!isDev && (!tenantId || !clientId)) {
     throw new Error(
       'Microsoft Entra External ID configuration is incomplete. ' +
-      'Set AZURE_ENTRA_TENANT_ID, AZURE_ENTRA_CLIENT_ID, and AZURE_ENTRA_TENANT_NAME.'
+      'Set AZURE_ENTRA_TENANT_ID and AZURE_ENTRA_CLIENT_ID.'
     );
   }
 
@@ -37,7 +36,6 @@ export function getAuthConfig(): AuthConfig {
 
 export function getOpenIdConfigUrl(): string {
   const config = getAuthConfig();
-  const tenantName = process.env.AZURE_ENTRA_TENANT_NAME || '';
   return `https://${config.tenantId}.ciamlogin.com/${config.tenantId}/v2.0/.well-known/openid-configuration`;
 }
 
