@@ -46,7 +46,7 @@ export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, login, logout, isAuthenticated, isLoading } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -54,8 +54,27 @@ export function Layout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h4" gutterBottom>TheCMS</Typography>
+          <Typography variant="body1" sx={{ mb: 3 }}>Sign in to access the admin dashboard</Typography>
+          <Button variant="contained" size="large" onClick={login}>Sign In</Button>
+        </Box>
+      </Box>
+    );
+  }
 
   const drawer = (
     <Box>
