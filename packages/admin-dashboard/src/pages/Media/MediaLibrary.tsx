@@ -48,7 +48,7 @@ export function MediaLibrary() {
       mediaService.list({
         page,
         limit: 20,
-        category: categoryFilter as any,
+        ...(categoryFilter && { category: categoryFilter as 'image' | 'document' | 'video' }),
       }),
   });
 
