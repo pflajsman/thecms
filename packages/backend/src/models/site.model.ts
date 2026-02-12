@@ -71,6 +71,7 @@ const SiteSchema = new Schema<ISite>(
 SiteSchema.index({ name: 1 });
 SiteSchema.index({ domain: 1 });
 SiteSchema.index({ isActive: 1, apiKey: 1 });
+SiteSchema.index({ createdAt: -1 });
 
 // Don't return apiKey in JSON by default (for security)
 SiteSchema.set('toJSON', {
