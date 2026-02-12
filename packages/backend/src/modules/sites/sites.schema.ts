@@ -64,7 +64,7 @@ export const listSitesSchema = z.object({
     isActive: z
       .string()
       .optional()
-      .transform((val) => val === 'true'),
+      .transform((val) => (val === undefined ? undefined : val === 'true')),
   }),
 });
 

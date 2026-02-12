@@ -50,7 +50,7 @@ export const listWebhooksSchema = z.object({
     page: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 1)),
     limit: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 20)),
     siteId: z.string().optional(),
-    isActive: z.string().optional().transform((val) => val === 'true'),
+    isActive: z.string().optional().transform((val) => (val === undefined ? undefined : val === 'true')),
   }),
 });
 
