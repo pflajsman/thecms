@@ -8,11 +8,7 @@ export async function connectDatabase(): Promise<void> {
   }
 
   try {
-    await mongoose.connect(mongoUri, {
-      // Connection options
-      retryWrites: true,
-      w: 'majority'
-    });
+    await mongoose.connect(mongoUri);
 
     // Connection event handlers
     mongoose.connection.on('connected', () => {
