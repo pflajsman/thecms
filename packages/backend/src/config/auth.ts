@@ -21,9 +21,9 @@ export function getAuthConfig(): AuthConfig {
     );
   }
 
-  const authority = `https://${tenantName}.ciamlogin.com/${tenantId}/v2.0`;
-  const issuer = `https://${tenantName}.ciamlogin.com/${tenantId}/v2.0`;
-  const jwksUri = `https://${tenantName}.ciamlogin.com/${tenantId}/discovery/v2.0/keys`;
+  const authority = `https://${tenantId}.ciamlogin.com/${tenantId}/v2.0`;
+  const issuer = `https://${tenantId}.ciamlogin.com/${tenantId}/v2.0`;
+  const jwksUri = `https://${tenantId}.ciamlogin.com/${tenantId}/discovery/v2.0/keys`;
 
   return {
     tenantId,
@@ -38,7 +38,7 @@ export function getAuthConfig(): AuthConfig {
 export function getOpenIdConfigUrl(): string {
   const config = getAuthConfig();
   const tenantName = process.env.AZURE_ENTRA_TENANT_NAME || '';
-  return `https://${tenantName}.ciamlogin.com/${config.tenantId}/v2.0/.well-known/openid-configuration`;
+  return `https://${config.tenantId}.ciamlogin.com/${config.tenantId}/v2.0/.well-known/openid-configuration`;
 }
 
 export function isDevMode(): boolean {
