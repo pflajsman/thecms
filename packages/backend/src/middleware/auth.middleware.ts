@@ -1,15 +1,86 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import jwksRsa from 'jwks-rsa';
 import { AppError } from './error.middleware';
 import { User, UserRole } from '../models/user.model';
+import { getAuthConfig, isDevMode } from '../config/auth';
 
-// JWT verification (simplified - will be enhanced with proper MSAL validation)
 export interface AuthRequest extends Request {
   user?: {
-    azureB2CId: string;
+    entraId: string;
     email: string;
     displayName?: string;
     role: UserRole;
   };
+}
+
+// JWKS client - lazily initialized on first real token validation
+let jwksClient: jwksRsa.JwksClient | null = null;
+
+function getJwksClient(): jwksRsa.JwksClient {
+  if (!jwksClient) {
+    const config = getAuthConfig();
+    jwksClient = jwksRsa({
+      jwksUri: config.jwksUri,
+      cache: true,
+      cacheMaxEntries: 5,
+      cacheMaxAge: 600000, // 10 minutes
+    });
+  }
+  return jwksClient;
+}
+
+function getSigningKey(header: jwt.JwtHeader): Promise<string> {
+  return new Promise((resolve, reject) => {
+    getJwksClient().getSigningKey(header.kid, (err, key) => {
+      if (err) return reject(err);
+      if (!key) return reject(new Error('No signing key found'));
+      const signingKey = key.getPublicKey();
+      resolve(signingKey);
+    });
+  });
+}
+
+async function verifyTokenProduction(token: string): Promise<jwt.JwtPayload> {
+  const config = getAuthConfig();
+
+  // Decode header first to get kid
+  const decoded = jwt.decode(token, { complete: true });
+  if (!decoded || typeof decoded === 'string') {
+    throw new AppError('Invalid token format', 401);
+  }
+
+  const signingKey = await getSigningKey(decoded.header);
+
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      token,
+      signingKey,
+      {
+        issuer: config.issuer,
+        audience: config.audience,
+        algorithms: ['RS256'],
+      },
+      (err, payload) => {
+        if (err) return reject(new AppError(`Token validation failed: ${err.message}`, 401));
+        resolve(payload as jwt.JwtPayload);
+      }
+    );
+  });
+}
+
+function parseTokenDev(token: string): jwt.JwtPayload {
+  // Development mode: decode without signature verification
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid token format');
+    }
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    return payload;
+  } catch {
+    throw new AppError('Invalid token', 401);
+  }
 }
 
 export const authMiddleware = async (
@@ -25,42 +96,44 @@ export const authMiddleware = async (
     }
 
     const token = authHeader.substring(7);
-
-    // TODO: Implement proper JWT validation with MSAL
-    // For now, we'll use a simplified version
-    // In production, this should:
-    // 1. Validate JWT signature using Azure AD B2C public keys
-    // 2. Validate issuer, audience, expiration
-    // 3. Extract claims from token
-
-    // Temporary implementation - replace with actual JWT validation
     if (!token) {
       throw new AppError('Invalid token', 401);
     }
 
-    // Parse token (in production, use proper JWT library)
-    // This is a placeholder - will be implemented fully when Azure AD B2C is configured
-    const decoded = parseToken(token);
+    // Validate token: production uses JWKS, dev uses simple decode
+    let payload: jwt.JwtPayload;
+    if (isDevMode()) {
+      payload = parseTokenDev(token);
+    } else {
+      payload = await verifyTokenProduction(token);
+    }
+
+    // Extract email - Entra External ID uses 'email' or 'preferred_username'
+    const email = payload.email || payload.preferred_username || payload.emails?.[0];
+    const displayName = payload.name || payload.given_name || '';
+    const sub = payload.sub || payload.oid;
+
+    if (!sub) {
+      throw new AppError('Token missing subject claim', 401);
+    }
 
     // Find or create user in database
-    let user = await User.findOne({ azureB2CId: decoded.sub });
+    let user = await User.findOne({ entraId: sub });
 
     if (!user) {
-      // Create user on first login
       user = await User.create({
-        azureB2CId: decoded.sub,
-        email: decoded.email || decoded.emails?.[0],
-        displayName: decoded.name,
-        role: UserRole.EDITOR // Default role
+        entraId: sub,
+        email: email,
+        displayName: displayName,
+        role: UserRole.EDITOR,
       });
     }
 
-    // Attach user to request
     req.user = {
-      azureB2CId: user.azureB2CId,
+      entraId: user.entraId,
       email: user.email,
       displayName: user.displayName,
-      role: user.role
+      role: user.role,
     };
 
     next();
@@ -87,19 +160,3 @@ export const requireRole = (...roles: UserRole[]) => {
     next();
   };
 };
-
-// Temporary token parser (replace with proper JWT validation)
-function parseToken(token: string): any {
-  // In production, use jsonwebtoken library to verify and decode
-  // This is just a placeholder
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      throw new Error('Invalid token format');
-    }
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-    return payload;
-  } catch (error) {
-    throw new AppError('Invalid token', 401);
-  }
-}

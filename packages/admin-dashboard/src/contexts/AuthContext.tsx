@@ -1,4 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useMsal, useIsAuthenticated } from '@azure/msal-react';
+import { InteractionStatus } from '@azure/msal-browser';
+import { loginRequest, isEntraConfigured } from '../config/msalConfig';
 
 interface User {
   sub: string;
@@ -9,9 +12,11 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, name: string) => void;
+  login: () => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  getAccessToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,47 +24,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Default token for development (same as backend test token)
 const DEFAULT_TOKEN = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0=.eyJzdWIiOiJ0ZXN0LXVzZXItMTIzIiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsIm5hbWUiOiJUZXN0IEFkbWluIn0=.signature';
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+function DevAuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check for stored token on mount
-    const storedToken = localStorage.getItem('auth_token');
-    if (storedToken) {
-      setToken(storedToken);
-      // Decode the token to get user info (simplified - just parse the payload)
-      try {
-        const payload = storedToken.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
-        setUser({
-          sub: decoded.sub,
-          email: decoded.email,
-          name: decoded.name,
-        });
-      } catch (error) {
-        console.error('Failed to decode token:', error);
-        localStorage.removeItem('auth_token');
-      }
-    } else {
-      // Auto-login with default token for development
-      const payload = DEFAULT_TOKEN.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      setToken(DEFAULT_TOKEN);
-      setUser({
-        sub: decoded.sub,
-        email: decoded.email,
-        name: decoded.name,
-      });
-      localStorage.setItem('auth_token', DEFAULT_TOKEN);
-    }
+    const payload = DEFAULT_TOKEN.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    setToken(DEFAULT_TOKEN);
+    setUser({
+      sub: decoded.sub,
+      email: decoded.email,
+      name: decoded.name,
+    });
+    localStorage.setItem('auth_token', DEFAULT_TOKEN);
   }, []);
 
-  const login = (email: string, name: string) => {
-    // For now, just use the default token
-    // In production, this would call Azure AD B2C and get a real token
+  const login = () => {
+    const payload = DEFAULT_TOKEN.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
     setToken(DEFAULT_TOKEN);
-    setUser({ sub: 'test-user-123', email, name });
+    setUser({ sub: decoded.sub, email: decoded.email, name: decoded.name });
     localStorage.setItem('auth_token', DEFAULT_TOKEN);
   };
 
@@ -69,19 +54,83 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('auth_token');
   };
 
+  const getAccessToken = async () => token;
+
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        token,
-        login,
-        logout,
-        isAuthenticated: !!token,
-      }}
+      value={{ user, token, login, logout, isAuthenticated: !!token, isLoading: false, getAccessToken }}
     >
       {children}
     </AuthContext.Provider>
   );
+}
+
+function EntraAuthProvider({ children }: { children: ReactNode }) {
+  const { instance, accounts, inProgress } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  const isLoading = inProgress !== InteractionStatus.None;
+
+  useEffect(() => {
+    if (isAuthenticated && accounts.length > 0) {
+      const account = accounts[0];
+      setUser({
+        sub: account.localAccountId,
+        email: account.username || '',
+        name: account.name || '',
+      });
+    } else {
+      setUser(null);
+      setToken(null);
+    }
+  }, [isAuthenticated, accounts]);
+
+  const getAccessToken = useCallback(async (): Promise<string | null> => {
+    if (!isAuthenticated || accounts.length === 0) return null;
+
+    try {
+      const response = await instance.acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      });
+      setToken(response.accessToken);
+      return response.accessToken;
+    } catch {
+      // Silent token acquisition failed, try interactive
+      try {
+        const response = await instance.acquireTokenPopup(loginRequest);
+        setToken(response.accessToken);
+        return response.accessToken;
+      } catch {
+        return null;
+      }
+    }
+  }, [instance, accounts, isAuthenticated]);
+
+  const login = useCallback(() => {
+    instance.loginRedirect(loginRequest);
+  }, [instance]);
+
+  const logout = useCallback(() => {
+    instance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
+  }, [instance]);
+
+  return (
+    <AuthContext.Provider
+      value={{ user, token, login, logout, isAuthenticated, isLoading, getAccessToken }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  if (isEntraConfigured()) {
+    return <EntraAuthProvider>{children}</EntraAuthProvider>;
+  }
+  return <DevAuthProvider>{children}</DevAuthProvider>;
 }
 
 export function useAuth() {

@@ -1,34 +1,46 @@
 export interface AuthConfig {
-  tenantName: string;
+  tenantId: string;
   clientId: string;
-  policyName: string;
+  authority: string;
   issuer: string;
   audience: string;
+  jwksUri: string;
 }
 
-export function getAuthConfig(): AuthConfig {
-  const tenantName = process.env.AZURE_AD_B2C_TENANT_NAME;
-  const clientId = process.env.AZURE_AD_B2C_CLIENT_ID;
-  const policyName = process.env.AZURE_AD_B2C_POLICY_NAME || 'B2C_1_signupsignin';
+const isDev = process.env.NODE_ENV !== 'production';
 
-  if (!tenantName || !clientId) {
-    throw new Error('Azure AD B2C configuration is incomplete. Please check environment variables.');
+export function getAuthConfig(): AuthConfig {
+  const tenantId = process.env.AZURE_ENTRA_TENANT_ID || '';
+  const clientId = process.env.AZURE_ENTRA_CLIENT_ID || '';
+  const tenantName = process.env.AZURE_ENTRA_TENANT_NAME || '';
+
+  if (!isDev && (!tenantId || !clientId || !tenantName)) {
+    throw new Error(
+      'Microsoft Entra External ID configuration is incomplete. ' +
+      'Set AZURE_ENTRA_TENANT_ID, AZURE_ENTRA_CLIENT_ID, and AZURE_ENTRA_TENANT_NAME.'
+    );
   }
 
-  const issuer = process.env.AZURE_AD_B2C_ISSUER ||
-    `https://${tenantName}.b2clogin.com/${tenantName}.onmicrosoft.com/v2.0/`;
+  const authority = `https://${tenantName}.ciamlogin.com/${tenantId}/v2.0`;
+  const issuer = `https://${tenantName}.ciamlogin.com/${tenantId}/v2.0`;
+  const jwksUri = `https://${tenantName}.ciamlogin.com/${tenantId}/discovery/v2.0/keys`;
 
   return {
-    tenantName,
+    tenantId,
     clientId,
-    policyName,
+    authority,
     issuer,
-    audience: clientId // Audience is typically the client ID
+    audience: clientId,
+    jwksUri,
   };
 }
 
-// Well-known OpenID configuration endpoint
 export function getOpenIdConfigUrl(): string {
   const config = getAuthConfig();
-  return `https://${config.tenantName}.b2clogin.com/${config.tenantName}.onmicrosoft.com/${config.policyName}/v2.0/.well-known/openid-configuration`;
+  const tenantName = process.env.AZURE_ENTRA_TENANT_NAME || '';
+  return `https://${tenantName}.ciamlogin.com/${config.tenantId}/v2.0/.well-known/openid-configuration`;
+}
+
+export function isDevMode(): boolean {
+  return isDev;
 }

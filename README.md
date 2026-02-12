@@ -27,7 +27,7 @@ TheCMS/
 ├── packages/
 │   ├── backend/          # Node.js API server
 │   └── admin-dashboard/  # React admin UI
-├── infrastructure/       # Terraform IaC
+├── infrastructure/       # Pulumi IaC (TypeScript)
 ├── IMPLEMENTATION_PLAN.md
 └── PROJECT_PROGRESS.md
 ```
@@ -54,14 +54,15 @@ pnpm dev
 ## Development Phases
 
 - ✅ Phase 0: Planning Complete
-- 🚧 Phase 1: Foundation & Authentication (In Progress)
-- ⏳ Phase 2: Content Types API
-- ⏳ Phase 3: Content Entries API
-- ⏳ Phase 4: Media Management
-- ⏳ Phase 5: Admin Dashboard - Foundation
-- ⏳ Phase 6: Admin Dashboard - Content & Media
-- ⏳ Phase 7: Consumer API & Multi-Site
-- ⏳ Phase 8: Production Readiness
+- 🚧 Phase 1: Foundation & Authentication (65% - Azure setup pending)
+- ✅ Phase 2: Content Types API
+- ✅ Phase 3: Content Entries API
+- ✅ Phase 4: Media Management
+- ✅ Phase 5: Admin Dashboard - Foundation
+- ✅ Phase 6: Admin Dashboard - Content & Media
+- ✅ Phase 7: Consumer API & Multi-Site
+- ✅ Phase 8: Webhooks & Events
+- ⏳ Phase 9: Production Readiness (Testing + Deployment)
 
 See [PROJECT_PROGRESS.md](./PROJECT_PROGRESS.md) for detailed task checklist.
 

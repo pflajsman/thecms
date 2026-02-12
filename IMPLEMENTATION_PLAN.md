@@ -1,5 +1,8 @@
 # Headless CMS on Azure - Implementation Plan
 
+> **📊 Current Progress:** See [PROJECT_PROGRESS.md](./PROJECT_PROGRESS.md) for up-to-date implementation status.
+> **Status:** Phases 1-8 complete (88%), currently running locally. Backend: http://localhost:3000, Frontend: http://localhost:5174
+
 ## Overview
 Build a cost-effective headless CMS hosted on Azure, maximizing free tier usage. Target: 1-5 sites, <10k requests/month, staying within $0-5/month cost.
 
@@ -40,7 +43,7 @@ Build a cost-effective headless CMS hosted on Azure, maximizing free tier usage.
 
 **Infrastructure:**
 - Docker (containerization)
-- Terraform (IaC)
+- Pulumi (IaC with TypeScript)
 - GitHub Actions (CI/CD)
 
 ## Project Structure
@@ -97,15 +100,18 @@ TheCMS/
 │       ├── vite.config.ts
 │       └── staticwebapp.config.json
 │
-├── infrastructure/                # Terraform IaC
-│   ├── terraform/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── modules/
-│   │       ├── container-apps/
-│   │       ├── database/
-│   │       ├── storage/
-│   │       └── static-web-app/
+├── infrastructure/                # Pulumi IaC
+│   └── pulumi/
+│       ├── index.ts              # Main infrastructure code
+│       ├── Pulumi.yaml           # Pulumi project file
+│       ├── Pulumi.dev.yaml       # Dev stack config
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── resources/
+│           ├── containerApps.ts
+│           ├── database.ts
+│           ├── storage.ts
+│           └── staticWebApp.ts
 │
 ├── .github/
 │   └── workflows/

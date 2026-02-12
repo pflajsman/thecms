@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { MsalProvider } from '@azure/msal-react';
+import { PublicClientApplication, EventType } from '@azure/msal-browser';
 import { AuthProvider } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -11,6 +13,8 @@ import { ContentEntryForm } from './pages/ContentEntries/ContentEntryForm';
 import { MediaLibrary } from './pages/Media/MediaLibrary';
 import { SitesList } from './pages/Sites/SitesList';
 import { SiteForm } from './pages/Sites/SiteForm';
+import { msalConfig, isEntraConfigured } from './config/msalConfig';
+import { setMsalInstance } from './lib/api';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +36,24 @@ const theme = createTheme({
   },
 });
 
-function App() {
+// Initialize MSAL instance only when Entra is configured
+let msalInstance: PublicClientApplication | undefined;
+if (isEntraConfigured()) {
+  msalInstance = new PublicClientApplication(msalConfig);
+
+  // Set the active account after login
+  msalInstance.addEventCallback((event) => {
+    if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
+      const payload = event.payload as { account: any };
+      msalInstance!.setActiveAccount(payload.account);
+    }
+  });
+
+  // Share MSAL instance with the API client
+  setMsalInstance(msalInstance);
+}
+
+function AppContent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
@@ -60,6 +81,17 @@ function App() {
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+function App() {
+  if (isEntraConfigured() && msalInstance) {
+    return (
+      <MsalProvider instance={msalInstance}>
+        <AppContent />
+      </MsalProvider>
+    );
+  }
+  return <AppContent />;
 }
 
 export default App;

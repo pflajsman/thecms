@@ -9,7 +9,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
     res.status(200).json({
       success: true,
       data: {
-        azureB2CId: req.user?.azureB2CId,
+        entraId: req.user?.entraId,
         email: req.user?.email,
         displayName: req.user?.displayName,
         role: req.user?.role

@@ -27,7 +27,7 @@ const options: swaggerJsdoc.Options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'JWT token from Azure AD B2C',
+          description: 'JWT token from Microsoft Entra External ID',
         },
       },
       schemas: {

@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules/
+/bin/
+
+# Pulumi state files (when using local backend)
+/.pulumi/
+.pulumi/
+
+# Passphrase file (keep secret!)
+.pulumi.passphrase
+
+# Stack configuration files with secrets
+Pulumi.*.yaml
+!Pulumi.dev.yaml
+
+# Build output
+/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

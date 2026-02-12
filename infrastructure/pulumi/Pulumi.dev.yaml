@@ -1,0 +1,12 @@
+config:
+  azure-native:location: westeurope
+  thecms-infrastructure:location: westeurope
+  # Optional: Set specific configuration per environment
+  # thecms-infrastructure:containerImage: youracr.azurecr.io/thecms-api:latest
+  # thecms-infrastructure:alertEmail: your-email@example.com
+  # thecms-infrastructure:repositoryUrl: https://github.com/your-org/your-repo
+
+  entra:tenantName: thecmscustomers
+  entra:tenantId: 6f7bb909-31ae-4c07-b59b-15cfe13c8cd1
+  entra:clientId: e2f284f3-6e8c-405d-b52a-bdc5ba0ae32a
+encryptionsalt: v1:H9cn2XG157k=:v1:8FWG/iXNInfAOWpy:IUQd+mULkvRsS/fIfL8zF3HcP8xo/w==

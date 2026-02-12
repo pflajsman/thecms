@@ -7,7 +7,7 @@ export enum UserRole {
 }
 
 export interface IUser extends Document {
-  azureB2CId: string;
+  entraId: string;
   email: string;
   displayName?: string;
   role: UserRole;
@@ -17,7 +17,7 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
   {
-    azureB2CId: {
+    entraId: {
       type: String,
       required: true,
       unique: true,
@@ -55,6 +55,6 @@ const userSchema = new Schema<IUser>(
 
 // Create indexes
 userSchema.index({ email: 1 });
-userSchema.index({ azureB2CId: 1 });
+userSchema.index({ entraId: 1 });
 
 export const User = mongoose.model<IUser>('User', userSchema);
