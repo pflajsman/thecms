@@ -119,8 +119,8 @@ export function SitesList() {
       )}
 
       {data && (
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 700 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>

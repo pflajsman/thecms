@@ -134,8 +134,8 @@ export function ContentEntriesList() {
 
       {/* Content Type Selector */}
       <Paper sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <FormControl sx={{ minWidth: 300 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 300 } }}>
             <InputLabel>Select Content Type</InputLabel>
             <Select
               value={selectedContentTypeId}
@@ -185,8 +185,8 @@ export function ContentEntriesList() {
       )}
 
       {entriesData && (
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 600 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Status</TableCell>
