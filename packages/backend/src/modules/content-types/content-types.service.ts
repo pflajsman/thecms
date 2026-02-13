@@ -10,8 +10,9 @@ export class ContentTypesService {
    * Create a new content type
    */
   async createContentType(data: CreateContentTypeInput): Promise<IContentType> {
-    // Check if slug already exists
-    const existingContentType = await ContentTypeModel.findOne({ slug: data.slug });
+    // Check if slug already exists (select only _id for minimal RU)
+    const existingContentType = await ContentTypeModel.findOne({ slug: data.slug })
+      .select('_id').lean();
     if (existingContentType) {
       throw new Error(`Content type with slug '${data.slug}' already exists`);
     }
@@ -73,7 +74,7 @@ export class ContentTypesService {
       const existingContentType = await ContentTypeModel.findOne({
         slug: data.slug,
         _id: { $ne: id },
-      });
+      }).select('_id').lean();
       if (existingContentType) {
         throw new Error(`Content type with slug '${data.slug}' already exists`);
       }

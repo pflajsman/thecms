@@ -14,6 +14,10 @@ export interface AuthRequest extends Request {
   };
 }
 
+// In-memory user cache to avoid DB lookup on every request
+const userCache = new Map<string, { user: { entraId: string; email: string; displayName?: string; role: UserRole }; expiresAt: number }>();
+const USER_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 // JWKS client - lazily initialized on first real token validation
 let jwksClient: jwksRsa.JwksClient | null = null;
 
@@ -117,8 +121,15 @@ export const authMiddleware = async (
       throw new AppError('Token missing subject claim', 401);
     }
 
+    // Check cache first to avoid DB query on every request
+    const cached = userCache.get(sub);
+    if (cached && cached.expiresAt > Date.now()) {
+      req.user = cached.user;
+      return next();
+    }
+
     // Find or create user in database
-    let user = await User.findOne({ entraId: sub });
+    let user = await User.findOne({ entraId: sub }).lean();
 
     if (!user) {
       user = await User.create({
@@ -129,12 +140,17 @@ export const authMiddleware = async (
       });
     }
 
-    req.user = {
+    const userData = {
       entraId: user.entraId,
       email: user.email,
       displayName: user.displayName,
       role: user.role,
     };
+
+    // Cache user data
+    userCache.set(sub, { user: userData, expiresAt: Date.now() + USER_CACHE_TTL });
+
+    req.user = userData;
 
     next();
   } catch (error) {

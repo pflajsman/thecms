@@ -230,7 +230,7 @@ export class MediaService {
 
     // Execute query
     const [media, total] = await Promise.all([
-      MediaModel.find(query).sort(sort).skip(skip).limit(limit).populate('uploadedBy').exec(),
+      MediaModel.find(query).sort(sort).skip(skip).limit(limit).exec(),
       MediaModel.countDocuments(query),
     ]);
 
@@ -253,7 +253,7 @@ export class MediaService {
       throw new Error('Invalid media ID');
     }
 
-    const media = await MediaModel.findById(mediaId).populate('uploadedBy').exec();
+    const media = await MediaModel.findById(mediaId).exec();
     return media;
   }
 
@@ -288,7 +288,8 @@ export class MediaService {
       throw new Error('Invalid media ID');
     }
 
-    const media = await MediaModel.findById(mediaId);
+    const media = await MediaModel.findById(mediaId)
+      .select('filename variants').lean();
     if (!media) {
       return false;
     }

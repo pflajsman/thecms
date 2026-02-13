@@ -150,7 +150,7 @@ export class WebhooksService {
       throw new Error('Invalid webhook ID');
     }
 
-    const webhook = await WebhookModel.findById(id).select('deliveryLogs').exec();
+    const webhook = await WebhookModel.findById(id).select('deliveryLogs').lean().exec();
 
     if (!webhook) {
       throw new Error('Webhook not found');

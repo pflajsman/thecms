@@ -35,7 +35,7 @@ export class WebhookService {
         query.siteId = siteId;
       }
 
-      const webhooks = await WebhookModel.find(query);
+      const webhooks = await WebhookModel.find(query).lean();
 
       if (webhooks.length === 0) {
         console.log(`No active webhooks found for event: ${event}`);
@@ -59,14 +59,16 @@ export class WebhookService {
 
   /**
    * Deliver a webhook to a single endpoint
+   * Uses atomic DB operations instead of multiple save() calls to reduce RU cost
    */
   private static async deliverWebhook(
-    webhook: IWebhook,
+    webhook: Pick<IWebhook, '_id' | 'secret' | 'url' | 'maxRetries' | 'retryDelay'>,
     event: WebhookEvent,
     data: any,
     attemptNumber = 1
   ): Promise<void> {
-    const deliveryId = `${webhook._id}_${Date.now()}_${attemptNumber}`;
+    const webhookId = webhook._id;
+    const deliveryId = `${webhookId}_${Date.now()}_${attemptNumber}`;
     const startTime = Date.now();
 
     // Build payload
@@ -75,7 +77,7 @@ export class WebhookService {
       timestamp: new Date().toISOString(),
       data,
       metadata: {
-        webhookId: webhook._id.toString(),
+        webhookId: webhookId.toString(),
         deliveryId,
       },
     };
@@ -99,25 +101,30 @@ export class WebhookService {
 
       const responseTime = Date.now() - startTime;
 
-      // Log successful delivery
-      await this.logDelivery(webhook, {
-        timestamp: new Date(),
-        event,
-        status: WebhookDeliveryStatus.SUCCESS,
-        statusCode: response.status,
-        responseTime,
-        attemptNumber,
-        payload: payloadString.length > 1000 ? '[Payload too large]' : payload,
+      // Single atomic update: log delivery + update stats
+      await WebhookModel.findByIdAndUpdate(webhookId, {
+        $push: {
+          deliveryLogs: {
+            $each: [{
+              timestamp: new Date(),
+              event,
+              status: WebhookDeliveryStatus.SUCCESS,
+              statusCode: response.status,
+              responseTime,
+              attemptNumber,
+              payload: payloadString.length > 1000 ? '[Payload too large]' : payload,
+            }],
+            $slice: -50,
+          },
+        },
+        $inc: { totalDeliveries: 1, successfulDeliveries: 1 },
+        $set: {
+          lastDeliveryAt: new Date(),
+          lastDeliveryStatus: WebhookDeliveryStatus.SUCCESS,
+        },
       });
 
-      // Update webhook statistics
-      webhook.totalDeliveries += 1;
-      webhook.successfulDeliveries += 1;
-      webhook.lastDeliveryAt = new Date();
-      webhook.lastDeliveryStatus = WebhookDeliveryStatus.SUCCESS;
-      await webhook.save();
-
-      console.log(`✅ Webhook delivered successfully to ${webhook.url} (${responseTime}ms)`);
+      console.log(`Webhook delivered successfully to ${webhook.url} (${responseTime}ms)`);
     } catch (error) {
       const responseTime = Date.now() - startTime;
       const axiosError = error as AxiosError;
@@ -133,75 +140,56 @@ export class WebhookService {
       const shouldRetry = attemptNumber < webhook.maxRetries &&
         (!statusCode || statusCode >= 500 || statusCode === 408 || statusCode === 429);
 
-      const status = shouldRetry
+      const deliveryStatus = shouldRetry
         ? WebhookDeliveryStatus.RETRYING
         : WebhookDeliveryStatus.FAILED;
 
-      // Log failed delivery
-      await this.logDelivery(webhook, {
-        timestamp: new Date(),
-        event,
-        status,
-        statusCode,
-        responseTime,
-        errorMessage,
-        attemptNumber,
-        payload: payloadString.length > 1000 ? '[Payload too large]' : payload,
+      // Single atomic update: log delivery + update stats
+      const incFields: Record<string, number> = { totalDeliveries: 1 };
+      if (!shouldRetry) {
+        incFields.failedDeliveries = 1;
+      }
+
+      await WebhookModel.findByIdAndUpdate(webhookId, {
+        $push: {
+          deliveryLogs: {
+            $each: [{
+              timestamp: new Date(),
+              event,
+              status: deliveryStatus,
+              statusCode,
+              responseTime,
+              errorMessage,
+              attemptNumber,
+              payload: payloadString.length > 1000 ? '[Payload too large]' : payload,
+            }],
+            $slice: -50,
+          },
+        },
+        $inc: incFields,
+        $set: {
+          lastDeliveryAt: new Date(),
+          lastDeliveryStatus: deliveryStatus,
+        },
       });
 
-      // Update webhook statistics
-      webhook.totalDeliveries += 1;
-      webhook.lastDeliveryAt = new Date();
-
       if (!shouldRetry) {
-        webhook.failedDeliveries += 1;
-        webhook.lastDeliveryStatus = WebhookDeliveryStatus.FAILED;
-        await webhook.save();
         console.error(
-          `❌ Webhook delivery failed to ${webhook.url} after ${attemptNumber} attempts`
+          `Webhook delivery failed to ${webhook.url} after ${attemptNumber} attempts`
         );
         return;
       }
 
-      webhook.lastDeliveryStatus = WebhookDeliveryStatus.RETRYING;
-      await webhook.save();
-
       // Schedule retry with exponential backoff
       const retryDelay = webhook.retryDelay * Math.pow(2, attemptNumber - 1);
       console.log(
-        `⏳ Retrying webhook ${webhook._id} in ${retryDelay}ms (attempt ${attemptNumber + 1}/${webhook.maxRetries})`
+        `Retrying webhook ${webhookId} in ${retryDelay}ms (attempt ${attemptNumber + 1}/${webhook.maxRetries})`
       );
 
       setTimeout(() => {
         this.deliverWebhook(webhook, event, data, attemptNumber + 1);
       }, retryDelay);
     }
-  }
-
-  /**
-   * Log webhook delivery
-   */
-  private static async logDelivery(
-    webhook: IWebhook,
-    log: Omit<WebhookPayload['metadata'], 'webhookId' | 'deliveryId'> & {
-      timestamp: Date;
-      event: WebhookEvent;
-      status: WebhookDeliveryStatus;
-      statusCode?: number;
-      responseTime?: number;
-      errorMessage?: string;
-      attemptNumber: number;
-      payload?: any;
-    }
-  ): Promise<void> {
-    webhook.deliveryLogs.push(log as any);
-
-    // Keep only last 50 logs (pre-save hook will handle this, but doing it here too)
-    if (webhook.deliveryLogs.length > 50) {
-      webhook.deliveryLogs = webhook.deliveryLogs.slice(-50);
-    }
-
-    await webhook.save();
   }
 
   /**

@@ -57,8 +57,8 @@ export class ContentEntriesService {
    * Create a new content entry
    */
   static async createEntry(entryData: CreateEntryData): Promise<IContentEntry> {
-    // Validate content type exists
-    const contentType = await ContentTypeModel.findById(entryData.contentTypeId);
+    // Validate content type exists (lean + select for minimal RU cost)
+    const contentType = await ContentTypeModel.findById(entryData.contentTypeId).lean();
     if (!contentType) {
       throw new Error('Content type not found');
     }
@@ -110,9 +110,9 @@ export class ContentEntriesService {
       search,
     } = options;
 
-    // Validate content type exists
-    const contentType = await ContentTypeModel.findById(contentTypeId);
-    if (!contentType) {
+    // Validate content type exists (select only _id for minimal RU cost)
+    const contentTypeExists = await ContentTypeModel.exists({ _id: contentTypeId });
+    if (!contentTypeExists) {
       throw new Error('Content type not found');
     }
 
@@ -187,8 +187,8 @@ export class ContentEntriesService {
       throw new Error('Content entry not found');
     }
 
-    // Get content type
-    const contentType = await ContentTypeModel.findById(entry.contentTypeId);
+    // Get content type (lean — only used for validation, not saved)
+    const contentType = await ContentTypeModel.findById(entry.contentTypeId).lean();
     if (!contentType) {
       throw new Error('Content type not found');
     }
@@ -243,7 +243,8 @@ export class ContentEntriesService {
       return false;
     }
 
-    const contentType = await ContentTypeModel.findById(entry.contentTypeId);
+    const contentType = await ContentTypeModel.findById(entry.contentTypeId)
+      .select('_id name slug').lean();
     const entryData = entry.toJSON();
 
     const result = await ContentEntryModel.findByIdAndDelete(entryId);
@@ -272,8 +273,8 @@ export class ContentEntriesService {
       throw new Error('Content entry not found');
     }
 
-    // Get content type to validate data before publishing
-    const contentType = await ContentTypeModel.findById(entry.contentTypeId);
+    // Get content type to validate data before publishing (lean — only read)
+    const contentType = await ContentTypeModel.findById(entry.contentTypeId).lean();
     if (!contentType) {
       throw new Error('Content type not found');
     }
@@ -334,8 +335,9 @@ export class ContentEntriesService {
     // The pre-save hook will clear publishedAt automatically
     await entry.save();
 
-    // Get content type for webhook
-    const contentType = await ContentTypeModel.findById(entry.contentTypeId);
+    // Get content type for webhook (select only needed fields)
+    const contentType = await ContentTypeModel.findById(entry.contentTypeId)
+      .select('_id name slug').lean();
 
     // Trigger webhook for entry unpublished
     WebhookService.triggerEvent(WebhookEvent.ENTRY_UNPUBLISHED, {
@@ -367,8 +369,9 @@ export class ContentEntriesService {
 
     await entry.save();
 
-    // Get content type for webhook
-    const contentType = await ContentTypeModel.findById(entry.contentTypeId);
+    // Get content type for webhook (select only needed fields)
+    const contentType = await ContentTypeModel.findById(entry.contentTypeId)
+      .select('_id name slug').lean();
 
     // Trigger webhook for entry archived
     WebhookService.triggerEvent(WebhookEvent.ENTRY_ARCHIVED, {
@@ -436,9 +439,9 @@ export class ContentEntriesService {
 
     const entries = await ContentEntryModel.find({
       _id: { $in: validIds },
-    }).exec();
+    }).lean().exec();
 
-    return entries;
+    return entries as IContentEntry[];
   }
 
   /**
