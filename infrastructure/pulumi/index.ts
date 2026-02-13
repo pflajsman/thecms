@@ -5,6 +5,7 @@ import { createStorage } from "./resources/storage";
 import { createContainerApp } from "./resources/containerApps";
 import { createStaticWebApp } from "./resources/staticWebApp";
 import { createApplicationInsights } from "./resources/monitoring";
+import { createExampleWebApp } from "./resources/exampleWebApp";
 
 // Get configuration
 const config = new pulumi.Config();
@@ -56,7 +57,14 @@ const staticWebApp = createStaticWebApp({
   apiUrl: pulumi.output(""), // Will be updated after container app is created
 });
 
-// 6. Create Container App Environment and Backend API
+// 6. Create Static Web App for Example Website
+const exampleWebApp = createExampleWebApp({
+  resourceGroupName: resourceGroup.name,
+  location,
+  name: `${resourcePrefix}-example`,
+});
+
+// 7. Create Container App Environment and Backend API
 const containerApp = createContainerApp({
   resourceGroupName: resourceGroup.name,
   location,
@@ -68,6 +76,7 @@ const containerApp = createContainerApp({
   workspaceId: appInsights.workspaceId,
   workspaceSharedKey: appInsights.workspaceSharedKey,
   staticWebAppUrl: staticWebApp.url,
+  exampleWebAppUrl: exampleWebApp.url,
   // GitHub Container Registry (ghcr.io) - free
   ...(ghcrToken
     ? {
@@ -90,5 +99,7 @@ export const storageConnectionString = storage.connectionString;
 export const containerAppUrl = containerApp.url;
 export const staticWebAppUrl = staticWebApp.url;
 export const staticWebAppDeploymentToken = staticWebApp.deploymentToken;
+export const exampleWebAppUrl = exampleWebApp.url;
+export const exampleWebAppDeploymentToken = exampleWebApp.deploymentToken;
 export const appInsightsInstrumentationKey = appInsights.instrumentationKey;
 export const appInsightsConnectionString = appInsights.connectionString;

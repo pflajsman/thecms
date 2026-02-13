@@ -10,6 +10,9 @@ build/
 !*.config.js
 !*.config.mjs
 
+# Example site runtime config (contains secrets locally)
+examples/config.js
+
 # Environment variables
 .env
 .env.local

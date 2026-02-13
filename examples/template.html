@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TheCMS - Template Page</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f8f9fa;
+    }
+
+    /* Header */
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { font-size: 1.5rem; font-weight: 700; }
+
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .search-box input {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      width: 250px;
+    }
+
+    .search-box button {
+      padding: 0.5rem 1rem;
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .search-box button:hover { background: #c73650; }
+
+    /* Navigation */
+    nav {
+      background: #16213e;
+      padding: 0.75rem 2rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: #a0a0b8;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    nav button:hover, nav button.active {
+      background: #e94560;
+      color: #fff;
+      border-color: #e94560;
+    }
+
+    /* Main content */
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    /* Content grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    .card-body { padding: 1.25rem; }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1a1a2e;
+    }
+
+    .card-meta {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-text {
+      font-size: 0.9rem;
+      color: #555;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-field {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .card-field strong { color: #1a1a2e; }
+
+    /* Detail view */
+    .detail-view {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 2rem;
+    }
+
+    .detail-view h2 { margin-bottom: 1rem; }
+
+    .detail-view .meta { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+    .detail-field {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+
+    .detail-field label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      padding: 0.5rem 1rem;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .back-btn:hover { background: #16213e; }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .pagination button {
+      padding: 0.5rem 1.25rem;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pagination span { font-size: 0.9rem; color: #555; }
+
+    /* States */
+    .loading, .error, .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #888;
+    }
+
+    .error { color: #e94560; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #e94560;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Setup banner */
+    .setup-banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .setup-banner h3 { margin-bottom: 0.5rem; }
+    .setup-banner code {
+      background: #f8f9fa;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="site-title">TheCMS Template</h1>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Search content...">
+      <button onclick="handleSearch()">Search</button>
+    </div>
+  </header>
+
+  <nav id="content-type-nav"></nav>
+
+  <main id="app"></main>
+
+  <!-- Runtime configuration injected via config.js (generated during CI/CD from GitHub secrets) -->
+  <script src="config.js"></script>
+  <script>
+    // Reads config from window.__CMS_CONFIG__ (set by config.js)
+    // Falls back to placeholder values that trigger the setup banner
+    const CONFIG = {
+      apiUrl: window.__CMS_CONFIG__?.apiUrl || 'YOUR_API_URL_HERE',
+      apiKey: window.__CMS_CONFIG__?.apiKey || 'YOUR_API_KEY_HERE',
+      siteTitle: window.__CMS_CONFIG__?.siteTitle || 'TheCMS Template',
+    };
+
+    document.getElementById('site-title').textContent = CONFIG.siteTitle;
+
+    // State
+    let state = {
+      contentTypes: [],
+      activeType: null,
+      entries: [],
+      pagination: null,
+      currentPage: 1,
+      activeEntry: null,
+      searchQuery: '',
+      loading: false,
+      error: null,
+    };
+
+    // --- API Client ---
+
+    async function api(endpoint, params = {}) {
+      const url = new URL(`${CONFIG.apiUrl}${endpoint}`);
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
+      });
+
+      const res = await fetch(url, {
+        headers: { 'X-API-Key': CONFIG.apiKey },
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `API error: ${res.status}`);
+      }
+
+      return res.json();
+    }
+
+    // --- Data fetching ---
+
+    async function loadContentTypes() {
+      try {
+        const result = await api('/content-types');
+        state.contentTypes = result.data || [];
+        renderNav();
+
+        if (state.contentTypes.length > 0 && !state.activeType) {
+          selectContentType(state.contentTypes[0].slug);
+        }
+      } catch (err) {
+        state.error = `Failed to load content types: ${err.message}`;
+        render();
+      }
+    }
+
+    async function loadEntries(slug, page = 1) {
+      state.loading = true;
+      state.error = null;
+      state.activeEntry = null;
+      render();
+
+      try {
+        const result = await api(`/content/${slug}`, { page, limit: 12 });
+        state.entries = result.data || [];
+        state.pagination = result.pagination || null;
+        state.currentPage = page;
+      } catch (err) {
+        state.error = `Failed to load entries: ${err.message}`;
+        state.entries = [];
+      }
+
+      state.loading = false;
+      render();
+    }
+
+    async function loadEntry(slug, entryId) {
+      state.loading = true;
+      state.error = null;
+      render();
+
+      try {
+        const result = await api(`/content/${slug}/${entryId}`);
+        state.activeEntry = result.data || null;
+      } catch (err) {
+        state.error = `Failed to load entry: ${err.message}`;
+      }
+
+      state.loading = false;
+      render();
+    }
+
+    async function searchEntries(query, page = 1) {
+      state.loading = true;
+      state.error = null;
+      state.activeEntry = null;
+      state.searchQuery = query;
+      render();
+
+      try {
+        const result = await api('/search', { q: query, page, limit: 12 });
+        state.entries = result.data || [];
+        state.pagination = result.pagination || null;
+        state.currentPage = page;
+      } catch (err) {
+        state.error = `Search failed: ${err.message}`;
+        state.entries = [];
+      }
+
+      state.loading = false;
+      render();
+    }
+
+    // --- Actions ---
+
+    function selectContentType(slug) {
+      state.activeType = slug;
+      state.searchQuery = '';
+      state.currentPage = 1;
+      renderNav();
+      loadEntries(slug, 1);
+    }
+
+    function handleSearch() {
+      const input = document.getElementById('search-input');
+      const query = input.value.trim();
+      if (query) {
+        state.activeType = null;
+        renderNav();
+        searchEntries(query);
+      }
+    }
+
+    // Enter key to search
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    // --- Rendering ---
+
+    function renderNav() {
+      const nav = document.getElementById('content-type-nav');
+      nav.innerHTML = state.contentTypes.map((ct) =>
+        `<button class="${state.activeType === ct.slug ? 'active' : ''}"
+                 onclick="selectContentType('${ct.slug}')">
+          ${ct.name}
+        </button>`
+      ).join('');
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+
+      // Setup check
+      if (CONFIG.apiKey === 'YOUR_API_KEY_HERE') {
+        app.innerHTML = `
+          <div class="setup-banner">
+            <h3>Setup Required</h3>
+            <p>No <code>config.js</code> found or it is missing configuration values.</p>
+            <p style="margin-top:0.5rem">For <strong>local development</strong>, create a <code>config.js</code> next to this file:</p>
+            <pre style="background:#f8f9fa;padding:0.75rem;border-radius:4px;margin-top:0.5rem;font-size:0.85rem">window.__CMS_CONFIG__ = {
+  apiUrl: "https://your-backend.azurecontainerapps.io/api/v1/public",
+  apiKey: "cms_your_api_key_here",
+  siteTitle: "My Site",
+};</pre>
+            <p style="margin-top:0.75rem">For <strong>production</strong>, these values are injected from GitHub secrets during deployment.</p>
+          </div>`;
+        return;
+      }
+
+      // Loading
+      if (state.loading) {
+        app.innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+          </div>`;
+        return;
+      }
+
+      // Error
+      if (state.error) {
+        app.innerHTML = `
+          <div class="error">
+            <p>${state.error}</p>
+            <button class="back-btn" style="margin-top:1rem" onclick="location.reload()">Retry</button>
+          </div>`;
+        return;
+      }
+
+      // Detail view
+      if (state.activeEntry) {
+        renderDetail();
+        return;
+      }
+
+      // List view
+      renderList();
+    }
+
+    function renderList() {
+      const app = document.getElementById('app');
+
+      if (state.entries.length === 0) {
+        app.innerHTML = `
+          <div class="empty">
+            <p>${state.searchQuery ? 'No results found for "' + escapeHtml(state.searchQuery) + '"' : 'No entries found.'}</p>
+          </div>`;
+        return;
+      }
+
+      const heading = state.searchQuery
+        ? `<h2 style="margin-bottom:1.5rem">Search results for "${escapeHtml(state.searchQuery)}"</h2>`
+        : '';
+
+      const cards = state.entries.map((entry) => {
+        const data = entry.data || {};
+        const title = entry.title || data.title || data.name || 'Untitled';
+        const date = entry.publishedAt
+          ? new Date(entry.publishedAt).toLocaleDateString()
+          : new Date(entry.createdAt).toLocaleDateString();
+
+        // Show first 2 fields from data
+        const fields = Object.entries(data).slice(0, 2).map(([key, value]) => {
+          const display = typeof value === 'object' ? JSON.stringify(value) : String(value);
+          return `<div class="card-field"><strong>${escapeHtml(key)}:</strong> ${escapeHtml(display.substring(0, 100))}</div>`;
+        }).join('');
+
+        const slug = state.activeType || '';
+
+        return `
+          <div class="card" onclick="loadEntry('${slug}', '${entry.id}')">
+            <div class="card-body">
+              <div class="card-title">${escapeHtml(title)}</div>
+              <div class="card-meta">${date}</div>
+              ${fields}
+            </div>
+          </div>`;
+      }).join('');
+
+      const pag = state.pagination ? `
+        <div class="pagination">
+          <button ${state.currentPage <= 1 ? 'disabled' : ''} onclick="navigatePage(${state.currentPage - 1})">Previous</button>
+          <span>Page ${state.pagination.page} of ${state.pagination.totalPages}</span>
+          <button ${state.currentPage >= state.pagination.totalPages ? 'disabled' : ''} onclick="navigatePage(${state.currentPage + 1})">Next</button>
+        </div>` : '';
+
+      app.innerHTML = heading + `<div class="content-grid">${cards}</div>` + pag;
+    }
+
+    function renderDetail() {
+      const app = document.getElementById('app');
+      const entry = state.activeEntry;
+      const data = entry.data || {};
+      const title = entry.title || data.title || data.name || 'Untitled';
+      const date = entry.publishedAt
+        ? new Date(entry.publishedAt).toLocaleDateString()
+        : new Date(entry.createdAt).toLocaleDateString();
+
+      const fields = Object.entries(data).map(([key, value]) => {
+        let display;
+        if (typeof value === 'object' && value !== null) {
+          display = `<pre style="white-space:pre-wrap;margin:0">${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;
+        } else {
+          display = escapeHtml(String(value ?? ''));
+        }
+        return `
+          <div class="detail-field">
+            <label>${escapeHtml(key)}</label>
+            <div>${display}</div>
+          </div>`;
+      }).join('');
+
+      app.innerHTML = `
+        <button class="back-btn" onclick="goBack()">Back to list</button>
+        <div class="detail-view">
+          <h2>${escapeHtml(title)}</h2>
+          <div class="meta">Published: ${date} | Status: ${entry.status}</div>
+          ${fields}
+        </div>`;
+    }
+
+    function navigatePage(page) {
+      if (state.searchQuery) {
+        searchEntries(state.searchQuery, page);
+      } else if (state.activeType) {
+        loadEntries(state.activeType, page);
+      }
+    }
+
+    function goBack() {
+      state.activeEntry = null;
+      render();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // --- Init ---
+    render();
+    if (CONFIG.apiKey !== 'YOUR_API_KEY_HERE') {
+      loadContentTypes();
+    }
+  </script>
+</body>
+</html>

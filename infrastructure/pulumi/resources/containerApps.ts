@@ -13,6 +13,7 @@ export interface ContainerAppArgs {
   workspaceId: pulumi.Output<string>;
   workspaceSharedKey: pulumi.Output<string>;
   staticWebAppUrl?: pulumi.Output<string>;
+  exampleWebAppUrl?: pulumi.Output<string>;
 
   // Container Registry (ghcr.io)
   registryServer?: string;
@@ -170,11 +171,17 @@ export function createContainerApp(args: ContainerAppArgs) {
             },
             {
               name: "CORS_ORIGINS",
-              value: args.staticWebAppUrl
-                ? args.staticWebAppUrl.apply(
-                    (url) => `${url}`
-                  )
-                : "https://localhost:5174",
+              value:
+                args.staticWebAppUrl || args.exampleWebAppUrl
+                  ? pulumi
+                      .all([
+                        args.staticWebAppUrl ?? pulumi.output(""),
+                        args.exampleWebAppUrl ?? pulumi.output(""),
+                      ])
+                      .apply(([adminUrl, exampleUrl]) =>
+                        [adminUrl, exampleUrl].filter(Boolean).join(",")
+                      )
+                  : "https://localhost:5174",
             },
           ],
         },

@@ -1,0 +1,42 @@
+name: Example Website CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'examples/**'
+      - '.github/workflows/example-website-ci-cd.yml'
+
+jobs:
+  deploy:
+    name: Deploy to Static Web App
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare deploy directory
+        run: |
+          mkdir -p deploy
+          cp examples/template.html deploy/index.html
+          cp examples/staticwebapp.config.json deploy/
+
+      - name: Generate config.js from secrets
+        run: |
+          cat > deploy/config.js <<'EOF'
+          window.__CMS_CONFIG__ = {
+            apiUrl: "${{ secrets.EXAMPLE_CMS_API_URL }}",
+            apiKey: "${{ secrets.EXAMPLE_CMS_API_KEY }}",
+            siteTitle: "${{ secrets.EXAMPLE_CMS_SITE_TITLE }}",
+          };
+          EOF
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_EXAMPLE_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: deploy
+          output_location: ''
+          skip_app_build: true
