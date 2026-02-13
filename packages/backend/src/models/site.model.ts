@@ -76,8 +76,11 @@ SiteSchema.index({ createdAt: -1 });
 // Don't return apiKey in JSON by default (for security)
 SiteSchema.set('toJSON', {
   transform: (_doc, ret) => {
-    // Only hide apiKey in list operations, allow it in single get
-    return ret;
+    const { _id, __v, ...rest } = ret;
+    return {
+      id: _id.toString(),
+      ...rest,
+    };
   },
 });
 

@@ -107,13 +107,12 @@ export function MediaLibrary() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Typography variant="h4" component="h1">
           Media Library
         </Typography>
         <Button
           variant="contained"
-          color="primary"
           startIcon={<CloudUpload />}
           onClick={() => setUploadDialogOpen(true)}
         >

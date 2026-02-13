@@ -46,13 +46,12 @@ export function ContentTypesList() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Typography variant="h4" component="h1">
           Content Types
         </Typography>
         <Button
           variant="contained"
-          color="primary"
           startIcon={<Add />}
           onClick={() => navigate('/content-types/new')}
         >

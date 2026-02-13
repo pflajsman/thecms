@@ -13,18 +13,18 @@ import {
   Toolbar,
   Typography,
   Button,
-  Divider,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Dashboard,
-  Article,
-  Collections,
-  Image,
+  SpaceDashboardOutlined,
+  SchemaOutlined,
+  EditNoteOutlined,
+  PermMediaOutlined,
+  ApiOutlined,
   Logout,
-  Language,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import { Logo } from './Logo';
 
 const drawerWidth = 240;
 
@@ -35,12 +35,22 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: <Dashboard /> },
-  { label: 'Content Types', path: '/content-types', icon: <Article /> },
-  { label: 'Content Entries', path: '/entries', icon: <Collections /> },
-  { label: 'Media Library', path: '/media', icon: <Image /> },
-  { label: 'Sites & API Keys', path: '/sites', icon: <Language /> },
+  { label: 'Dashboard', path: '/', icon: <SpaceDashboardOutlined /> },
+  { label: 'Content Types', path: '/content-types', icon: <SchemaOutlined /> },
+  { label: 'Content Entries', path: '/entries', icon: <EditNoteOutlined /> },
+  { label: 'Media Library', path: '/media', icon: <PermMediaOutlined /> },
+  { label: 'Sites & API Keys', path: '/sites', icon: <ApiOutlined /> },
 ];
+
+const drawerStyles = {
+  '& .MuiDrawer-paper': {
+    boxSizing: 'border-box',
+    width: drawerWidth,
+    backgroundColor: '#000000',
+    color: '#ffffff',
+    borderRight: 'none',
+  },
+};
 
 export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -66,10 +76,11 @@ export function Layout() {
 
   if (!isAuthenticated) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
         <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h4" gutterBottom>TheCMS</Typography>
-          <Typography variant="body1" sx={{ mb: 3 }}>Sign in to access the admin dashboard</Typography>
+          <Logo size={64} />
+          <Typography variant="h4" gutterBottom sx={{ mt: 2, fontWeight: 700 }}>TheCMS</Typography>
+          <Typography variant="body1" sx={{ mb: 3 }} color="text.secondary">Sign in to access the admin dashboard</Typography>
           <Button variant="contained" size="large" onClick={login}>Sign In</Button>
         </Box>
       </Box>
@@ -78,27 +89,46 @@ export function Layout() {
 
   const drawer = (
     <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+      <Toolbar sx={{ gap: 1.5 }}>
+        <Logo size={32} light />
+        <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700, color: '#ffffff' }}>
           TheCMS
         </Typography>
       </Toolbar>
-      <Divider />
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => {
-                navigate(item.path);
-                setMobileOpen(false);
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+      <List sx={{ px: 1 }}>
+        {navItems.map((item) => {
+          const selected = location.pathname === item.path;
+          return (
+            <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                selected={selected}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileOpen(false);
+                }}
+                sx={{
+                  borderRadius: 1,
+                  color: selected ? '#000000' : '#ffffff',
+                  backgroundColor: selected ? '#ffffff' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: selected ? '#ffffff' : 'rgba(255,255,255,0.1)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: '#ffffff',
+                    '&:hover': {
+                      backgroundColor: '#e0e0e0',
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: selected ? '#000000' : '#ffffff', minWidth: 40 }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
     </Box>
   );
@@ -125,9 +155,19 @@ export function Layout() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Admin Dashboard
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2">{user?.name}</Typography>
-            <Button color="inherit" onClick={handleLogout} startIcon={<Logout />}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              {user?.name}
+            </Typography>
+            <IconButton color="inherit" onClick={handleLogout} sx={{ display: { xs: 'flex', sm: 'none' } }}>
+              <Logout />
+            </IconButton>
+            <Button
+              color="inherit"
+              onClick={handleLogout}
+              startIcon={<Logout />}
+              sx={{ display: { xs: 'none', sm: 'flex' } }}
+            >
               Logout
             </Button>
           </Box>
@@ -144,14 +184,11 @@ export function Layout() {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile
+            keepMounted: true,
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
+            ...drawerStyles,
           }}
         >
           {drawer}
@@ -162,10 +199,7 @@ export function Layout() {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
+            ...drawerStyles,
           }}
           open
         >
@@ -179,6 +213,8 @@ export function Layout() {
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
+          maxWidth: '100%',
+          overflow: 'hidden',
         }}
       >
         <Toolbar />

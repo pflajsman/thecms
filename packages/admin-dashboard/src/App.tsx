@@ -28,10 +28,40 @@ const queryClient = new QueryClient({
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#000000',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#555555',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff',
+    },
+  },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#000000',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        containedPrimary: {
+          backgroundColor: '#000000',
+          '&:hover': {
+            backgroundColor: '#333333',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.12)',
+        },
+      },
     },
   },
 });

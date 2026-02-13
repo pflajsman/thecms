@@ -1,5 +1,5 @@
 import { Box, Typography, Paper, Grid, Card, CardContent } from '@mui/material';
-import { Article, Collections, Image, People } from '@mui/icons-material';
+import { SchemaOutlined, EditNoteOutlined, PermMediaOutlined, KeyOutlined } from '@mui/icons-material';
 
 export function Dashboard() {
   return (
@@ -13,7 +13,7 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Article color="primary" sx={{ fontSize: 40 }} />
+                <SchemaOutlined sx={{ fontSize: 40 }} />
                 <Box>
                   <Typography variant="h6">Content Types</Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -29,7 +29,7 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Collections color="primary" sx={{ fontSize: 40 }} />
+                <EditNoteOutlined sx={{ fontSize: 40 }} />
                 <Box>
                   <Typography variant="h6">Content Entries</Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -45,7 +45,7 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Image color="primary" sx={{ fontSize: 40 }} />
+                <PermMediaOutlined sx={{ fontSize: 40 }} />
                 <Box>
                   <Typography variant="h6">Media Library</Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -61,11 +61,11 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <People color="primary" sx={{ fontSize: 40 }} />
+                <KeyOutlined sx={{ fontSize: 40 }} />
                 <Box>
-                  <Typography variant="h6">Users</Typography>
+                  <Typography variant="h6">Sites</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Manage users
+                    API keys & access
                   </Typography>
                 </Box>
               </Box>
