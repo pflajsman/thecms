@@ -4,7 +4,7 @@ interface LogoProps {
 }
 
 export function Logo({ size = 36, light = false }: LogoProps) {
-  const fg = light ? '#ffffff' : '#000000';
+  const fg = '#ffffff';
   const bg = light ? '#ffffff' : '#000000';
 
   return (
