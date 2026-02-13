@@ -46,7 +46,9 @@ export function ContentEntryForm() {
   useEffect(() => {
     if (entryData?.data) {
       setFormData(entryData.data.data);
-      setContentTypeId(entryData.data.contentTypeId);
+      // contentTypeId may be a populated object or a plain string
+      const ctId = entryData.data.contentTypeId;
+      setContentTypeId(typeof ctId === 'object' && ctId !== null ? (ctId as any).id || (ctId as any)._id : ctId);
     }
   }, [entryData]);
 
