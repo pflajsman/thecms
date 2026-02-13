@@ -2,6 +2,7 @@ import { TextField, Checkbox, FormControlLabel, Typography, Box } from '@mui/mat
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { RichTextEditor } from './RichTextEditor';
+import { MediaPicker } from './MediaPicker';
 import type { Field } from '../types';
 
 interface DynamicFormGeneratorProps {
@@ -138,15 +139,17 @@ export function DynamicFormGenerator({ fields, values, onChange, errors }: Dynam
                 {field.description}
               </Typography>
             )}
-            {/* Media picker will be implemented */}
-            <TextField
+            <MediaPicker
               value={value}
-              onChange={(e) => onChange(field.name, e.target.value)}
-              placeholder="Media ID (Media picker coming soon)"
-              fullWidth
-              helperText={error}
-              error={!!error}
+              onChange={(val) => onChange(field.name, val)}
+              multiple={field.validation?.multiple}
+              allowedMimeTypes={field.validation?.allowedMimeTypes}
             />
+            {error && (
+              <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                {error}
+              </Typography>
+            )}
           </Box>
         );
 

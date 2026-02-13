@@ -11,12 +11,14 @@ import {
 } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
 import { mediaService } from '../../services/media';
+import type { MediaFile } from '../../types';
 
 interface MediaUploadProps {
   onSuccess?: () => void;
+  onUploaded?: (media: MediaFile) => void;
 }
 
-export function MediaUpload({ onSuccess }: MediaUploadProps) {
+export function MediaUpload({ onSuccess, onUploaded }: MediaUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [altText, setAltText] = useState('');
@@ -27,13 +29,14 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
   const uploadMutation = useMutation({
     mutationFn: (data: { file: File; metadata: any }) =>
       mediaService.upload(data.file, data.metadata),
-    onSuccess: () => {
+    onSuccess: (response) => {
       setFile(null);
       setPreview(null);
       setAltText('');
       setDescription('');
       setTags('');
       setError(null);
+      onUploaded?.(response.data);
       onSuccess?.();
     },
     onError: (err: any) => {

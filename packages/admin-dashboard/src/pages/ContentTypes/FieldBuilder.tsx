@@ -231,6 +231,43 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                     />
                   </Box>
                 )}
+
+                {field.type === 'MEDIA' && (
+                  <Box sx={{ display: 'grid', gap: 2 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.validation?.multiple || false}
+                          onChange={(e) =>
+                            updateField(index, {
+                              validation: {
+                                ...field.validation,
+                                multiple: e.target.checked,
+                              },
+                            })
+                          }
+                        />
+                      }
+                      label="Allow multiple files"
+                    />
+                    <TextField
+                      label="Allowed MIME Types"
+                      value={field.validation?.allowedMimeTypes?.join(', ') || ''}
+                      onChange={(e) =>
+                        updateField(index, {
+                          validation: {
+                            ...field.validation,
+                            allowedMimeTypes: e.target.value
+                              ? e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                              : undefined,
+                          },
+                        })
+                      }
+                      fullWidth
+                      helperText="Comma-separated (e.g., image/*, application/pdf)"
+                    />
+                  </Box>
+                )}
               </Box>
             </Collapse>
           </CardContent>

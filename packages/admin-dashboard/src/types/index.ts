@@ -9,6 +9,9 @@ export interface ValidationRules {
   max?: number;
   pattern?: string;
   allowedContentTypes?: string[];
+  multiple?: boolean;
+  allowedMimeTypes?: string[];
+  maxFileSize?: number;
 }
 
 export interface Field {
