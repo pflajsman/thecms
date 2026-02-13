@@ -6,6 +6,7 @@ import mediaRoutes from '../modules/media/media.routes';
 import sitesRoutes from '../modules/sites/sites.routes';
 import publicRoutes from '../modules/public/public.routes';
 import webhooksRoutes from '../modules/webhooks/webhooks.routes';
+import contactFormsRoutes from '../modules/contact-forms/contact-forms.routes';
 
 const router: IRouter = Router();
 
@@ -17,5 +18,6 @@ router.use('/media', mediaRoutes);
 router.use('/sites', sitesRoutes);
 router.use('/public', publicRoutes);
 router.use('/webhooks', webhooksRoutes);
+router.use('/contact-forms', contactFormsRoutes);
 
 export { router as apiRoutes };

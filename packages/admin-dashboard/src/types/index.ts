@@ -91,3 +91,61 @@ export interface ApiResponse<T> {
   error?: string;
   details?: any;
 }
+
+// Contact Forms
+export type FormFieldType = 'TEXT' | 'EMAIL' | 'TEXTAREA' | 'SELECT' | 'NUMBER' | 'CHECKBOX' | 'DATE';
+
+export interface FormFieldValidation {
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
+}
+
+export interface FormFieldDefinition {
+  name: string;
+  type: FormFieldType;
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+  validation?: FormFieldValidation;
+}
+
+export interface ContactForm {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  fields: FormFieldDefinition[];
+  recipientEmail: string;
+  siteId?: string;
+  isActive: boolean;
+  submissionCount: number;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SubmissionStatus = 'UNREAD' | 'READ' | 'ARCHIVED';
+
+export interface FormSubmission {
+  id: string;
+  formId: string;
+  data: Record<string, any>;
+  status: SubmissionStatus;
+  submitterIp?: string;
+  submitterUserAgent?: string;
+  emailSent: boolean;
+  emailError?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmissionStats {
+  total: number;
+  unread: number;
+  read: number;
+  archived: number;
+}

@@ -21,6 +21,7 @@ import {
   EditNoteOutlined,
   PermMediaOutlined,
   ApiOutlined,
+  DynamicFormOutlined,
   Logout,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
@@ -39,6 +40,7 @@ const navItems: NavItem[] = [
   { label: 'Content Types', path: '/content-types', icon: <SchemaOutlined /> },
   { label: 'Content Entries', path: '/entries', icon: <EditNoteOutlined /> },
   { label: 'Media Library', path: '/media', icon: <PermMediaOutlined /> },
+  { label: 'Contact Forms', path: '/contact-forms', icon: <DynamicFormOutlined /> },
   { label: 'Sites & API Keys', path: '/sites', icon: <ApiOutlined /> },
 ];
 

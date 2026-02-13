@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { contentTypesService } from '../content-types/content-types.service';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
 import { ContentStatus } from '../../models/content-entry.model';
+import { ContactFormsService } from '../contact-forms/contact-forms.service';
 
 /**
  * Public API Controller
@@ -185,6 +186,77 @@ export class PublicController {
         pagination: result.pagination,
       });
     } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get contact form schema by slug
+   * GET /api/v1/public/forms/:formSlug
+   */
+  async getForm(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { formSlug } = req.params;
+
+      const form = await ContactFormsService.getFormBySlug(formSlug);
+
+      if (!form) {
+        res.status(404).json({
+          success: false,
+          error: 'Form not found',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          name: form.name,
+          description: form.description,
+          fields: form.fields,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Submit a contact form
+   * POST /api/v1/public/forms/:formSlug/submit
+   */
+  async submitForm(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { formSlug } = req.params;
+
+      const form = await ContactFormsService.getFormBySlug(formSlug);
+
+      if (!form) {
+        res.status(404).json({
+          success: false,
+          error: 'Form not found',
+        });
+        return;
+      }
+
+      await ContactFormsService.createSubmission({
+        formId: form._id.toString(),
+        data: req.body,
+        submitterIp: req.ip,
+        submitterUserAgent: req.headers['user-agent'],
+      });
+
+      res.status(200).json({
+        success: true,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('Field ')) {
+        res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+        return;
+      }
       next(error);
     }
   }

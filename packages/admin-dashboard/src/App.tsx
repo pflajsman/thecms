@@ -13,6 +13,9 @@ import { ContentEntryForm } from './pages/ContentEntries/ContentEntryForm';
 import { MediaLibrary } from './pages/Media/MediaLibrary';
 import { SitesList } from './pages/Sites/SitesList';
 import { SiteForm } from './pages/Sites/SiteForm';
+import { ContactFormsList } from './pages/ContactForms/ContactFormsList';
+import { ContactFormForm } from './pages/ContactForms/ContactFormForm';
+import { SubmissionsList } from './pages/ContactForms/SubmissionsList';
 import { msalConfig, isEntraConfigured } from './config/msalConfig';
 import { setMsalInstance } from './lib/api';
 
@@ -100,6 +103,10 @@ function AppContent() {
                 <Route path="entries/new" element={<ContentEntryForm />} />
                 <Route path="entries/:id/edit" element={<ContentEntryForm />} />
                 <Route path="media" element={<MediaLibrary />} />
+                <Route path="contact-forms" element={<ContactFormsList />} />
+                <Route path="contact-forms/new" element={<ContactFormForm />} />
+                <Route path="contact-forms/:id/edit" element={<ContactFormForm />} />
+                <Route path="contact-forms/:formId/submissions" element={<SubmissionsList />} />
                 <Route path="sites" element={<SitesList />} />
                 <Route path="sites/new" element={<SiteForm />} />
                 <Route path="sites/:id/edit" element={<SiteForm />} />

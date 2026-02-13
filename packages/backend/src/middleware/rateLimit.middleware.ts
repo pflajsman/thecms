@@ -27,6 +27,30 @@ export const publicApiLimiter = rateLimit({
 });
 
 /**
+ * Rate limiter for form submissions
+ * 20 submissions per 15 minutes per IP
+ */
+export const formSubmitLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: {
+    success: false,
+    error: 'Too many submissions. Please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.ip || 'unknown';
+  },
+  handler: (_req, res) => {
+    res.status(429).json({
+      success: false,
+      error: 'Too many submissions. Please try again later.',
+    });
+  },
+});
+
+/**
  * Rate limiter for admin API
  * 500 requests per 15 minutes per user
  */

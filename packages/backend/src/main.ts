@@ -2,9 +2,13 @@ import dotenv from 'dotenv';
 import { app } from './app';
 import { connectDatabase } from './config/database';
 import { storageService } from './config/storage';
+import { EmailService } from './services/email.service';
 
 // Load environment variables
 dotenv.config();
+
+// Initialize email service
+EmailService.initialize();
 
 const PORT = process.env.PORT || 3000;
 

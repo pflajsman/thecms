@@ -1,7 +1,7 @@
 import { Router, type IRouter } from 'express';
 import { publicController } from './public.controller';
 import { apiKeyMiddleware } from '../../middleware/apiKey.middleware';
-import { publicApiLimiter } from '../../middleware/rateLimit.middleware';
+import { publicApiLimiter, formSubmitLimiter } from '../../middleware/rateLimit.middleware';
 
 /**
  * Public API Routes
@@ -163,6 +163,62 @@ router.get('/content/:contentTypeSlug/:entryId', (req, res, next) =>
  */
 router.get('/search', (req, res, next) =>
   publicController.searchPublishedEntries(req, res, next)
+);
+
+/**
+ * @swagger
+ * /api/v1/public/forms/{formSlug}:
+ *   get:
+ *     summary: Get contact form schema by slug
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: formSlug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Contact form schema
+ *       404:
+ *         description: Form not found
+ */
+router.get('/forms/:formSlug', (req, res, next) =>
+  publicController.getForm(req, res, next)
+);
+
+/**
+ * @swagger
+ * /api/v1/public/forms/{formSlug}/submit:
+ *   post:
+ *     summary: Submit a contact form
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: formSlug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Submission received
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Form not found
+ */
+router.post('/forms/:formSlug/submit', formSubmitLimiter, (req, res, next) =>
+  publicController.submitForm(req, res, next)
 );
 
 export default router;
