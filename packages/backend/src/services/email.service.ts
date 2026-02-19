@@ -1,24 +1,26 @@
-import sgMail from '@sendgrid/mail';
+import { TransactionalEmailsApi, SendSmtpEmail } from '@getbrevo/brevo';
 
 /**
  * Email Service
- * Sends email notifications via SendGrid
+ * Sends email notifications via Brevo (formerly Sendinblue)
  */
 export class EmailService {
   private static initialized = false;
+  private static apiInstance: TransactionalEmailsApi;
 
   /**
-   * Initialize SendGrid with API key
+   * Initialize Brevo with API key
    */
   static initialize(): void {
-    const apiKey = process.env.SENDGRID_API_KEY;
+    const apiKey = process.env.BREVO_API_KEY;
     if (!apiKey) {
-      console.warn('⚠️  SENDGRID_API_KEY not set — email notifications disabled');
+      console.warn('⚠️  BREVO_API_KEY not set — email notifications disabled');
       return;
     }
-    sgMail.setApiKey(apiKey);
+    EmailService.apiInstance = new TransactionalEmailsApi();
+    EmailService.apiInstance.setApiKey(0, apiKey);
     EmailService.initialized = true;
-    console.log('✅ Email service initialized (SendGrid)');
+    console.log('✅ Email service initialized (Brevo)');
   }
 
   /**
@@ -34,7 +36,7 @@ export class EmailService {
       return;
     }
 
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@thecms.app';
+    const fromEmail = process.env.BREVO_FROM_EMAIL || 'noreply@thecms.app';
 
     const rows = options.fields
       .map(
@@ -59,12 +61,13 @@ export class EmailService {
       </div>
     `;
 
-    await sgMail.send({
-      to: options.to,
-      from: fromEmail,
-      subject: `New form submission: ${options.formName}`,
-      html,
-    });
+    const email = new SendSmtpEmail();
+    email.sender = { email: fromEmail, name: 'TheCMS' };
+    email.to = [{ email: options.to }];
+    email.subject = `New form submission: ${options.formName}`;
+    email.htmlContent = html;
+
+    await EmailService.apiInstance.sendTransacEmail(email);
   }
 }
 

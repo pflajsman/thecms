@@ -319,19 +319,17 @@ db.users.updateOne(
 
 ---
 
-## SendGrid Setup (Optional - Email)
+## Brevo Setup (Optional - Email)
 
-1. Go to [Azure Portal](https://portal.azure.com) > **Create a resource** > search **"Twilio SendGrid"**
-2. Select **Free** plan (100 emails/day)
-3. Complete signup and go to SendGrid dashboard via **Manage**
-4. Go to **Settings** > **API Keys** > **Create API Key**
-5. Add the API key to the Container App:
+1. Go to [Brevo](https://www.brevo.com/) and create a free account (300 emails/day)
+2. Go to **Settings** > **SMTP & API** > **API Keys** > **Generate a new API key**
+3. Add the API key to the Container App:
 
 ```bash
 az containerapp update \
   --name thecms-dev-api \
   --resource-group thecms-dev-rg \
-  --set-env-vars "SENDGRID_API_KEY=<your-key>" "SENDGRID_FROM_EMAIL=noreply@yourdomain.com"
+  --set-env-vars "BREVO_API_KEY=<your-key>" "BREVO_FROM_EMAIL=noreply@yourdomain.com"
 ```
 
 ---

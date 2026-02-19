@@ -223,6 +223,92 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Contact form */
+    .contact-section {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .contact-section h2 { margin-bottom: 0.5rem; }
+    .contact-section .form-description { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      color: #1a1a2e;
+    }
+
+    .form-group label .required { color: #e94560; }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #e94560;
+    }
+
+    .form-group textarea { resize: vertical; min-height: 100px; }
+
+    .form-group .field-error {
+      color: #e94560;
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+
+    .submit-btn {
+      padding: 0.65rem 2rem;
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover { background: #c73650; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .form-success {
+      text-align: center;
+      padding: 2rem;
+      color: #2e7d32;
+    }
+
+    .form-success h3 { margin-bottom: 0.5rem; }
+
+    .form-error-banner {
+      background: #fdecea;
+      color: #c62828;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
     /* Setup banner */
     .setup-banner {
       background: #fff3cd;
@@ -264,6 +350,7 @@
       apiUrl: window.__CMS_CONFIG__?.apiUrl || 'YOUR_API_URL_HERE',
       apiKey: window.__CMS_CONFIG__?.apiKey || 'YOUR_API_KEY_HERE',
       siteTitle: window.__CMS_CONFIG__?.siteTitle || 'TheCMS Template',
+      contactFormSlug: window.__CMS_CONFIG__?.contactFormSlug || '',
     };
 
     document.getElementById('site-title').textContent = CONFIG.siteTitle;
@@ -279,6 +366,12 @@
       searchQuery: '',
       loading: false,
       error: null,
+      // Contact form
+      showContactForm: false,
+      contactForm: null,
+      contactSubmitting: false,
+      contactSuccess: false,
+      contactError: null,
     };
 
     // --- API Client ---
@@ -381,6 +474,7 @@
       state.activeType = slug;
       state.searchQuery = '';
       state.currentPage = 1;
+      state.showContactForm = false;
       renderNav();
       loadEntries(slug, 1);
     }
@@ -390,6 +484,7 @@
       const query = input.value.trim();
       if (query) {
         state.activeType = null;
+        state.showContactForm = false;
         renderNav();
         searchEntries(query);
       }
@@ -404,12 +499,18 @@
 
     function renderNav() {
       const nav = document.getElementById('content-type-nav');
-      nav.innerHTML = state.contentTypes.map((ct) =>
-        `<button class="${state.activeType === ct.slug ? 'active' : ''}"
+      const typeButtons = state.contentTypes.map((ct) =>
+        `<button class="${state.activeType === ct.slug && !state.showContactForm ? 'active' : ''}"
                  onclick="selectContentType('${ct.slug}')">
           ${ct.name}
         </button>`
       ).join('');
+
+      const contactBtn = CONFIG.contactFormSlug
+        ? `<button class="${state.showContactForm ? 'active' : ''}" onclick="showContactForm()">Contact</button>`
+        : '';
+
+      nav.innerHTML = typeButtons + contactBtn;
     }
 
     function render() {
@@ -426,6 +527,7 @@
   apiUrl: "https://your-backend.azurecontainerapps.io/api/v1/public",
   apiKey: "cms_your_api_key_here",
   siteTitle: "My Site",
+  contactFormSlug: "contact-us",
 };</pre>
             <p style="margin-top:0.75rem">For <strong>production</strong>, these values are injected from GitHub secrets during deployment.</p>
           </div>`;
@@ -449,6 +551,12 @@
             <p>${state.error}</p>
             <button class="back-btn" style="margin-top:1rem" onclick="location.reload()">Retry</button>
           </div>`;
+        return;
+      }
+
+      // Contact form view
+      if (state.showContactForm && state.contactForm) {
+        renderContactForm();
         return;
       }
 
@@ -561,6 +669,152 @@
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
+    }
+
+    // --- Contact Form ---
+
+    async function showContactForm() {
+      state.showContactForm = true;
+      state.activeType = null;
+      state.activeEntry = null;
+      state.searchQuery = '';
+      state.contactSuccess = false;
+      state.contactError = null;
+      renderNav();
+
+      if (!state.contactForm) {
+        state.loading = true;
+        render();
+        try {
+          const result = await api(`/forms/${CONFIG.contactFormSlug}`);
+          state.contactForm = result.data;
+        } catch (err) {
+          state.error = `Failed to load contact form: ${err.message}`;
+        }
+        state.loading = false;
+      }
+
+      render();
+    }
+
+    function renderContactForm() {
+      const app = document.getElementById('app');
+      const form = state.contactForm;
+
+      if (state.contactSuccess) {
+        app.innerHTML = `
+          <div class="contact-section">
+            <div class="form-success">
+              <h3>Thank you!</h3>
+              <p>Your message has been sent successfully.</p>
+              <button class="back-btn" style="margin-top:1rem" onclick="showContactForm()">Send another</button>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const errorBanner = state.contactError
+        ? `<div class="form-error-banner">${escapeHtml(state.contactError)}</div>`
+        : '';
+
+      const fields = form.fields.map((field) => {
+        const req = field.required ? '<span class="required"> *</span>' : '';
+        const ph = field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : '';
+
+        if (field.type === 'TEXTAREA') {
+          return `
+            <div class="form-group">
+              <label>${escapeHtml(field.label)}${req}</label>
+              <textarea name="${escapeHtml(field.name)}" ${ph} ${field.required ? 'required' : ''}></textarea>
+            </div>`;
+        }
+
+        if (field.type === 'SELECT' && field.options) {
+          const opts = field.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+          return `
+            <div class="form-group">
+              <label>${escapeHtml(field.label)}${req}</label>
+              <select name="${escapeHtml(field.name)}" ${field.required ? 'required' : ''}>
+                <option value="">Select...</option>
+                ${opts}
+              </select>
+            </div>`;
+        }
+
+        if (field.type === 'CHECKBOX') {
+          return `
+            <div class="form-group">
+              <label><input type="checkbox" name="${escapeHtml(field.name)}" ${field.required ? 'required' : ''}> ${escapeHtml(field.label)}${req}</label>
+            </div>`;
+        }
+
+        const inputType = field.type === 'EMAIL' ? 'email'
+          : field.type === 'NUMBER' ? 'number'
+          : field.type === 'DATE' ? 'date'
+          : 'text';
+
+        return `
+          <div class="form-group">
+            <label>${escapeHtml(field.label)}${req}</label>
+            <input type="${inputType}" name="${escapeHtml(field.name)}" ${ph} ${field.required ? 'required' : ''}>
+          </div>`;
+      }).join('');
+
+      app.innerHTML = `
+        <div class="contact-section">
+          <h2>${escapeHtml(form.name)}</h2>
+          ${form.description ? `<p class="form-description">${escapeHtml(form.description)}</p>` : ''}
+          ${errorBanner}
+          <form id="contact-form" onsubmit="submitContactForm(event)">
+            ${fields}
+            <button type="submit" class="submit-btn" ${state.contactSubmitting ? 'disabled' : ''}>
+              ${state.contactSubmitting ? 'Sending...' : 'Send'}
+            </button>
+          </form>
+        </div>`;
+    }
+
+    async function submitContactForm(e) {
+      e.preventDefault();
+      state.contactSubmitting = true;
+      state.contactError = null;
+      render();
+
+      const formEl = document.getElementById('contact-form');
+      const formData = {};
+      state.contactForm.fields.forEach((field) => {
+        const el = formEl.querySelector(`[name="${field.name}"]`);
+        if (!el) return;
+        if (field.type === 'CHECKBOX') {
+          formData[field.name] = el.checked;
+        } else {
+          formData[field.name] = el.value;
+        }
+      });
+
+      try {
+        const res = await fetch(`${CONFIG.apiUrl}/forms/${CONFIG.contactFormSlug}/submit`, {
+          method: 'POST',
+          headers: {
+            'X-API-Key': CONFIG.apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const body = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(body.error || `Submission failed (${res.status})`);
+        }
+
+        state.contactSuccess = true;
+      } catch (err) {
+        state.contactError = err.message;
+      }
+
+      state.contactSubmitting = false;
+      render();
     }
 
     // --- Init ---

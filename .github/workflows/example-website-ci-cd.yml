@@ -28,6 +28,7 @@ jobs:
             apiUrl: "${{ secrets.EXAMPLE_CMS_API_URL }}",
             apiKey: "${{ secrets.EXAMPLE_CMS_API_KEY }}",
             siteTitle: "${{ secrets.EXAMPLE_CMS_SITE_TITLE }}",
+            contactFormSlug: "${{ secrets.EXAMPLE_CMS_CONTACT_FORM_SLUG }}",
           };
           EOF
 
