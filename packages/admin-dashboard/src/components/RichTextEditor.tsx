@@ -1,8 +1,18 @@
+import { useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
-import { Box, IconButton, Paper, Divider } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Paper,
+  Divider,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import {
   FormatBold,
   FormatItalic,
@@ -12,7 +22,11 @@ import {
   Code,
   Link as LinkIcon,
   Image as ImageIcon,
+  PermMediaOutlined,
+  LinkOutlined,
 } from '@mui/icons-material';
+import { MediaPickerDialog } from './MediaPickerDialog';
+import type { MediaFile } from '../types';
 
 interface RichTextEditorProps {
   value: string;
@@ -21,6 +35,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+  const [imageMenuAnchor, setImageMenuAnchor] = useState<null | HTMLElement>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -51,10 +68,22 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     }
   };
 
-  const addImage = () => {
+  const addImageFromUrl = () => {
+    setImageMenuAnchor(null);
     const url = prompt('Enter image URL:');
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const handleGallerySelect = (media: MediaFile | MediaFile[]) => {
+    const file = Array.isArray(media) ? media[0] : media;
+    if (file) {
+      editor
+        .chain()
+        .focus()
+        .setImage({ src: file.blobUrl, alt: file.altText || file.originalName })
+        .run();
     }
   };
 
@@ -116,10 +145,41 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         <IconButton size="small" onClick={addLink}>
           <LinkIcon />
         </IconButton>
-        <IconButton size="small" onClick={addImage}>
+        <IconButton size="small" onClick={(e) => setImageMenuAnchor(e.currentTarget)}>
           <ImageIcon />
         </IconButton>
+
+        <Menu
+          anchorEl={imageMenuAnchor}
+          open={Boolean(imageMenuAnchor)}
+          onClose={() => setImageMenuAnchor(null)}
+        >
+          <MenuItem
+            onClick={() => {
+              setImageMenuAnchor(null);
+              setGalleryOpen(true);
+            }}
+          >
+            <ListItemIcon>
+              <PermMediaOutlined fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>From media library</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={addImageFromUrl}>
+            <ListItemIcon>
+              <LinkOutlined fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>By URL</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
+
+      <MediaPickerDialog
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        onSelect={handleGallerySelect}
+        allowedMimeTypes={['image/*']}
+      />
 
       {/* Editor */}
       <Box
