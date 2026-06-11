@@ -3,825 +3,612 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TheCMS - Template Page</title>
+  <title>TheCMS — The headless CMS that gets out of your way</title>
   <style>
+    :root {
+      --bg:        #0d0d0f;
+      --bg-soft:   #15151a;
+      --bg-card:   #1a1a20;
+      --border:    #2a2a33;
+      --text:      #f2f2f2;
+      --text-dim:  #9a9aa8;
+      --yellow:    #ffd23f;
+      --yellow-dk: #e6bc20;
+      --red:       #ff3b3b;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-      color: #1a1a2e;
-      background: #f8f9fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Header */
+    a { color: inherit; text-decoration: none; }
+
+    h1, h2, h3 { color: var(--yellow); line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ---- Header ---- */
     header {
-      background: #1a1a2e;
-      color: #fff;
-      padding: 1.5rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(13,13,15,0.82);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .brand {
+      font-size: 1.35rem; font-weight: 800; letter-spacing: -0.03em;
+      color: var(--red);
+    }
+    .brand span { color: var(--text); }
+    .nav-links { display: flex; gap: 1.75rem; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: 0.92rem; font-weight: 500; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--yellow); }
+    .nav-cta {
+      background: var(--yellow); color: #1a1a1a !important;
+      padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 700 !important;
+    }
+    .nav-cta:hover { background: var(--yellow-dk); }
+    @media (max-width: 680px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-block; cursor: pointer; border: none;
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      padding: 0.8rem 1.6rem; border-radius: 9px; transition: all 0.18s;
+    }
+    .btn-primary { background: var(--yellow); color: #1a1a1a; }
+    .btn-primary:hover { background: var(--yellow-dk); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ---- Hero ---- */
+    .hero { padding: 6rem 0 4rem; text-align: center; }
+    .hero .eyebrow {
+      display: inline-block; color: var(--yellow); font-weight: 700;
+      font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid var(--border); border-radius: 100px; padding: 0.3rem 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); margin-bottom: 1.25rem; }
+    .hero h1 em { color: var(--text); font-style: normal; }
+    .hero p.lead {
+      color: var(--text-dim); font-size: 1.2rem; max-width: 620px;
+      margin: 0 auto 2.25rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ---- Section ---- */
+    section { padding: 4rem 0; }
+    .section-head { text-align: center; max-width: 600px; margin: 0 auto 3rem; }
+    .section-head h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 0.75rem; }
+    .section-head p { color: var(--text-dim); font-size: 1.05rem; }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* ---- Feature grid ---- */
+    .grid { display: grid; gap: 1.25rem; }
+    .grid-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+    .feature-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.75rem; transition: border-color 0.18s, transform 0.18s;
+    }
+    .feature-card:hover { border-color: var(--yellow); transform: translateY(-3px); }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: rgba(255,210,63,0.12); color: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .feature-card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--text-dim); font-size: 0.95rem; }
+
+    /* ---- Blog / article cards ---- */
+    .post-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; cursor: pointer;
+      transition: border-color 0.18s, transform 0.18s; display: flex; flex-direction: column;
+    }
+    .post-card:hover { border-color: var(--yellow); transform: translateY(-3px); }
+    .post-card .thumb { aspect-ratio: 16/9; background: var(--bg-soft); object-fit: cover; width: 100%; }
+    .post-card .body { padding: 1.4rem; flex: 1; }
+    .post-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text); }
+    .post-card:hover h3 { color: var(--yellow); }
+    .post-card .meta { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .post-card .excerpt {
+      color: var(--text-dim); font-size: 0.92rem;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    header h1 { font-size: 1.5rem; font-weight: 700; }
-
-    .search-box {
-      display: flex;
-      gap: 0.5rem;
+    /* ---- Article detail ---- */
+    .article { max-width: 760px; margin: 0 auto; }
+    .article h1 { font-size: clamp(1.9rem, 5vw, 3rem); margin-bottom: 1rem; color: var(--text); }
+    .article .meta { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; }
+    .article .cover { width: 100%; border-radius: 14px; margin-bottom: 2rem; }
+    .article-body { font-size: 1.08rem; color: #d8d8e0; }
+    .article-body h2, .article-body h3 { margin: 2rem 0 0.75rem; }
+    .article-body p { margin-bottom: 1.1rem; }
+    .article-body img { max-width: 100%; border-radius: 10px; height: auto; }
+    .article-body a { color: var(--yellow); text-decoration: underline; }
+    .article-body ul, .article-body ol { margin: 0 0 1.1rem 1.4rem; }
+    .article-body blockquote {
+      border-left: 3px solid var(--yellow); padding-left: 1rem;
+      color: var(--text-dim); margin: 0 0 1.1rem;
     }
 
-    .search-box input {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      width: 250px;
-    }
-
-    .search-box button {
-      padding: 0.5rem 1rem;
-      background: #e94560;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    .search-box button:hover { background: #c73650; }
-
-    /* Navigation */
-    nav {
-      background: #16213e;
-      padding: 0.75rem 2rem;
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    nav button {
-      padding: 0.5rem 1rem;
-      background: transparent;
-      color: #a0a0b8;
-      border: 1px solid #2a2a4a;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-    }
-
-    nav button:hover, nav button.active {
-      background: #e94560;
-      color: #fff;
-      border-color: #e94560;
-    }
-
-    /* Main content */
-    main {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 2rem;
-    }
-
-    /* Content grid */
-    .content-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* Card */
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-    }
-
-    .card-body { padding: 1.25rem; }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #1a1a2e;
-    }
-
-    .card-meta {
-      font-size: 0.8rem;
-      color: #888;
-      margin-bottom: 0.75rem;
-    }
-
-    .card-text {
-      font-size: 0.9rem;
-      color: #555;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-field {
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      background: #f8f9fa;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
-
-    .card-field strong { color: #1a1a2e; }
-
-    /* Detail view */
-    .detail-view {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 2rem;
-    }
-
-    .detail-view h2 { margin-bottom: 1rem; }
-
-    .detail-view .meta { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
-
-    .detail-field {
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 6px;
-    }
-
+    /* ---- Pricing / generic data fields ---- */
+    .detail-field { border-top: 1px solid var(--border); padding: 1rem 0; }
     .detail-field label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.8rem;
-      color: #888;
-      text-transform: uppercase;
-      margin-bottom: 0.25rem;
+      display: block; color: var(--text-dim); font-size: 0.78rem;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;
     }
 
     .back-btn {
-      display: inline-block;
-      margin-bottom: 1.5rem;
-      padding: 0.5rem 1rem;
-      background: #1a1a2e;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; cursor: pointer;
+      background: none; border: none; font-family: inherit;
     }
+    .back-btn:hover { color: var(--yellow); }
 
-    .back-btn:hover { background: #16213e; }
-
-    /* Pagination */
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
+    /* ---- Pagination ---- */
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2.5rem; }
     .pagination button {
-      padding: 0.5rem 1.25rem;
-      background: #1a1a2e;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 0.5rem 1.25rem; background: var(--bg-card); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-family: inherit;
+    }
+    .pagination button:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); }
+    .pagination button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .pagination span { color: var(--text-dim); font-size: 0.9rem; }
+
+    /* ---- Contact form ---- */
+    .contact-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2.5rem; max-width: 580px; margin: 0 auto;
+    }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text); }
+    .form-group label .required { color: var(--red); }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 0.7rem 0.85rem; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+      transition: border-color 0.18s;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: var(--yellow);
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .checkbox-row { display: flex; align-items: flex-start; gap: 0.6rem; }
+    .checkbox-row input { width: auto; margin-top: 0.3rem; }
+    .form-success { text-align: center; padding: 1.5rem 0; }
+    .form-success h3 { color: var(--yellow); margin-bottom: 0.5rem; }
+    .form-error-banner {
+      background: rgba(255,59,59,0.12); border: 1px solid var(--red); color: #ff8080;
+      padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;
     }
 
-    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .pagination span { font-size: 0.9rem; color: #555; }
-
-    /* States */
-    .loading, .error, .empty {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: #888;
+    /* ---- Footer ---- */
+    footer {
+      border-top: 1px solid var(--border); padding: 2.5rem 0; margin-top: 3rem;
+      color: var(--text-dim); font-size: 0.88rem;
     }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    footer .brand { font-size: 1.1rem; }
 
-    .error { color: #e94560; }
-
+    /* ---- States ---- */
+    .state { text-align: center; padding: 5rem 1.5rem; color: var(--text-dim); }
+    .state.error { color: var(--red); }
     .spinner {
-      width: 40px; height: 40px;
-      border: 4px solid #e0e0e0;
-      border-top-color: #e94560;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 1rem;
+      width: 38px; height: 38px; border: 3px solid var(--border);
+      border-top-color: var(--yellow); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Contact form */
-    .contact-section {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 2rem;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .contact-section h2 { margin-bottom: 0.5rem; }
-    .contact-section .form-description { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-bottom: 0.35rem;
-      color: #1a1a2e;
-    }
-
-    .form-group label .required { color: #e94560; }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid #d0d0d0;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #e94560;
-    }
-
-    .form-group textarea { resize: vertical; min-height: 100px; }
-
-    .form-group .field-error {
-      color: #e94560;
-      font-size: 0.8rem;
-      margin-top: 0.25rem;
-    }
-
-    .submit-btn {
-      padding: 0.65rem 2rem;
-      background: #e94560;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .submit-btn:hover { background: #c73650; }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .form-success {
-      text-align: center;
-      padding: 2rem;
-      color: #2e7d32;
-    }
-
-    .form-success h3 { margin-bottom: 0.5rem; }
-
-    .form-error-banner {
-      background: #fdecea;
-      color: #c62828;
-      padding: 0.75rem 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-
-    /* Setup banner */
     .setup-banner {
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 10px;
-      padding: 2rem;
-      margin-bottom: 2rem;
+      background: var(--bg-card); border: 1px solid var(--yellow); border-radius: 14px;
+      padding: 2rem; margin: 2rem auto; max-width: 720px;
     }
-
-    .setup-banner h3 { margin-bottom: 0.5rem; }
-    .setup-banner code {
-      background: #f8f9fa;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.85rem;
+    .setup-banner h3 { margin-bottom: 0.75rem; }
+    .setup-banner pre {
+      background: var(--bg); padding: 1rem; border-radius: 8px; margin-top: 0.75rem;
+      font-size: 0.82rem; overflow-x: auto; color: var(--text-dim);
     }
+    .setup-banner code { background: var(--bg); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--yellow); }
   </style>
 </head>
 <body>
 
   <header>
-    <h1 id="site-title">TheCMS Template</h1>
-    <div class="search-box">
-      <input type="text" id="search-input" placeholder="Search content...">
-      <button onclick="handleSearch()">Search</button>
+    <div class="container header-inner">
+      <a href="#" class="brand" onclick="goHome(event)" id="brand">The<span>CMS</span></a>
+      <nav class="nav-links" id="nav-links"></nav>
     </div>
   </header>
 
-  <nav id="content-type-nav"></nav>
-
   <main id="app"></main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span class="brand" id="footer-brand">The<span style="color:var(--text)">CMS</span></span>
+      <span>Built on TheCMS — content served live from the headless API.</span>
+    </div>
+  </footer>
 
   <!-- Runtime configuration injected via config.js (generated during CI/CD from GitHub secrets) -->
   <script src="config.js"></script>
   <script>
-    // Reads config from window.__CMS_CONFIG__ (set by config.js)
-    // Falls back to placeholder values that trigger the setup banner
     const CONFIG = {
       apiUrl: window.__CMS_CONFIG__?.apiUrl || 'YOUR_API_URL_HERE',
       apiKey: window.__CMS_CONFIG__?.apiKey || 'YOUR_API_KEY_HERE',
-      siteTitle: window.__CMS_CONFIG__?.siteTitle || 'TheCMS Template',
-      contactFormSlug: window.__CMS_CONFIG__?.contactFormSlug || '',
+      siteTitle: window.__CMS_CONFIG__?.siteTitle || 'TheCMS',
+      // slugs of the content types this site renders (match the manual setup below)
+      featuresSlug: window.__CMS_CONFIG__?.featuresSlug || 'feature',
+      postsSlug: window.__CMS_CONFIG__?.postsSlug || 'blog-post',
+      heroSlug: window.__CMS_CONFIG__?.heroSlug || 'landing-hero',
+      contactFormSlug: window.__CMS_CONFIG__?.contactFormSlug || 'contact-us',
     };
 
-    document.getElementById('site-title').textContent = CONFIG.siteTitle;
+    // ---- State / routing ----
+    let view = { page: 'home', entry: null, postsPage: 1 };
+    let cache = { hero: null, features: [], posts: [], contactForm: null };
+    let ui = { contactSubmitting: false, contactSuccess: false, contactError: null };
 
-    // State
-    let state = {
-      contentTypes: [],
-      activeType: null,
-      entries: [],
-      pagination: null,
-      currentPage: 1,
-      activeEntry: null,
-      searchQuery: '',
-      loading: false,
-      error: null,
-      // Contact form
-      showContactForm: false,
-      contactForm: null,
-      contactSubmitting: false,
-      contactSuccess: false,
-      contactError: null,
-    };
-
-    // --- API Client ---
-
+    // ---- API ----
     async function api(endpoint, params = {}) {
       const url = new URL(`${CONFIG.apiUrl}${endpoint}`);
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
       });
-
-      const res = await fetch(url, {
-        headers: { 'X-API-Key': CONFIG.apiKey },
-      });
-
+      const res = await fetch(url, { headers: { 'X-API-Key': CONFIG.apiKey } });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || `API error: ${res.status}`);
       }
-
       return res.json();
     }
 
-    // --- Data fetching ---
-
-    async function loadContentTypes() {
-      try {
-        const result = await api('/content-types');
-        state.contentTypes = result.data || [];
-        renderNav();
-
-        if (state.contentTypes.length > 0 && !state.activeType) {
-          selectContentType(state.contentTypes[0].slug);
-        }
-      } catch (err) {
-        state.error = `Failed to load content types: ${err.message}`;
-        render();
-      }
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = str == null ? '' : String(str);
+      return d.innerHTML;
     }
 
-    async function loadEntries(slug, page = 1) {
-      state.loading = true;
-      state.error = null;
-      state.activeEntry = null;
-      render();
-
-      try {
-        const result = await api(`/content/${slug}`, { page, limit: 12 });
-        state.entries = result.data || [];
-        state.pagination = result.pagination || null;
-        state.currentPage = page;
-      } catch (err) {
-        state.error = `Failed to load entries: ${err.message}`;
-        state.entries = [];
-      }
-
-      state.loading = false;
-      render();
+    function fmtDate(d) {
+      if (!d) return '';
+      return new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
-    async function loadEntry(slug, entryId) {
-      state.loading = true;
-      state.error = null;
-      render();
-
-      try {
-        const result = await api(`/content/${slug}/${entryId}`);
-        state.activeEntry = result.data || null;
-      } catch (err) {
-        state.error = `Failed to load entry: ${err.message}`;
-      }
-
-      state.loading = false;
-      render();
-    }
-
-    async function searchEntries(query, page = 1) {
-      state.loading = true;
-      state.error = null;
-      state.activeEntry = null;
-      state.searchQuery = query;
-      render();
-
-      try {
-        const result = await api('/search', { q: query, page, limit: 12 });
-        state.entries = result.data || [];
-        state.pagination = result.pagination || null;
-        state.currentPage = page;
-      } catch (err) {
-        state.error = `Search failed: ${err.message}`;
-        state.entries = [];
-      }
-
-      state.loading = false;
-      render();
-    }
-
-    // --- Actions ---
-
-    function selectContentType(slug) {
-      state.activeType = slug;
-      state.searchQuery = '';
-      state.currentPage = 1;
-      state.showContactForm = false;
-      renderNav();
-      loadEntries(slug, 1);
-    }
-
-    function handleSearch() {
-      const input = document.getElementById('search-input');
-      const query = input.value.trim();
-      if (query) {
-        state.activeType = null;
-        state.showContactForm = false;
-        renderNav();
-        searchEntries(query);
-      }
-    }
-
-    // Enter key to search
-    document.getElementById('search-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleSearch();
-    });
-
-    // --- Rendering ---
-
+    // ---- Navigation ----
     function renderNav() {
-      const nav = document.getElementById('content-type-nav');
-      const typeButtons = state.contentTypes.map((ct) =>
-        `<button class="${state.activeType === ct.slug && !state.showContactForm ? 'active' : ''}"
-                 onclick="selectContentType('${ct.slug}')">
-          ${ct.name}
-        </button>`
-      ).join('');
-
-      const contactBtn = CONFIG.contactFormSlug
-        ? `<button class="${state.showContactForm ? 'active' : ''}" onclick="showContactForm()">Contact</button>`
-        : '';
-
-      nav.innerHTML = typeButtons + contactBtn;
+      document.getElementById('nav-links').innerHTML = `
+        <a href="#features" onclick="goSection(event,'features')">Features</a>
+        <a href="#blog" onclick="goSection(event,'blog')">Blog</a>
+        <a href="#contact" onclick="goContact(event)">Contact</a>
+        <a href="#contact" class="nav-cta" onclick="goContact(event)">Get started</a>`;
     }
 
+    function goHome(e) { if (e) e.preventDefault(); view = { page: 'home', entry: null, postsPage: 1 }; render(); window.scrollTo(0,0); }
+    function goSection(e, id) {
+      if (e) e.preventDefault();
+      if (view.page !== 'home') { goHome(); }
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 50);
+    }
+    function goContact(e) { if (e) e.preventDefault(); openContact(); }
+
+    // ---- Render root ----
     function render() {
       const app = document.getElementById('app');
 
-      // Setup check
-      if (CONFIG.apiKey === 'YOUR_API_KEY_HERE') {
-        app.innerHTML = `
-          <div class="setup-banner">
-            <h3>Setup Required</h3>
-            <p>No <code>config.js</code> found or it is missing configuration values.</p>
-            <p style="margin-top:0.5rem">For <strong>local development</strong>, create a <code>config.js</code> next to this file:</p>
-            <pre style="background:#f8f9fa;padding:0.75rem;border-radius:4px;margin-top:0.5rem;font-size:0.85rem">window.__CMS_CONFIG__ = {
-  apiUrl: "https://your-backend.azurecontainerapps.io/api/v1/public",
-  apiKey: "cms_your_api_key_here",
-  siteTitle: "My Site",
-  contactFormSlug: "contact-us",
-};</pre>
-            <p style="margin-top:0.75rem">For <strong>production</strong>, these values are injected from GitHub secrets during deployment.</p>
-          </div>`;
-        return;
-      }
+      if (CONFIG.apiKey === 'YOUR_API_KEY_HERE') { app.innerHTML = setupBanner(); return; }
+      if (view.page === 'loading') { app.innerHTML = stateLoading(); return; }
+      if (view.page === 'error')   { app.innerHTML = stateError(); return; }
+      if (view.page === 'post')    { app.innerHTML = renderArticle(); return; }
+      if (view.page === 'contact') { renderContact(); return; }
 
-      // Loading
-      if (state.loading) {
-        app.innerHTML = `
-          <div class="loading">
-            <div class="spinner"></div>
-            <p>Loading...</p>
-          </div>`;
-        return;
-      }
-
-      // Error
-      if (state.error) {
-        app.innerHTML = `
-          <div class="error">
-            <p>${state.error}</p>
-            <button class="back-btn" style="margin-top:1rem" onclick="location.reload()">Retry</button>
-          </div>`;
-        return;
-      }
-
-      // Contact form view
-      if (state.showContactForm && state.contactForm) {
-        renderContactForm();
-        return;
-      }
-
-      // Detail view
-      if (state.activeEntry) {
-        renderDetail();
-        return;
-      }
-
-      // List view
-      renderList();
+      // home
+      app.innerHTML = renderHero() + renderFeatures() + renderBlog() + renderCTA();
     }
 
-    function renderList() {
-      const app = document.getElementById('app');
+    // ---- Home sections ----
+    function renderHero() {
+      const h = cache.hero?.data || {};
+      const eyebrow = h.eyebrow || 'Headless CMS · API-first';
+      const title = h.title || 'Content that ships at <em>the speed of your code</em>';
+      const subtitle = h.subtitle || 'A lightweight, API-first headless CMS. Model any content, publish through a clean REST API, and plug it into any front end — web, mobile, or static site.';
+      return `
+        <section class="hero">
+          <div class="container">
+            <span class="eyebrow">${esc(eyebrow)}</span>
+            <h1>${title}</h1>
+            <p class="lead">${esc(subtitle)}</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="goContact(event)">${esc(h.primaryCta || 'Get started free')}</button>
+              <a class="btn btn-ghost" href="#features" onclick="goSection(event,'features')">See features</a>
+            </div>
+          </div>
+        </section>`;
+    }
 
-      if (state.entries.length === 0) {
-        app.innerHTML = `
-          <div class="empty">
-            <p>${state.searchQuery ? 'No results found for "' + escapeHtml(state.searchQuery) + '"' : 'No entries found.'}</p>
-          </div>`;
-        return;
-      }
-
-      const heading = state.searchQuery
-        ? `<h2 style="margin-bottom:1.5rem">Search results for "${escapeHtml(state.searchQuery)}"</h2>`
-        : '';
-
-      const cards = state.entries.map((entry) => {
-        const data = entry.data || {};
-        const title = entry.title || data.title || data.name || 'Untitled';
-        const date = entry.publishedAt
-          ? new Date(entry.publishedAt).toLocaleDateString()
-          : new Date(entry.createdAt).toLocaleDateString();
-
-        // Show first 2 fields from data
-        const fields = Object.entries(data).slice(0, 2).map(([key, value]) => {
-          const display = typeof value === 'object' ? JSON.stringify(value) : String(value);
-          return `<div class="card-field"><strong>${escapeHtml(key)}:</strong> ${escapeHtml(display.substring(0, 100))}</div>`;
-        }).join('');
-
-        const slug = state.activeType || '';
-
+    function renderFeatures() {
+      const items = cache.features.length ? cache.features.map((e) => {
+        const d = e.data || {};
         return `
-          <div class="card" onclick="loadEntry('${slug}', '${entry.id}')">
-            <div class="card-body">
-              <div class="card-title">${escapeHtml(title)}</div>
-              <div class="card-meta">${date}</div>
-              ${fields}
+          <div class="feature-card">
+            <div class="feature-icon">${esc(d.icon || '◆')}</div>
+            <h3>${esc(d.title || d.name || 'Feature')}</h3>
+            <p>${esc(d.description || '')}</p>
+          </div>`;
+      }).join('') : placeholderFeatures();
+
+      return `
+        <hr class="section-divider">
+        <section id="features">
+          <div class="container">
+            <div class="section-head">
+              <h2>Everything you need, nothing you don't</h2>
+              <p>The CMS does one thing well: structured content over a fast, secure API.</p>
+            </div>
+            <div class="grid grid-3">${items}</div>
+          </div>
+        </section>`;
+    }
+
+    function placeholderFeatures() {
+      // Fallback shown only if no "feature" entries exist yet
+      const demo = [
+        ['⚡', 'API-first', 'Every piece of content is available instantly over a clean REST API with per-site keys.'],
+        ['🧩', 'Flexible content types', 'Model anything — define fields, validation, and relations without touching code.'],
+        ['🔒', 'Secure by default', 'Scoped API keys, rate limiting, and signed webhooks built in.'],
+      ];
+      return demo.map(([i,t,d]) => `
+        <div class="feature-card">
+          <div class="feature-icon">${i}</div>
+          <h3>${t}</h3>
+          <p>${d}</p>
+        </div>`).join('');
+    }
+
+    function renderBlog() {
+      if (!cache.posts.length) return '';
+      const cards = cache.posts.slice(0, 6).map((e) => {
+        const d = e.data || {};
+        const title = d.title || e.title || 'Untitled';
+        const cover = d.coverImage || d.image || '';
+        const excerpt = d.excerpt || d.summary || stripHtml(d.body || '').slice(0, 160);
+        return `
+          <div class="post-card" onclick="openPost('${e.id}')">
+            ${cover ? `<img class="thumb" src="${esc(cover)}" alt="${esc(title)}" loading="lazy">` : ''}
+            <div class="body">
+              <div class="meta">${fmtDate(e.publishedAt || e.createdAt)}${d.author ? ' · ' + esc(d.author) : ''}</div>
+              <h3>${esc(title)}</h3>
+              <p class="excerpt">${esc(excerpt)}</p>
             </div>
           </div>`;
       }).join('');
 
-      const pag = state.pagination ? `
-        <div class="pagination">
-          <button ${state.currentPage <= 1 ? 'disabled' : ''} onclick="navigatePage(${state.currentPage - 1})">Previous</button>
-          <span>Page ${state.pagination.page} of ${state.pagination.totalPages}</span>
-          <button ${state.currentPage >= state.pagination.totalPages ? 'disabled' : ''} onclick="navigatePage(${state.currentPage + 1})">Next</button>
-        </div>` : '';
-
-      app.innerHTML = heading + `<div class="content-grid">${cards}</div>` + pag;
+      return `
+        <hr class="section-divider">
+        <section id="blog">
+          <div class="container">
+            <div class="section-head">
+              <h2>From the blog</h2>
+              <p>Product news, guides, and engineering notes.</p>
+            </div>
+            <div class="grid grid-3">${cards}</div>
+          </div>
+        </section>`;
     }
 
-    function renderDetail() {
-      const app = document.getElementById('app');
-      const entry = state.activeEntry;
-      const data = entry.data || {};
-      const title = entry.title || data.title || data.name || 'Untitled';
-      const date = entry.publishedAt
-        ? new Date(entry.publishedAt).toLocaleDateString()
-        : new Date(entry.createdAt).toLocaleDateString();
+    function renderCTA() {
+      return `
+        <hr class="section-divider">
+        <section>
+          <div class="container" style="text-align:center">
+            <div class="section-head" style="margin-bottom:1.75rem">
+              <h2>Ready to build?</h2>
+              <p>Spin up your first content type in minutes and serve it anywhere.</p>
+            </div>
+            <button class="btn btn-primary" onclick="goContact(event)">Talk to us</button>
+          </div>
+        </section>`;
+    }
 
-      const fields = Object.entries(data).map(([key, value]) => {
-        let display;
-        if (typeof value === 'object' && value !== null) {
-          display = `<pre style="white-space:pre-wrap;margin:0">${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;
-        } else {
-          display = escapeHtml(String(value ?? ''));
-        }
-        return `
-          <div class="detail-field">
-            <label>${escapeHtml(key)}</label>
-            <div>${display}</div>
-          </div>`;
-      }).join('');
+    function stripHtml(html) {
+      const d = document.createElement('div'); d.innerHTML = html || ''; return d.textContent || '';
+    }
 
-      app.innerHTML = `
-        <button class="back-btn" onclick="goBack()">Back to list</button>
-        <div class="detail-view">
-          <h2>${escapeHtml(title)}</h2>
-          <div class="meta">Published: ${date} | Status: ${entry.status}</div>
-          ${fields}
+    // ---- Article detail ----
+    async function openPost(id) {
+      view = { page: 'loading', entry: null };
+      render();
+      try {
+        const result = await api(`/content/${CONFIG.postsSlug}/${id}`);
+        view = { page: 'post', entry: result.data };
+      } catch (err) {
+        view = { page: 'error', error: err.message };
+      }
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function renderArticle() {
+      const e = view.entry; const d = e?.data || {};
+      const title = d.title || e?.title || 'Untitled';
+      const cover = d.coverImage || d.image || '';
+      const bodyHtml = d.body || d.content || `<p>${esc(d.excerpt || '')}</p>`;
+      return `
+        <div class="container" style="padding-top:3rem;padding-bottom:2rem">
+          <article class="article">
+            <button class="back-btn" onclick="goHome(event)">← Back</button>
+            <h1>${esc(title)}</h1>
+            <div class="meta">${fmtDate(e.publishedAt || e.createdAt)}${d.author ? ' · by ' + esc(d.author) : ''}</div>
+            ${cover ? `<img class="cover" src="${esc(cover)}" alt="${esc(title)}">` : ''}
+            <div class="article-body">${bodyHtml}</div>
+          </article>
         </div>`;
     }
 
-    function navigatePage(page) {
-      if (state.searchQuery) {
-        searchEntries(state.searchQuery, page);
-      } else if (state.activeType) {
-        loadEntries(state.activeType, page);
-      }
-    }
-
-    function goBack() {
-      state.activeEntry = null;
-      render();
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    // --- Contact Form ---
-
-    async function showContactForm() {
-      state.showContactForm = true;
-      state.activeType = null;
-      state.activeEntry = null;
-      state.searchQuery = '';
-      state.contactSuccess = false;
-      state.contactError = null;
-      renderNav();
-
-      if (!state.contactForm) {
-        state.loading = true;
-        render();
+    // ---- Contact form ----
+    async function openContact() {
+      view = { page: 'contact' };
+      ui.contactSuccess = false; ui.contactError = null;
+      if (!cache.contactForm) {
+        view.page = 'loading'; render();
         try {
           const result = await api(`/forms/${CONFIG.contactFormSlug}`);
-          state.contactForm = result.data;
+          cache.contactForm = result.data;
+          view.page = 'contact';
         } catch (err) {
-          state.error = `Failed to load contact form: ${err.message}`;
+          view = { page: 'error', error: `Failed to load contact form: ${err.message}` };
         }
-        state.loading = false;
       }
-
       render();
+      window.scrollTo(0, 0);
     }
 
-    function renderContactForm() {
+    function renderContact() {
       const app = document.getElementById('app');
-      const form = state.contactForm;
+      const form = cache.contactForm;
+      if (!form) { app.innerHTML = stateError(); return; }
 
-      if (state.contactSuccess) {
+      if (ui.contactSuccess) {
         app.innerHTML = `
-          <div class="contact-section">
-            <div class="form-success">
-              <h3>Thank you!</h3>
-              <p>Your message has been sent successfully.</p>
-              <button class="back-btn" style="margin-top:1rem" onclick="showContactForm()">Send another</button>
+          <div class="container" style="padding:4rem 1.5rem">
+            <div class="contact-card">
+              <div class="form-success">
+                <h3>Thanks — we'll be in touch.</h3>
+                <p style="color:var(--text-dim)">Your message has been sent successfully.</p>
+                <button class="btn btn-ghost" style="margin-top:1.25rem" onclick="openContact()">Send another</button>
+              </div>
             </div>
           </div>`;
         return;
       }
 
-      const errorBanner = state.contactError
-        ? `<div class="form-error-banner">${escapeHtml(state.contactError)}</div>`
-        : '';
+      const errorBanner = ui.contactError ? `<div class="form-error-banner">${esc(ui.contactError)}</div>` : '';
 
       const fields = form.fields.map((field) => {
         const req = field.required ? '<span class="required"> *</span>' : '';
-        const ph = field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : '';
-
+        const ph = field.placeholder ? `placeholder="${esc(field.placeholder)}"` : '';
         if (field.type === 'TEXTAREA') {
-          return `
-            <div class="form-group">
-              <label>${escapeHtml(field.label)}${req}</label>
-              <textarea name="${escapeHtml(field.name)}" ${ph} ${field.required ? 'required' : ''}></textarea>
-            </div>`;
+          return `<div class="form-group"><label>${esc(field.label)}${req}</label>
+            <textarea name="${esc(field.name)}" ${ph} ${field.required ? 'required' : ''}></textarea></div>`;
         }
-
         if (field.type === 'SELECT' && field.options) {
-          const opts = field.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
-          return `
-            <div class="form-group">
-              <label>${escapeHtml(field.label)}${req}</label>
-              <select name="${escapeHtml(field.name)}" ${field.required ? 'required' : ''}>
-                <option value="">Select...</option>
-                ${opts}
-              </select>
-            </div>`;
+          const opts = field.options.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+          return `<div class="form-group"><label>${esc(field.label)}${req}</label>
+            <select name="${esc(field.name)}" ${field.required ? 'required' : ''}><option value="">Select…</option>${opts}</select></div>`;
         }
-
         if (field.type === 'CHECKBOX') {
-          return `
-            <div class="form-group">
-              <label><input type="checkbox" name="${escapeHtml(field.name)}" ${field.required ? 'required' : ''}> ${escapeHtml(field.label)}${req}</label>
-            </div>`;
+          return `<div class="form-group"><div class="checkbox-row">
+            <input type="checkbox" name="${esc(field.name)}" ${field.required ? 'required' : ''}>
+            <label style="margin:0">${esc(field.label)}${req}</label></div></div>`;
         }
-
-        const inputType = field.type === 'EMAIL' ? 'email'
-          : field.type === 'NUMBER' ? 'number'
-          : field.type === 'DATE' ? 'date'
-          : 'text';
-
-        return `
-          <div class="form-group">
-            <label>${escapeHtml(field.label)}${req}</label>
-            <input type="${inputType}" name="${escapeHtml(field.name)}" ${ph} ${field.required ? 'required' : ''}>
-          </div>`;
+        const t = field.type === 'EMAIL' ? 'email' : field.type === 'NUMBER' ? 'number' : field.type === 'DATE' ? 'date' : 'text';
+        return `<div class="form-group"><label>${esc(field.label)}${req}</label>
+          <input type="${t}" name="${esc(field.name)}" ${ph} ${field.required ? 'required' : ''}></div>`;
       }).join('');
 
       app.innerHTML = `
-        <div class="contact-section">
-          <h2>${escapeHtml(form.name)}</h2>
-          ${form.description ? `<p class="form-description">${escapeHtml(form.description)}</p>` : ''}
-          ${errorBanner}
-          <form id="contact-form" onsubmit="submitContactForm(event)">
-            ${fields}
-            <button type="submit" class="submit-btn" ${state.contactSubmitting ? 'disabled' : ''}>
-              ${state.contactSubmitting ? 'Sending...' : 'Send'}
-            </button>
-          </form>
+        <div class="container" style="padding:4rem 1.5rem">
+          <div class="section-head"><h2>${esc(form.name || 'Get in touch')}</h2>
+            ${form.description ? `<p>${esc(form.description)}</p>` : ''}</div>
+          <div class="contact-card">
+            ${errorBanner}
+            <form id="contact-form" onsubmit="submitContact(event)">
+              ${fields}
+              <button type="submit" class="btn btn-primary" style="width:100%" ${ui.contactSubmitting ? 'disabled' : ''}>
+                ${ui.contactSubmitting ? 'Sending…' : 'Send message'}
+              </button>
+            </form>
+          </div>
         </div>`;
     }
 
-    async function submitContactForm(e) {
+    async function submitContact(e) {
       e.preventDefault();
-      state.contactSubmitting = true;
-      state.contactError = null;
-      render();
-
+      ui.contactSubmitting = true; ui.contactError = null; render();
       const formEl = document.getElementById('contact-form');
-      const formData = {};
-      state.contactForm.fields.forEach((field) => {
+      const data = {};
+      cache.contactForm.fields.forEach((field) => {
         const el = formEl.querySelector(`[name="${field.name}"]`);
         if (!el) return;
-        if (field.type === 'CHECKBOX') {
-          formData[field.name] = el.checked;
-        } else {
-          formData[field.name] = el.value;
-        }
+        data[field.name] = field.type === 'CHECKBOX' ? el.checked : el.value;
       });
-
       try {
         const res = await fetch(`${CONFIG.apiUrl}/forms/${CONFIG.contactFormSlug}/submit`, {
           method: 'POST',
-          headers: {
-            'X-API-Key': CONFIG.apiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
+          headers: { 'X-API-Key': CONFIG.apiKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
         });
-
         const body = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          throw new Error(body.error || `Submission failed (${res.status})`);
-        }
-
-        state.contactSuccess = true;
+        if (!res.ok) throw new Error(body.error || `Submission failed (${res.status})`);
+        ui.contactSuccess = true;
       } catch (err) {
-        state.contactError = err.message;
+        ui.contactError = err.message;
       }
+      ui.contactSubmitting = false; render();
+    }
 
-      state.contactSubmitting = false;
+    // ---- States ----
+    function stateLoading() { return `<div class="state"><div class="spinner"></div><p>Loading…</p></div>`; }
+    function stateError() {
+      return `<div class="state error"><p>${esc(view.error || 'Something went wrong.')}</p>
+        <button class="btn btn-ghost" style="margin-top:1.25rem" onclick="goHome(event)">Back home</button></div>`;
+    }
+    function setupBanner() {
+      return `
+        <div class="setup-banner">
+          <h3>Setup required</h3>
+          <p>No <code>config.js</code> found, or it is missing values.</p>
+          <p style="margin-top:0.5rem;color:var(--text-dim)">For local development, create <code>config.js</code> next to this file:</p>
+          <pre>window.__CMS_CONFIG__ = {
+  apiUrl: "https://your-backend.azurecontainerapps.io/api/v1/public",
+  apiKey: "cms_your_api_key_here",
+  siteTitle: "TheCMS",
+  featuresSlug: "feature",
+  postsSlug: "blog-post",
+  heroSlug: "landing-hero",
+  contactFormSlug: "contact-us",
+};</pre>
+          <p style="margin-top:0.75rem;color:var(--text-dim)">In production these are injected from GitHub secrets during deployment.</p>
+        </div>`;
+    }
+
+    // ---- Init ----
+    async function init() {
+      renderNav();
+      document.title = `${CONFIG.siteTitle} — headless CMS`;
+      if (CONFIG.apiKey === 'YOUR_API_KEY_HERE') { render(); return; }
+
+      view.page = 'loading'; render();
+
+      // Load home content in parallel; tolerate any single type being absent
+      const [hero, features, posts] = await Promise.all([
+        api(`/content/${CONFIG.heroSlug}`, { limit: 1 }).catch(() => null),
+        api(`/content/${CONFIG.featuresSlug}`, { limit: 12, sortBy: 'createdAt', sortOrder: 'asc' }).catch(() => null),
+        api(`/content/${CONFIG.postsSlug}`, { limit: 6 }).catch(() => null),
+      ]);
+
+      cache.hero = hero?.data?.[0] || null;
+      cache.features = features?.data || [];
+      cache.posts = posts?.data || [];
+
+      view.page = 'home';
       render();
     }
 
-    // --- Init ---
-    render();
-    if (CONFIG.apiKey !== 'YOUR_API_KEY_HERE') {
-      loadContentTypes();
-    }
+    init();
   </script>
 </body>
 </html>
