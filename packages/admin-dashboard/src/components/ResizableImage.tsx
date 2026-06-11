@@ -8,18 +8,28 @@ import {
 
 const MIN_WIDTH = 40;
 
+export type ImageFloat = 'left' | 'right' | 'none';
+
 /**
  * NodeView for a resizable image. Shows the image and, when selected in an
  * editable editor, a draggable corner handle (bottom-right) to resize it.
- * The chosen width is written back to the node's `width` attribute and
- * serialized as a plain `width` attribute on the <img> in the stored HTML.
+ *
+ * - `width` is written back as a plain `width` attribute on the <img>.
+ * - `float` ('left' | 'right' | 'none') makes surrounding text wrap around the
+ *   image; serialized as an inline `style` on the <img> so it renders the same
+ *   on consumer sites.
+ *
+ * Resizing can grow the image up to its natural (intrinsic) resolution, so it
+ * can be made bigger as well as smaller. Beyond natural size it's capped to
+ * avoid upscaling blur.
  */
 function ResizableImageView({ node, updateAttributes, selected, editor }: NodeViewProps) {
-  const { src, alt, title, width } = node.attrs as {
+  const { src, alt, title, width, float } = node.attrs as {
     src: string;
     alt?: string;
     title?: string;
     width?: number | null;
+    float?: ImageFloat;
   };
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -31,9 +41,13 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
       event.preventDefault();
       event.stopPropagation();
 
+      const img = imgRef.current;
       const startX = event.clientX;
-      const startWidth = imgRef.current?.offsetWidth ?? MIN_WIDTH;
-      const maxWidth = imgRef.current?.parentElement?.offsetWidth ?? Infinity;
+      const startWidth = img?.offsetWidth ?? MIN_WIDTH;
+      // Allow growing up to the image's true resolution (naturalWidth).
+      // Fall back to a generous cap if natural size is unknown.
+      const naturalWidth = img?.naturalWidth || 4000;
+      const maxWidth = Math.max(naturalWidth, startWidth);
 
       const onMouseMove = (moveEvent: MouseEvent) => {
         const delta = moveEvent.clientX - startX;
@@ -67,14 +81,22 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
 
   const displayWidth = dragWidth ?? (width ? Number(width) : undefined);
 
+  const floatStyle: React.CSSProperties =
+    float === 'left'
+      ? { float: 'left', marginRight: 16, marginBottom: 8 }
+      : float === 'right'
+      ? { float: 'right', marginLeft: 16, marginBottom: 8 }
+      : {};
+
   return (
     <NodeViewWrapper
       as="span"
       style={{
-        display: 'inline-block',
+        display: float === 'left' || float === 'right' ? 'block' : 'inline-block',
         position: 'relative',
         lineHeight: 0,
         maxWidth: '100%',
+        ...floatStyle,
       }}
     >
       <img
@@ -108,6 +130,7 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
             border: '2px solid #fff',
             boxShadow: '0 0 2px rgba(0,0,0,0.4)',
             cursor: 'nwse-resize',
+            zIndex: 1,
           }}
         />
       )}
@@ -136,8 +159,8 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
 }
 
 /**
- * Image extension with a `width` attribute and a drag-to-resize NodeView.
- * Drop-in replacement for the default `@tiptap/extension-image`.
+ * Image extension with `width` + `float` attributes and a drag-to-resize
+ * NodeView. Drop-in replacement for the default `@tiptap/extension-image`.
  */
 export const ResizableImage = Image.extend({
   addAttributes() {
@@ -146,12 +169,22 @@ export const ResizableImage = Image.extend({
       width: {
         default: null,
         parseHTML: (element) => {
-          const w = element.getAttribute('width');
+          const w = element.getAttribute('width') || element.style.width;
           return w ? parseInt(w, 10) : null;
         },
         renderHTML: (attributes) => {
           if (!attributes.width) return {};
           return { width: attributes.width };
+        },
+      },
+      float: {
+        default: 'none',
+        parseHTML: (element) => (element.style.float as ImageFloat) || 'none',
+        renderHTML: (attributes) => {
+          const float = attributes.float as ImageFloat;
+          if (!float || float === 'none') return {};
+          const margin = float === 'left' ? '0 16px 8px 0' : '0 0 8px 16px';
+          return { style: `float: ${float}; margin: ${margin};` };
         },
       },
     };
