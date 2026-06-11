@@ -138,8 +138,17 @@ export class PublicController {
         return;
       }
 
-      // Check if entry belongs to the content type
-      if (entry.contentTypeId.toString() !== contentType._id.toString()) {
+      // Check if entry belongs to the content type.
+      // getEntryById populates contentTypeId, so it may be the full content-type
+      // document rather than a raw ObjectId — normalise to the id either way.
+      const rawContentTypeId = entry.contentTypeId as unknown as
+        | { _id?: { toString(): string }; toString(): string };
+      const entryTypeId =
+        rawContentTypeId && typeof rawContentTypeId === 'object' && rawContentTypeId._id
+          ? rawContentTypeId._id.toString()
+          : rawContentTypeId.toString();
+
+      if (entryTypeId !== contentType._id.toString()) {
         res.status(404).json({
           success: false,
           error: 'Entry not found',
