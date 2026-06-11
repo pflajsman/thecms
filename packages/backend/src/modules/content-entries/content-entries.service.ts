@@ -74,6 +74,14 @@ export class ContentEntriesService {
       throw new Error(`Validation failed: ${errorMessages}`);
     }
 
+    if (validationResult.warnings.length > 0) {
+      console.warn(
+        `Content entry (type ${entryData.contentTypeId}) has orphaned fields: ${validationResult.warnings
+          .map((w) => w.field)
+          .join(', ')}`
+      );
+    }
+
     // Create the entry
     const entry = new ContentEntryModel({
       contentTypeId: entryData.contentTypeId,
@@ -203,6 +211,14 @@ export class ContentEntriesService {
       if (!validationResult.valid) {
         const errorMessages = validationResult.errors.map((e) => e.message).join(', ');
         throw new Error(`Validation failed: ${errorMessages}`);
+      }
+
+      if (validationResult.warnings.length > 0) {
+        console.warn(
+          `Content entry ${entryId} has orphaned fields: ${validationResult.warnings
+            .map((w) => w.field)
+            .join(', ')}`
+        );
       }
 
       entry.data = updateData.data;

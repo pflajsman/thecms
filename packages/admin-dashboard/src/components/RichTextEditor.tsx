@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
+import { ResizableImage } from './ResizableImage';
 import {
   Box,
   IconButton,
@@ -44,7 +44,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       Link.configure({
         openOnClick: false,
       }),
-      Image,
+      ResizableImage,
     ],
     content: value,
     onUpdate: ({ editor }) => {

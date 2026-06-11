@@ -298,6 +298,43 @@ router.delete('/:id', (req, res, next) => contentTypesController.deleteContentTy
 
 /**
  * @swagger
+ * /api/v1/content-types/{id}/entry-count:
+ *   get:
+ *     summary: Get the number of content entries using this content type
+ *     tags: [Content Types]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Content type ID
+ *     responses:
+ *       200:
+ *         description: Entry count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: integer
+ *                       example: 12
+ *       404:
+ *         description: Content type not found
+ */
+router.get('/:id/entry-count', (req, res, next) => contentTypesController.getEntryCount(req, res, next));
+
+/**
+ * @swagger
  * /api/v1/content-types/{typeId}/entries:
  *   post:
  *     summary: Create a new content entry for a specific content type

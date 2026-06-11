@@ -182,14 +182,44 @@ export class ContentTypesController {
   }
 
   /**
+   * Get the number of content entries using a content type
+   * GET /api/v1/content-types/:id/entry-count
+   */
+  async getEntryCount(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const contentType = await contentTypesService.getContentTypeById(id);
+      if (!contentType) {
+        res.status(404).json({
+          success: false,
+          error: 'Content type not found',
+        });
+        return;
+      }
+
+      const count = await contentTypesService.countEntriesForType(id);
+
+      res.status(200).json({
+        success: true,
+        data: { count },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Delete content type
    * DELETE /api/v1/content-types/:id
+   * Refuses to delete a type that still has entries unless `?force=true`.
    */
   async deleteContentType(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
+      const force = req.query.force === 'true';
 
-      const deleted = await contentTypesService.deleteContentType(id);
+      const deleted = await contentTypesService.deleteContentType(id, { force });
 
       if (!deleted) {
         res.status(404).json({
@@ -204,6 +234,16 @@ export class ContentTypesController {
         message: 'Content type deleted successfully',
       });
     } catch (error) {
+      if (error instanceof Error && (error as Error & { code?: string }).code === 'HAS_ENTRIES') {
+        res.status(409).json({
+          success: false,
+          error: error.message,
+          code: 'HAS_ENTRIES',
+          entryCount: (error as Error & { entryCount?: number }).entryCount,
+        });
+        return;
+      }
+
       next(error);
     }
   }

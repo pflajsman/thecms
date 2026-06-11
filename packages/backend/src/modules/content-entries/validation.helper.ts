@@ -11,10 +11,16 @@ export interface ValidationError {
 
 /**
  * Validation result
+ *
+ * `errors` block the operation (entry stays invalid). `warnings` are
+ * non-blocking — e.g. data left over from a field that was removed from the
+ * content type. We surface warnings so they can be logged/cleaned up, but they
+ * must never prevent an existing entry from being saved or published.
  */
 export interface ValidationResult {
   valid: boolean;
   errors: ValidationError[];
+  warnings: ValidationError[];
 }
 
 /**
@@ -29,6 +35,7 @@ export class ContentEntryValidator {
     fields: FieldDefinition[]
   ): ValidationResult {
     const errors: ValidationError[] = [];
+    const warnings: ValidationError[] = [];
 
     // Check required fields
     for (const field of fields) {
@@ -45,11 +52,14 @@ export class ContentEntryValidator {
     for (const [fieldName, fieldValue] of Object.entries(data)) {
       const fieldDef = fields.find((f) => f.name === fieldName);
 
-      // Check if field exists in content type
+      // Field is not defined in the content type. This is expected after a
+      // field is removed/renamed on the type while entries still hold its data.
+      // Treat it as a non-blocking warning so existing entries stay editable —
+      // the orphaned value is simply ignored rather than blocking the save.
       if (!fieldDef) {
-        errors.push({
+        warnings.push({
           field: fieldName,
-          message: `Field "${fieldName}" is not defined in content type`,
+          message: `Field "${fieldName}" is not defined in content type (orphaned data)`,
           type: 'unknown_field',
         });
         continue;
@@ -68,6 +78,7 @@ export class ContentEntryValidator {
     return {
       valid: errors.length === 0,
       errors,
+      warnings,
     };
   }
 

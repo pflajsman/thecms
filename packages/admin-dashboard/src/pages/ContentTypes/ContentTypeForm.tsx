@@ -35,6 +35,14 @@ export function ContentTypeForm() {
     enabled: isEditMode,
   });
 
+  // How many entries already use this type (edit mode only) — used to warn
+  // before schema changes that could orphan existing entry data.
+  const { data: entryCount } = useQuery({
+    queryKey: ['contentType', id, 'entryCount'],
+    queryFn: () => contentTypesService.getEntryCount(id!),
+    enabled: isEditMode,
+  });
+
   useEffect(() => {
     if (contentType?.data) {
       setName(contentType.data.name);
@@ -127,6 +135,15 @@ export function ContentTypeForm() {
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
+          </Alert>
+        )}
+
+        {isEditMode && entryCount !== undefined && entryCount > 0 && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {entryCount} {entryCount === 1 ? 'entry uses' : 'entries use'} this content type.
+            Removing or renaming a field will orphan that field's data in existing entries, and
+            changing a field's type or validation may make them fail to publish until re-edited.
+            Adding optional fields is always safe.
           </Alert>
         )}
 

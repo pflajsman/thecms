@@ -28,19 +28,44 @@ export function ContentTypesList() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: contentTypesService.delete,
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
+      contentTypesService.delete(id, force),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contentTypes'] });
     },
   });
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      try {
-        await deleteMutation.mutateAsync(id);
-      } catch (error) {
-        console.error('Failed to delete content type:', error);
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+      return;
+    }
+
+    try {
+      await deleteMutation.mutateAsync({ id });
+    } catch (err: any) {
+      // Backend refuses to delete a type that still has entries (409 HAS_ENTRIES).
+      // Offer to cascade-delete the dependent entries.
+      if (err?.response?.data?.code === 'HAS_ENTRIES') {
+        const count = err.response.data.entryCount;
+        const confirmForce = confirm(
+          `"${name}" is used by ${count} ${count === 1 ? 'entry' : 'entries'}.\n\n` +
+            `Deleting it will permanently delete ${
+              count === 1 ? 'that entry' : 'those entries'
+            } too. This cannot be undone.\n\nDelete the content type and all its entries?`
+        );
+        if (confirmForce) {
+          try {
+            await deleteMutation.mutateAsync({ id, force: true });
+          } catch (forceErr) {
+            console.error('Failed to force-delete content type:', forceErr);
+            alert('Failed to delete content type. Please try again.');
+          }
+        }
+        return;
       }
+
+      console.error('Failed to delete content type:', err);
+      alert(err?.response?.data?.error || 'Failed to delete content type. Please try again.');
     }
   };
 

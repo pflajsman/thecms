@@ -1,4 +1,5 @@
 import { ContentTypeModel, IContentType } from '../../models/content-type.model';
+import { ContentEntryModel } from '../../models/content-entry.model';
 import { CreateContentTypeInput, UpdateContentTypeInput } from './content-types.schema';
 
 /**
@@ -91,10 +92,41 @@ export class ContentTypesService {
   }
 
   /**
-   * Delete content type
-   * Note: In production, you might want to check if there are content entries using this type
+   * Count content entries using a given content type
    */
-  async deleteContentType(id: string): Promise<boolean> {
+  async countEntriesForType(id: string): Promise<number> {
+    return ContentEntryModel.countDocuments({ contentTypeId: id });
+  }
+
+  /**
+   * Delete content type
+   *
+   * By default this refuses to delete a content type that still has entries,
+   * to avoid silently orphaning content. Pass `force: true` to cascade-delete
+   * all entries of this type as well.
+   *
+   * @throws Error with `code: 'HAS_ENTRIES'` when entries exist and force is not set.
+   */
+  async deleteContentType(id: string, options?: { force?: boolean }): Promise<boolean> {
+    const force = options?.force ?? false;
+
+    const entryCount = await this.countEntriesForType(id);
+    if (entryCount > 0 && !force) {
+      const error = new Error(
+        `Cannot delete content type: ${entryCount} content ${
+          entryCount === 1 ? 'entry uses' : 'entries use'
+        } it. Delete those entries first, or force-delete to remove them too.`
+      ) as Error & { code?: string; entryCount?: number };
+      error.code = 'HAS_ENTRIES';
+      error.entryCount = entryCount;
+      throw error;
+    }
+
+    // Force delete: remove dependent entries first to avoid orphans
+    if (entryCount > 0 && force) {
+      await ContentEntryModel.deleteMany({ contentTypeId: id });
+    }
+
     const result = await ContentTypeModel.findByIdAndDelete(id);
     return result !== null;
   }
