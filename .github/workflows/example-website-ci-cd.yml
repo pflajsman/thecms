@@ -9,25 +9,35 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Static Web App
+    name: Build & Deploy to Static Web App
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare deploy directory
-        run: |
-          mkdir -p deploy
-          cp examples/template.html deploy/index.html
-          cp examples/staticwebapp.config.json deploy/
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build blog
+        run: pnpm --filter blog-flajsman build
 
       - name: Generate config.js from secrets
         run: |
-          cat > deploy/config.js <<'EOF'
+          cat > examples/dist/config.js <<EOF
           window.__CMS_CONFIG__ = {
             apiUrl: "${{ secrets.EXAMPLE_CMS_API_URL }}",
             apiKey: "${{ secrets.EXAMPLE_CMS_API_KEY }}",
             siteTitle: "${{ secrets.EXAMPLE_CMS_SITE_TITLE }}",
+            postsSlug: "${{ secrets.EXAMPLE_CMS_POSTS_SLUG }}",
             contactFormSlug: "${{ secrets.EXAMPLE_CMS_CONTACT_FORM_SLUG }}",
           };
           EOF
@@ -38,6 +48,6 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_EXAMPLE_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
-          app_location: deploy
+          app_location: examples/dist
           output_location: ''
           skip_app_build: true
