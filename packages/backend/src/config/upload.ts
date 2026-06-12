@@ -41,6 +41,20 @@ export const ALL_ALLOWED_MIME_TYPES = [
 ];
 
 /**
+ * File extensions allowed regardless of the MIME type the browser reports.
+ * Some types (notably .gpx on Windows) have no registered MIME type and arrive
+ * as application/octet-stream, so we also allow them by extension.
+ */
+export const ALLOWED_EXTENSIONS: Record<string, string> = {
+  gpx: 'application/gpx+xml',
+};
+
+/** Get the lowercase extension (without dot) from a filename. */
+export function getExtension(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() || '';
+}
+
+/**
  * Maximum file size (10MB)
  */
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -53,13 +67,25 @@ const fileFilter = (
   file: Express.Multer.File,
   callback: multer.FileFilterCallback
 ) => {
-  // Check if MIME type is allowed
-  if (ALL_ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+  const ext = getExtension(file.originalname);
+
+  // Allow by MIME type, or by extension fallback (e.g. .gpx that the browser
+  // reports as application/octet-stream).
+  if (ALL_ALLOWED_MIME_TYPES.includes(file.mimetype) || ALLOWED_EXTENSIONS[ext]) {
+    // Normalise a missing/generic MIME type to the canonical one for the
+    // extension, so category + magic-byte checks downstream behave correctly.
+    if (!ALL_ALLOWED_MIME_TYPES.includes(file.mimetype) && ALLOWED_EXTENSIONS[ext]) {
+      file.mimetype = ALLOWED_EXTENSIONS[ext];
+    }
     callback(null, true);
   } else {
     callback(
       new AppError(
-        `File type not allowed. Allowed types: ${ALL_ALLOWED_MIME_TYPES.join(', ')}`,
+        `File type not allowed. Allowed types: ${ALL_ALLOWED_MIME_TYPES.join(', ')}, or extensions: ${Object.keys(
+          ALLOWED_EXTENSIONS
+        )
+          .map((e) => '.' + e)
+          .join(', ')}`,
         400
       )
     );
