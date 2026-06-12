@@ -11,6 +11,8 @@ export interface CmsConfig {
   postsSlug: string;
   /** slug of the content type used for static page text (home intro, about) */
   pagesSlug: string;
+  /** slug of the content type used for bike trips */
+  tripsSlug: string;
   /** slug of the contact form */
   contactFormSlug: string;
 }
@@ -29,6 +31,7 @@ export const config: CmsConfig = {
   siteTitle: raw.siteTitle || 'flajsman.cz',
   postsSlug: raw.postsSlug || 'blog-post',
   pagesSlug: raw.pagesSlug || 'page',
+  tripsSlug: raw.tripsSlug || 'trip',
   contactFormSlug: raw.contactFormSlug || 'contact-us',
 };
 

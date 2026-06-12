@@ -39,6 +39,7 @@ jobs:
             siteTitle: "${{ secrets.EXAMPLE_CMS_SITE_TITLE }}",
             postsSlug: "${{ secrets.EXAMPLE_CMS_POSTS_SLUG }}",
             pagesSlug: "${{ secrets.EXAMPLE_CMS_PAGES_SLUG }}",
+            tripsSlug: "${{ secrets.EXAMPLE_CMS_TRIPS_SLUG }}",
             contactFormSlug: "${{ secrets.EXAMPLE_CMS_CONTACT_FORM_SLUG }}",
           };
           EOF

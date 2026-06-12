@@ -1,5 +1,5 @@
 import { config } from '../config';
-import type { ContactForm, Entry, EntryList, Page, Post } from '../types';
+import type { ContactForm, Entry, EntryList, Page, Post, Trip } from '../types';
 
 /** Low-level fetch against the TheCMS public API. */
 async function request<T>(endpoint: string, params: Record<string, unknown> = {}): Promise<T> {
@@ -45,6 +45,26 @@ export function toPost(entry: Entry): Post {
   };
 }
 
+function toNum(v: unknown): number | undefined {
+  const n = typeof v === 'number' ? v : parseFloat(str(v));
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/** Normalise a raw CMS entry into a typed Trip. */
+export function toTrip(entry: Entry): Trip {
+  const d = entry.data ?? {};
+  const body = str(d.body ?? d.content);
+  return {
+    id: entry.id,
+    title: str(d.title ?? d.name) || 'Bez názvu',
+    summary: str(d.summary ?? d.excerpt) || stripHtml(body).slice(0, 160),
+    body,
+    gpxUrl: str(d.gpxUrl ?? d.gpx ?? d.track) || undefined,
+    distanceKm: toNum(d.distanceKm ?? d.distance),
+    date: entry.publishedAt || entry.createdAt,
+  };
+}
+
 export const cms = {
   async listPosts(page = 1, limit = 10): Promise<{ posts: Post[]; total: number; totalPages: number }> {
     const res = await request<EntryList>(`/content/${config.postsSlug}`, { page, limit });
@@ -76,6 +96,41 @@ export const cms = {
       subtitle: str(d.subtitle ?? d.tagline),
       body: str(d.body ?? d.content),
     };
+  },
+
+  async listTrips(page = 1, limit = 20): Promise<{ trips: Trip[]; total: number; totalPages: number }> {
+    const res = await request<EntryList>(`/content/${config.tripsSlug}`, { page, limit });
+    return {
+      trips: (res.data ?? []).map(toTrip),
+      total: res.pagination?.total ?? 0,
+      totalPages: res.pagination?.totalPages ?? 1,
+    };
+  },
+
+  async getTrip(id: string): Promise<Trip> {
+    const res = await request<{ data: Entry }>(`/content/${config.tripsSlug}/${id}`);
+    return toTrip(res.data);
+  },
+
+  /**
+   * Resolve a media reference to a downloadable file URL + name.
+   * Accepts either a full URL (returned as-is) or a media id (resolved via the
+   * public media endpoint).
+   */
+  async resolveMedia(ref: string): Promise<{ url: string; filename: string } | null> {
+    if (!ref) return null;
+    if (/^https?:\/\//i.test(ref)) {
+      return { url: ref, filename: ref.split('/').pop() || 'track.gpx' };
+    }
+    if (/^[a-f0-9]{24}$/i.test(ref)) {
+      try {
+        const res = await request<{ data: { url: string; originalName: string } }>(`/media/${ref}`);
+        return { url: res.data.url, filename: res.data.originalName || 'track.gpx' };
+      } catch {
+        return null;
+      }
+    }
+    return null;
   },
 
   async getContactForm(): Promise<ContactForm> {

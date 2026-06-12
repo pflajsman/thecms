@@ -18,6 +18,31 @@ export function usePost(id: string | undefined) {
   });
 }
 
+export function useTrips(page = 1, limit = 20) {
+  return useQuery({
+    queryKey: ['trips', page, limit],
+    queryFn: () => cms.listTrips(page, limit),
+    enabled: isConfigured,
+  });
+}
+
+export function useTrip(id: string | undefined) {
+  return useQuery({
+    queryKey: ['trip', id],
+    queryFn: () => cms.getTrip(id!),
+    enabled: isConfigured && !!id,
+  });
+}
+
+/** Resolve a GPX reference (URL or media id) to a downloadable file. */
+export function useMedia(ref: string | undefined) {
+  return useQuery({
+    queryKey: ['media', ref],
+    queryFn: () => cms.resolveMedia(ref!),
+    enabled: isConfigured && !!ref,
+  });
+}
+
 export function usePage(key: string) {
   return useQuery({
     queryKey: ['page', key],

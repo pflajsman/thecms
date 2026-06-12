@@ -52,6 +52,12 @@ Without a real `config.js` the app shows a Setup screen.
   tagline), `body` (RICH_TEXT, used for the about text). Create one published
   entry with `key=home` and one with `key=about`. Pages fall back to built-in
   copy if absent.
+- **Content type** `trip` for bike trips, fields: `title` (TEXT, required),
+  `summary` (TEXT), `gpxUrl` (TEXT — either a media **id** of a `.gpx` uploaded
+  to the Media Library, or a full public URL), `distanceKm` (NUMBER, optional —
+  auto-computed from the GPX if empty), `body` (RICH_TEXT). The route is drawn
+  with Leaflet from the GPX, and a "Stáhnout GPX" download button is shown.
+  Media ids are resolved to file URLs via `GET /api/v1/public/media/:id`.
 - **Contact form** slug `contact-us` (any fields; the form renders itself).
 
 ## Deploy

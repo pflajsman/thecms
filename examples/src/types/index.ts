@@ -66,3 +66,15 @@ export interface Page {
   subtitle: string;
   body: string;
 }
+
+/** A bike trip, normalised from an Entry's dynamic data. */
+export interface Trip {
+  id: string;
+  title: string;
+  summary: string;
+  body: string;
+  /** URL of the uploaded .gpx track (from a MEDIA field). */
+  gpxUrl?: string;
+  distanceKm?: number;
+  date: string;
+}

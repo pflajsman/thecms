@@ -3,6 +3,7 @@ import { contentTypesService } from '../content-types/content-types.service';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
 import { ContentStatus } from '../../models/content-entry.model';
 import { ContactFormsService } from '../contact-forms/contact-forms.service';
+import { MediaService } from '../media/media.service';
 
 /**
  * Public API Controller
@@ -193,6 +194,49 @@ export class PublicController {
         success: true,
         data: result.entries,
         pagination: result.pagination,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Resolve a media item by id to its public file info.
+   * GET /api/v1/public/media/:id
+   *
+   * Returns only public-safe fields (no uploader/internal data) so consumer
+   * apps can turn a media id stored in entry data into a downloadable URL.
+   */
+  async getMedia(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const media = await MediaService.getMediaById(id).catch(() => null);
+
+      if (!media) {
+        res.status(404).json({
+          success: false,
+          error: 'Media not found',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          id: media._id.toString(),
+          filename: media.filename,
+          originalName: media.originalName,
+          mimeType: media.mimeType,
+          size: media.size,
+          url: media.cdnUrl || media.blobUrl,
+          blobUrl: media.blobUrl,
+          cdnUrl: media.cdnUrl,
+          width: media.width,
+          height: media.height,
+          thumbnailUrl: media.thumbnailUrl,
+          variants: media.variants,
+        },
       });
     } catch (error) {
       next(error);

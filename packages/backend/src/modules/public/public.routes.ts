@@ -167,6 +167,28 @@ router.get('/search', (req, res, next) =>
 
 /**
  * @swagger
+ * /api/v1/public/media/{id}:
+ *   get:
+ *     summary: Resolve a media item by id to its public file info (url, size, type)
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public media info
+ *       404:
+ *         description: Media not found
+ */
+router.get('/media/:id', (req, res, next) => publicController.getMedia(req, res, next));
+
+/**
+ * @swagger
  * /api/v1/public/forms/{formSlug}:
  *   get:
  *     summary: Get contact form schema by slug

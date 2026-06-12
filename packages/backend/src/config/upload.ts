@@ -22,6 +22,11 @@ export const ALLOWED_MIME_TYPES = {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-powerpoint',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    // GPX (GPS track) files — XML-based. Browsers send these as gpx+xml,
+    // plain xml, or octet-stream depending on OS, so accept all.
+    'application/gpx+xml',
+    'application/xml',
+    'text/xml',
   ],
   videos: ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm'],
 };
@@ -144,6 +149,17 @@ export function validateFileMagicBytes(buffer: Buffer, mimeType: string): boolea
   if (mimeType === 'image/svg+xml') {
     const start = buffer.toString('utf8', 0, 100).trim();
     return start.startsWith('<svg') || start.startsWith('<?xml');
+  }
+
+  // GPX and other XML-based files: must look like XML (and, for GPX, contain a
+  // <gpx> root somewhere near the top).
+  if (
+    mimeType === 'application/gpx+xml' ||
+    mimeType === 'application/xml' ||
+    mimeType === 'text/xml'
+  ) {
+    const start = buffer.toString('utf8', 0, 512).trim();
+    return start.startsWith('<?xml') || start.startsWith('<gpx');
   }
 
   // For other types (Office documents, etc.), we trust the MIME type

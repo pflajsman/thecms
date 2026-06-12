@@ -11,6 +11,7 @@ export function Header() {
           <NavLink to="/" end>
             psaní
           </NavLink>
+          <NavLink to="/trips">na kole</NavLink>
           <NavLink to="/about">o mně</NavLink>
           <NavLink to="/contact">kontakt</NavLink>
         </nav>
