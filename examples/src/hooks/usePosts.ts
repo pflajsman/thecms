@@ -18,6 +18,14 @@ export function usePost(id: string | undefined) {
   });
 }
 
+export function usePage(key: string) {
+  return useQuery({
+    queryKey: ['page', key],
+    queryFn: () => cms.getPageByKey(key),
+    enabled: isConfigured,
+  });
+}
+
 export function useContactForm() {
   return useQuery({
     queryKey: ['contact-form'],

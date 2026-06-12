@@ -47,6 +47,11 @@ Without a real `config.js` the app shows a Setup screen.
 - **Content type** `blog-post` with fields: `title` (TEXT, required),
   `excerpt` (TEXT), `coverImage` (TEXT/MEDIA url), `author` (TEXT),
   `tags` (TEXT), `body` (RICH_TEXT, required). Publish entries.
+- **Content type** `page` for static page text, fields: `key` (TEXT, required —
+  e.g. `home` or `about`), `title` (TEXT), `subtitle` (TEXT, used for the home
+  tagline), `body` (RICH_TEXT, used for the about text). Create one published
+  entry with `key=home` and one with `key=about`. Pages fall back to built-in
+  copy if absent.
 - **Contact form** slug `contact-us` (any fields; the form renders itself).
 
 ## Deploy

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePosts } from '../hooks/usePosts';
+import { usePosts, usePage } from '../hooks/usePosts';
 import { PostRow } from '../components/PostRow';
 import { Spinner, ErrorState } from '../components/Spinner';
 
@@ -8,20 +8,31 @@ const PAGE_SIZE = 10;
 export function Home() {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, error } = usePosts(page, PAGE_SIZE);
+  const { data: intro } = usePage('home');
 
   return (
     <>
       <section className="intro">
         <div className="container">
-          <h1 className="display">
-            Píšu o&nbsp;kódu,
-            <br />
-            designu a&nbsp;všem mezi.
-          </h1>
-          <p className="tagline">
-            Osobní blog Pavla Flajšmana. <strong>Myšlenky</strong>, poznámky a&nbsp;experimenty —
-            publikované přes vlastní headless CMS.
-          </p>
+          {intro?.title ? (
+            <h1 className="display" style={{ whiteSpace: 'pre-line' }}>
+              {intro.title}
+            </h1>
+          ) : (
+            <h1 className="display">
+              Píšu o&nbsp;kódu,
+              <br />
+              designu a&nbsp;všem mezi.
+            </h1>
+          )}
+          {intro?.subtitle ? (
+            <p className="tagline">{intro.subtitle}</p>
+          ) : (
+            <p className="tagline">
+              Osobní blog Pavla Flajšmana. <strong>Myšlenky</strong>, poznámky a&nbsp;experimenty —
+              publikované přes vlastní headless CMS.
+            </p>
+          )}
         </div>
       </section>
 

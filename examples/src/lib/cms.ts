@@ -1,5 +1,5 @@
 import { config } from '../config';
-import type { ContactForm, Entry, EntryList, Post } from '../types';
+import type { ContactForm, Entry, EntryList, Page, Post } from '../types';
 
 /** Low-level fetch against the TheCMS public API. */
 async function request<T>(endpoint: string, params: Record<string, unknown> = {}): Promise<T> {
@@ -58,6 +58,24 @@ export const cms = {
   async getPost(id: string): Promise<Post> {
     const res = await request<{ data: Entry }>(`/content/${config.postsSlug}/${id}`);
     return toPost(res.data);
+  },
+
+  /**
+   * Fetch a single static page by its `key` field (e.g. "home", "about").
+   * Returns null if the page content type or matching entry doesn't exist,
+   * so callers can fall back to built-in defaults.
+   */
+  async getPageByKey(key: string): Promise<Page | null> {
+    const res = await request<EntryList>(`/content/${config.pagesSlug}`, { limit: 50 });
+    const entry = (res.data ?? []).find((e) => str(e.data?.key) === key);
+    if (!entry) return null;
+    const d = entry.data ?? {};
+    return {
+      key,
+      title: str(d.title),
+      subtitle: str(d.subtitle ?? d.tagline),
+      body: str(d.body ?? d.content),
+    };
   },
 
   async getContactForm(): Promise<ContactForm> {

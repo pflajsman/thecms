@@ -58,3 +58,11 @@ export interface Post {
   tags: string[];
   date: string;
 }
+
+/** Static page text (home intro, about), keyed by `key` (e.g. "home", "about"). */
+export interface Page {
+  key: string;
+  title: string;
+  subtitle: string;
+  body: string;
+}

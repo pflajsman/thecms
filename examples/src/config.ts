@@ -9,6 +9,8 @@ export interface CmsConfig {
   siteTitle: string;
   /** slug of the content type used for blog posts */
   postsSlug: string;
+  /** slug of the content type used for static page text (home intro, about) */
+  pagesSlug: string;
   /** slug of the contact form */
   contactFormSlug: string;
 }
@@ -26,6 +28,7 @@ export const config: CmsConfig = {
   apiKey: raw.apiKey || 'YOUR_API_KEY_HERE',
   siteTitle: raw.siteTitle || 'flajsman.cz',
   postsSlug: raw.postsSlug || 'blog-post',
+  pagesSlug: raw.pagesSlug || 'page',
   contactFormSlug: raw.contactFormSlug || 'contact-us',
 };
 
