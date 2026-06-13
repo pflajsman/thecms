@@ -26,20 +26,36 @@ function stripHtml(html: string): string {
   return div.textContent || '';
 }
 
+/**
+ * Case-insensitive field lookup. The admin lowercases content-type field names
+ * (e.g. `gpxUrl` is stored as `gpxurl`), so match keys ignoring case. Returns
+ * the value of the first matching candidate.
+ */
+function pick(data: Record<string, unknown>, ...candidates: string[]): unknown {
+  const lower: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data)) lower[k.toLowerCase()] = v;
+  for (const c of candidates) {
+    const v = lower[c.toLowerCase()];
+    if (v !== undefined && v !== null && v !== '') return v;
+  }
+  return undefined;
+}
+
 /** Normalise a raw CMS entry into a typed Post, tolerant of field-name variations. */
 export function toPost(entry: Entry): Post {
   const d = entry.data ?? {};
-  const body = str(d.body ?? d.content);
-  const excerptRaw = str(d.excerpt ?? d.summary) || stripHtml(body).slice(0, 200);
-  const tags = Array.isArray(d.tags) ? d.tags.map(str) : str(d.tags) ? [str(d.tags)] : [];
+  const body = str(pick(d, 'body', 'content'));
+  const excerptRaw = str(pick(d, 'excerpt', 'summary')) || stripHtml(body).slice(0, 200);
+  const tagsVal = pick(d, 'tags');
+  const tags = Array.isArray(tagsVal) ? tagsVal.map(str) : str(tagsVal) ? [str(tagsVal)] : [];
 
   return {
     id: entry.id,
-    title: str(d.title ?? d.name) || 'Bez názvu',
+    title: str(pick(d, 'title', 'name')) || 'Bez názvu',
     excerpt: excerptRaw,
     body,
-    coverImage: str(d.coverImage ?? d.image) || undefined,
-    author: str(d.author) || undefined,
+    coverImage: str(pick(d, 'coverImage', 'image')) || undefined,
+    author: str(pick(d, 'author')) || undefined,
     tags,
     date: entry.publishedAt || entry.createdAt,
   };
@@ -53,14 +69,14 @@ function toNum(v: unknown): number | undefined {
 /** Normalise a raw CMS entry into a typed Trip. */
 export function toTrip(entry: Entry): Trip {
   const d = entry.data ?? {};
-  const body = str(d.body ?? d.content);
+  const body = str(pick(d, 'body', 'content'));
   return {
     id: entry.id,
-    title: str(d.title ?? d.name) || 'Bez názvu',
-    summary: str(d.summary ?? d.excerpt) || stripHtml(body).slice(0, 160),
+    title: str(pick(d, 'title', 'name')) || 'Bez názvu',
+    summary: str(pick(d, 'summary', 'excerpt')) || stripHtml(body).slice(0, 160),
     body,
-    gpxUrl: str(d.gpxUrl ?? d.gpx ?? d.track) || undefined,
-    distanceKm: toNum(d.distanceKm ?? d.distance),
+    gpxUrl: str(pick(d, 'gpxUrl', 'gpx', 'track')) || undefined,
+    distanceKm: toNum(pick(d, 'distanceKm', 'distance')),
     date: entry.publishedAt || entry.createdAt,
   };
 }
@@ -87,14 +103,14 @@ export const cms = {
    */
   async getPageByKey(key: string): Promise<Page | null> {
     const res = await request<EntryList>(`/content/${config.pagesSlug}`, { limit: 50 });
-    const entry = (res.data ?? []).find((e) => str(e.data?.key) === key);
+    const entry = (res.data ?? []).find((e) => str(pick(e.data ?? {}, 'key')) === key);
     if (!entry) return null;
     const d = entry.data ?? {};
     return {
       key,
-      title: str(d.title),
-      subtitle: str(d.subtitle ?? d.tagline),
-      body: str(d.body ?? d.content),
+      title: str(pick(d, 'title')),
+      subtitle: str(pick(d, 'subtitle', 'tagline')),
+      body: str(pick(d, 'body', 'content')),
     };
   },
 
