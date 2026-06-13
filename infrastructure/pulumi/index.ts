@@ -40,6 +40,10 @@ const storage = createStorage({
   resourceGroupName: resourceGroup.name,
   location,
   accountName: `${resourcePrefix.replace(/-/g, "")}sa`, // Storage accounts can't have dashes
+  // Browser fetch() of media (e.g. blog reading .gpx tracks) needs CORS.
+  // Public media is read-only GET. Use "*" so any front end can read it;
+  // tighten to specific origins here if you prefer.
+  corsAllowedOrigins: ["*"],
 });
 
 // 4. Create Application Insights for Monitoring

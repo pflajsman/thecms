@@ -5,6 +5,12 @@ export interface StorageArgs {
   resourceGroupName: pulumi.Input<string>;
   location: string;
   accountName: string;
+  /**
+   * Origins allowed to fetch blobs from the browser (CORS). Needed because the
+   * blog reads .gpx files via fetch(), which is subject to CORS. Defaults to
+   * "*" if not provided (read-only GET, so low risk for public media).
+   */
+  corsAllowedOrigins?: string[];
 }
 
 export function createStorage(args: StorageArgs) {
@@ -33,6 +39,30 @@ export function createStorage(args: StorageArgs) {
     tags: {
       Project: "TheCMS",
       Environment: pulumi.getStack(),
+    },
+  });
+
+  // Configure CORS on the Blob service so browsers can fetch() media files
+  // (e.g. the blog reads .gpx tracks via fetch, which requires CORS headers).
+  // Public media is read-only, so we only allow GET/HEAD.
+  const corsOrigins = args.corsAllowedOrigins && args.corsAllowedOrigins.length > 0
+    ? args.corsAllowedOrigins
+    : ["*"];
+
+  new storage.BlobServiceProperties("blobCors", {
+    accountName: storageAccount.name,
+    resourceGroupName: args.resourceGroupName,
+    blobServicesName: "default",
+    cors: {
+      corsRules: [
+        {
+          allowedOrigins: corsOrigins,
+          allowedMethods: ["GET", "HEAD", "OPTIONS"],
+          allowedHeaders: ["*"],
+          exposedHeaders: ["*"],
+          maxAgeInSeconds: 3600,
+        },
+      ],
     },
   });
 
