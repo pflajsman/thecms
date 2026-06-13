@@ -24,7 +24,15 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { CloudUpload, Delete, Edit, Image as ImageIcon } from '@mui/icons-material';
+import {
+  CloudUpload,
+  Delete,
+  Edit,
+  Image as ImageIcon,
+  ContentCopy,
+  InsertDriveFile,
+  Check,
+} from '@mui/icons-material';
 import { mediaService } from '../../services/media';
 import { MediaUpload } from './MediaUpload';
 
@@ -41,6 +49,18 @@ export function MediaLibrary() {
     description: '',
     tags: [] as string[],
   });
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copy = async (value: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      // Clipboard API may be blocked on non-HTTPS; fall back to a prompt.
+      window.prompt('Copy:', value);
+    }
+    setCopied(key);
+    setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
+  };
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['media', categoryFilter, page],
@@ -188,7 +208,12 @@ export function MediaLibrary() {
                           sx={{ height: 200, objectFit: 'contain' }}
                         />
                       ) : (
-                        <ImageIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
+                        <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                          <InsertDriveFile sx={{ fontSize: 64 }} />
+                          <Typography variant="caption" display="block" sx={{ textTransform: 'uppercase' }}>
+                            {media.originalName.split('.').pop()}
+                          </Typography>
+                        </Box>
                       )}
                     </Box>
                     <CardContent>
@@ -213,13 +238,21 @@ export function MediaLibrary() {
                       </Box>
                     </CardContent>
                     <CardActions>
-                      <IconButton size="small" onClick={() => handleEdit(media)}>
+                      <Button
+                        size="small"
+                        startIcon={copied === `id-${media.id}` ? <Check /> : <ContentCopy />}
+                        onClick={() => copy(media.id, `id-${media.id}`)}
+                      >
+                        {copied === `id-${media.id}` ? 'Copied' : 'Copy ID'}
+                      </Button>
+                      <IconButton size="small" onClick={() => handleEdit(media)} title="Edit / details">
                         <Edit />
                       </IconButton>
                       <IconButton
                         size="small"
                         color="error"
                         onClick={() => handleDelete(media.id, media.originalName)}
+                        title="Delete"
                       >
                         <Delete />
                       </IconButton>
@@ -252,8 +285,49 @@ export function MediaLibrary() {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Media</DialogTitle>
+        <DialogTitle>Media details</DialogTitle>
         <DialogContent>
+          {selectedMedia && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1, mt: 1 }} noWrap title={selectedMedia.originalName}>
+                {selectedMedia.originalName}
+              </Typography>
+              <TextField
+                label="Media ID (use this in the gpxUrl field)"
+                value={selectedMedia.id}
+                fullWidth
+                size="small"
+                margin="dense"
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <IconButton size="small" onClick={() => copy(selectedMedia.id, 'dlg-id')} title="Copy ID">
+                      {copied === 'dlg-id' ? <Check fontSize="small" /> : <ContentCopy fontSize="small" />}
+                    </IconButton>
+                  ),
+                }}
+              />
+              <TextField
+                label="File URL"
+                value={selectedMedia.cdnUrl || selectedMedia.blobUrl}
+                fullWidth
+                size="small"
+                margin="dense"
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <IconButton
+                      size="small"
+                      onClick={() => copy(selectedMedia.cdnUrl || selectedMedia.blobUrl, 'dlg-url')}
+                      title="Copy URL"
+                    >
+                      {copied === 'dlg-url' ? <Check fontSize="small" /> : <ContentCopy fontSize="small" />}
+                    </IconButton>
+                  ),
+                }}
+              />
+            </Box>
+          )}
           <TextField
             label="Alt Text"
             value={editForm.altText}
