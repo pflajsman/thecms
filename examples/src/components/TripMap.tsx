@@ -2,6 +2,32 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { parseGpx, trackDistanceKm, type LatLng } from '../lib/gpx';
+import { config } from '../config';
+
+/**
+ * Basemap tile layer. Uses MapTiler (crisp, themed) when an API key is
+ * configured — the "toner"/monochrome style suits the black & white blog —
+ * and falls back to OpenStreetMap otherwise.
+ */
+function basemap(): L.TileLayer {
+  if (config.mapTilerKey) {
+    // MapTiler raster tiles. "toner" is a clean high-contrast B&W style.
+    return L.tileLayer(
+      `https://api.maptiler.com/maps/toner-v2/{z}/{x}/{y}{r}.png?key=${config.mapTilerKey}`,
+      {
+        attribution:
+          '© <a href="https://www.maptiler.com/copyright/">MapTiler</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 20,
+        tileSize: 512,
+        zoomOffset: -1,
+      }
+    );
+  }
+  return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 18,
+  });
+}
 
 interface TripMapProps {
   gpxUrl: string;
@@ -46,12 +72,12 @@ export function TripMap({ gpxUrl, onDistance, height = 420 }: TripMapProps) {
         const map = L.map(containerRef.current, { scrollWheelZoom: false });
         mapRef.current = map;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap',
-          maxZoom: 18,
-        }).addTo(map);
+        basemap().addTo(map);
 
-        const line = L.polyline(points, { color: '#0a0a0a', weight: 4, opacity: 0.9 }).addTo(map);
+        // Route drawn as two stacked lines: a dark casing underneath so the
+        // lime line stays visible on light/monochrome basemaps.
+        L.polyline(points, { color: '#0a0a0a', weight: 7, opacity: 0.85 }).addTo(map);
+        const line = L.polyline(points, { color: '#c6ff00', weight: 4, opacity: 1 }).addTo(map);
 
         // Start / end markers
         const dot = (color: string) =>

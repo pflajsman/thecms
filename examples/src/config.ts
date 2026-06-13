@@ -15,6 +15,8 @@ export interface CmsConfig {
   tripsSlug: string;
   /** slug of the contact form */
   contactFormSlug: string;
+  /** MapTiler API key for trip maps (free tier). Empty = fall back to OSM. */
+  mapTilerKey: string;
 }
 
 declare global {
@@ -33,6 +35,7 @@ export const config: CmsConfig = {
   pagesSlug: raw.pagesSlug || 'page',
   tripsSlug: raw.tripsSlug || 'trip',
   contactFormSlug: raw.contactFormSlug || 'contact-us',
+  mapTilerKey: raw.mapTilerKey || '',
 };
 
 /** True when the site hasn't been configured with a real API key yet. */

@@ -58,6 +58,8 @@ Without a real `config.js` the app shows a Setup screen.
   auto-computed from the GPX if empty), `body` (RICH_TEXT). The route is drawn
   with Leaflet from the GPX, and a "Stáhnout GPX" download button is shown.
   Media ids are resolved to file URLs via `GET /api/v1/public/media/:id`.
+  The basemap uses MapTiler (monochrome "toner" style) when `mapTilerKey` is
+  set, otherwise falls back to OpenStreetMap. Get a free key at maptiler.com.
 - **Contact form** slug `contact-us` (any fields; the form renders itself).
 
 ## Deploy
