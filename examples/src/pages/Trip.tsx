@@ -11,7 +11,12 @@ export function Trip() {
   const { id } = useParams();
   const { data: trip, isLoading, isError, error } = useTrip(id);
   // gpxUrl may be a full URL or a media id — resolve to a real file URL.
-  const { data: gpx } = useMedia(trip?.gpxUrl);
+  const {
+    data: gpx,
+    isLoading: gpxLoading,
+    isError: gpxError,
+    error: gpxErr,
+  } = useMedia(trip?.gpxUrl);
   // Distance computed from the GPX, used when the CMS field is empty.
   const [computedKm, setComputedKm] = useState<number | null>(null);
 
@@ -60,8 +65,12 @@ export function Trip() {
               </a>
             </div>
           </div>
-        ) : trip.gpxUrl ? (
+        ) : trip.gpxUrl && gpxLoading ? (
           <p style={{ color: 'var(--muted)', margin: '20px 0' }}>Načítám trasu…</p>
+        ) : trip.gpxUrl && gpxError ? (
+          <p style={{ color: 'var(--muted)', margin: '20px 0' }}>
+            Trasu se nepodařilo načíst: {(gpxErr as Error)?.message || 'neznámá chyba'}
+          </p>
         ) : (
           <p style={{ color: 'var(--muted)', margin: '20px 0' }}>
             (K tomuto výletu zatím není nahraná GPX trasa.)

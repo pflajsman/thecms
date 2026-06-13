@@ -118,19 +118,19 @@ export const cms = {
    * public media endpoint).
    */
   async resolveMedia(ref: string): Promise<{ url: string; filename: string } | null> {
-    if (!ref) return null;
-    if (/^https?:\/\//i.test(ref)) {
-      return { url: ref, filename: ref.split('/').pop() || 'track.gpx' };
+    const value = (ref || '').trim();
+    if (!value) return null;
+    if (/^https?:\/\//i.test(value)) {
+      return { url: value, filename: value.split('/').pop() || 'track.gpx' };
     }
-    if (/^[a-f0-9]{24}$/i.test(ref)) {
-      try {
-        const res = await request<{ data: { url: string; originalName: string } }>(`/media/${ref}`);
-        return { url: res.data.url, filename: res.data.originalName || 'track.gpx' };
-      } catch {
-        return null;
-      }
+    if (/^[a-f0-9]{24}$/i.test(value)) {
+      // Throws on failure so the UI can show a real error instead of silently
+      // pretending there's no track.
+      const res = await request<{ data: { url: string; originalName: string } }>(`/media/${value}`);
+      return { url: res.data.url, filename: res.data.originalName || 'track.gpx' };
     }
-    return null;
+    // Unrecognised format (not a URL, not a 24-char id)
+    throw new Error(`Neplatná hodnota gpxUrl: "${value}" (očekává se ID média nebo URL).`);
   },
 
   async getContactForm(): Promise<ContactForm> {
