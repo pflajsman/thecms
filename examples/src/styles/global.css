@@ -93,7 +93,8 @@ h3 {
   position: sticky;
   top: 0;
   background: var(--bg);
-  z-index: 50;
+  /* Above Leaflet's panes/controls, which climb to z-index 1000. */
+  z-index: 1100;
 }
 .site-header .inner {
   display: flex;
