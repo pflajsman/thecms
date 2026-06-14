@@ -121,6 +121,7 @@ export function TripMap({ gpxUrl, onDistance, height = 420 }: TripMapProps) {
     <div style={{ position: 'relative' }}>
       <div
         ref={containerRef}
+        className="trip-map"
         style={{ height, width: '100%', border: '2px solid var(--line)', background: '#f4f4f4' }}
       />
       {loading && (
