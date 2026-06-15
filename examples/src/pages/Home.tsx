@@ -12,29 +12,18 @@ export function Home() {
 
   return (
     <>
-      <section className="intro">
-        <div className="container">
-          {intro?.title ? (
-            <h1 className="display" style={{ whiteSpace: 'pre-line' }}>
-              {intro.title}
-            </h1>
-          ) : (
-            <h1 className="display">
-              Píšu o&nbsp;kódu,
-              <br />
-              designu a&nbsp;všem mezi.
-            </h1>
-          )}
-          {intro?.subtitle ? (
-            <p className="tagline">{intro.subtitle}</p>
-          ) : (
-            <p className="tagline">
-              Osobní blog Pavla Flajšmana. <strong>Myšlenky</strong>, poznámky a&nbsp;experimenty —
-              publikované přes vlastní headless CMS.
-            </p>
-          )}
-        </div>
-      </section>
+      {intro && (
+        <section className="intro">
+          <div className="container">
+            {intro.title && (
+              <h1 className="display" style={{ whiteSpace: 'pre-line' }}>
+                {intro.title}
+              </h1>
+            )}
+            {intro.subtitle && <p className="tagline">{intro.subtitle}</p>}
+          </div>
+        </section>
+      )}
 
       <section className="container">
         <div className="section-label">psaní</div>

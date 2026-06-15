@@ -101,7 +101,7 @@ export function Contact() {
     <section className="article">
       <div className="container">
         <div className="kicker">kontakt</div>
-        <h1>{form?.name || 'Napiš mi'}</h1>
+        {form?.name && <h1>{form.name}</h1>}
         {form?.description && (
           <p style={{ color: 'var(--muted)', marginTop: 12, marginBottom: 8 }}>{form.description}</p>
         )}
