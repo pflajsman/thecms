@@ -11,9 +11,10 @@ import { config } from '../config';
  */
 function basemap(): L.TileLayer {
   if (config.mapTilerKey) {
-    // MapTiler raster tiles. "toner" is a clean high-contrast B&W style.
+    // MapTiler raster tiles. "outdoor" is a topographic style with terrain
+    // and trails — well suited to bike routes.
     return L.tileLayer(
-      `https://api.maptiler.com/maps/toner-v2/{z}/{x}/{y}{r}.png?key=${config.mapTilerKey}`,
+      `https://api.maptiler.com/maps/outdoor-v2/{z}/{x}/{y}{r}.png?key=${config.mapTilerKey}`,
       {
         attribution:
           '© <a href="https://www.maptiler.com/copyright/">MapTiler</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
