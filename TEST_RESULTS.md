@@ -318,3 +318,25 @@ Environment: local mongod and Azurite, backend and admin dev servers; Plan 2 dat
 | 360px (iframe): Home, Media, Media detail, editor have no horizontal scroll | Pass |
 | Dark theme on Media with the sheet open | Pass |
 | Drag-to-reorder with a pointer | Not checked by hand (dnd-kit pointer drag; keyboard path verified) |
+
+## Admin redesign Plan 4 verification (2026-09-29)
+
+Environment: local mongod and Azurite, backend and admin dev servers, data from Plans 1 to 3.
+
+| Check | Result |
+|---|---|
+| Backend tests (50) and admin tests (238) | Pass |
+| `/content-types` redirects to `/models`; cards show field and entry counts | Pass |
+| New model from the Event template: fields listed, title star, save creates it, URL becomes `/models/<id>` | Pass |
+| Add Text field, label "GPX URL" gives key `gpxUrl`; Move up reorders; save persists the order | Pass |
+| Trip (15 entries): renaming `gpxUrl` asks "15 entries use this model … gpxUrl → gpxTrack"; cancel keeps it | Pass |
+| Delete Trip asks to type "Trip" (cancelled) | Pass |
+| Form builder: preview updates with a new field; a Choice field without options blocks save; with options it saves | Pass |
+| Embed snippet URL and key used with `curl` create a submission | Pass |
+| Inbox: new message listed; opening it marks it read (badge 3 → 2) and it stays on screen with "Mark unread" | Pass (after fix in this plan) |
+| Reply link `mailto:petra@example.com?subject=Re: Contact us`; Archive | Pass |
+| `/contact-forms/<id>/submissions` redirects to `/inbox?form=<id>&view=all` | Pass |
+| Home Inbox card lists the latest unread messages | Pass |
+| 360px (iframe): models list and builder, form builder and new form, inbox list and message; no horizontal scroll | Pass (after fix in this plan for the form builder) |
+| Dark theme on the Inbox | Pass |
+| Inbox does not refresh on its own while open (refetch on focus is off app-wide) | Noted (see minors) |
