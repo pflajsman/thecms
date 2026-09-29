@@ -61,7 +61,7 @@ export function ContentListPage() {
     { id: 'type', header: 'Model', cell: (e) => <TypeLabel entry={e} />, className: 'w-40' },
     { id: 'edited', header: 'Edited', cell: (e) => <Edited date={e.updatedAt} />, className: 'w-32 whitespace-nowrap' },
     { id: 'status', header: 'Status', cell: (e) => <StatusPill status={e.status} />, className: 'w-28' },
-    { id: 'actions', header: '', cell: (e) => <EntryRowMenu entry={e} type={e.contentType ? typeById.get(e.contentType.id) : undefined} />, className: 'w-12 text-right' },
+    { id: 'actions', header: 'Actions', hideHeader: true, cell: (e) => <EntryRowMenu entry={e} type={e.contentType ? typeById.get(e.contentType.id) : undefined} />, className: 'w-12 text-right' },
   ]
 
   let body: React.ReactNode
@@ -163,7 +163,7 @@ function Edited({ date }: { date: string }) {
 
 function ListSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading entries" className="space-y-2">
+    <div role="status" aria-busy="true" aria-label="Loading entries" className="space-y-2">
       {Array.from({ length: 6 }, (_, i) => (
         <Skeleton key={i} className="h-14 w-full rounded-lg" />
       ))}

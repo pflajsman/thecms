@@ -72,3 +72,10 @@ it('keeps the key of a field once the form is saved', async () => {
   await userEvent.type(label, 'Phone')
   expect(within(inspector).getByLabelText('API key')).toHaveValue('shortText')
 })
+
+it('marks required preview fields for assistive technology', async () => {
+  renderRoutes(routes, { route: '/forms/f1' })
+  const preview = await screen.findByRole('region', { name: 'Preview' })
+  expect(within(preview).getByLabelText(/Email/)).toBeRequired()
+  expect(within(preview).getByLabelText(/Message/)).toBeRequired()
+})

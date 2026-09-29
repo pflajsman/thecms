@@ -23,7 +23,7 @@ export function AppShell() {
         <Sidebar modules={modules} />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar modules={modules} />
-          <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 md:px-8 md:pb-10">
+          <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 md:px-8 md:pb-10">
             <Outlet />
           </main>
         </div>

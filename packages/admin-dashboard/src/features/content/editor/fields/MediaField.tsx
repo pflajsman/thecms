@@ -144,7 +144,7 @@ interface MediaItemProps {
 }
 
 function MediaItem({ mediaId, media, loading, sortable, first, last, onMove, onRemove }: MediaItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: mediaId, disabled: !sortable })
+  const { listeners, setNodeRef, transform, transition } = useSortable({ id: mediaId, disabled: !sortable })
   const name = media?.originalName ?? (loading ? 'Loading' : 'Missing file')
   return (
     <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="group relative overflow-hidden rounded-md border bg-background">
@@ -157,7 +157,7 @@ function MediaItem({ mediaId, media, loading, sortable, first, last, onMove, onR
       <div className="absolute inset-x-0 top-0 flex justify-between p-1 opacity-100 transition-opacity md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
         {sortable ? (
           <span className="flex gap-0.5">
-            <button type="button" {...attributes} {...listeners} aria-label={`Drag ${name}`} className="rounded bg-background/90 p-0.5"><GripVertical aria-hidden className="size-3.5" /></button>
+            <span {...listeners} aria-hidden title="Drag to reorder" className="cursor-grab rounded bg-background/90 p-0.5"><GripVertical className="size-3.5" /></span>
             {!first && <button type="button" onClick={() => onMove(-1)} aria-label={`Move ${name} earlier`} className="rounded bg-background/90 p-0.5"><ArrowLeft aria-hidden className="size-3.5" /></button>}
             {!last && <button type="button" onClick={() => onMove(1)} aria-label={`Move ${name} later`} className="rounded bg-background/90 p-0.5"><ArrowRight aria-hidden className="size-3.5" /></button>}
           </span>

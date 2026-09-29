@@ -39,6 +39,14 @@ it('moveItem reorders', () => {
 })
 
 describe('MediaField', () => {
+  it('drag handles are not tab stops; the Move buttons are the keyboard path', async () => {
+    renderWithProviders(<Harness field={gallery} initial={['a', 'b']} />)
+    const list = await screen.findByRole('list', { name: 'Gallery files' })
+    await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(2))
+    await waitFor(() => expect(within(list).getByRole('button', { name: 'Move b.jpg earlier' })).toBeInTheDocument())
+    expect(within(list).queryAllByRole('button', { name: /^Drag / })).toHaveLength(0)
+  })
+
   it('shows thumbnails in order and reorders with the keyboard buttons', async () => {
     renderWithProviders(<Harness field={gallery} initial={['a', 'b']} />)
     const list = await screen.findByRole('list', { name: 'Gallery files' })

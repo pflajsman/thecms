@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils'
 export interface DataColumn<T> {
   id: string
   header: string
+  /** Keep the header for screen readers but hide it visually (for icon-only columns). */
+  hideHeader?: boolean
   cell: (row: T) => ReactNode
   className?: string
 }
@@ -27,7 +29,7 @@ export function DataList<T>({ rows, columns, rowKey, mobileRow, caption }: DataL
           <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
             {columns.map((c) => (
               <th key={c.id} scope="col" className={cn('px-3 pb-1 font-medium', c.className)}>
-                {c.header}
+                {c.hideHeader ? <span className="sr-only">{c.header}</span> : c.header}
               </th>
             ))}
           </tr>

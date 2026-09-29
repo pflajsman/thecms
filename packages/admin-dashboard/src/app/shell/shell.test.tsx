@@ -120,6 +120,12 @@ describe('Command palette', () => {
 })
 
 describe('AppShell', () => {
+  it('skip link target can take focus', () => {
+    auth.value = { ...auth.value, isAuthenticated: true, isLoading: false }
+    renderWithProviders(<AppShell />)
+    expect(document.getElementById('main')).toHaveAttribute('tabindex', '-1')
+  })
+
   it('shows a skeleton while auth is loading', () => {
     auth.value = { ...auth.value, isLoading: true }
     renderWithProviders(<AppShell />)

@@ -54,7 +54,7 @@ export function MediaLibraryPage() {
   let body: React.ReactNode
   if (list.isPending) {
     body = (
-      <div aria-busy="true" aria-label="Loading media" className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+      <div role="status" aria-busy="true" aria-label="Loading media" className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
         {Array.from({ length: 10 }, (_, i) => <Skeleton key={i} className="aspect-square w-full rounded-lg" />)}
       </div>
     )

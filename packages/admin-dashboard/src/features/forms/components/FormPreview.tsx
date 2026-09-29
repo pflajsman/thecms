@@ -21,7 +21,7 @@ export function FormPreview({ name, fields }: { name: string; fields: FormFieldD
           if (f.type === 'CHECKBOX') {
             return (
               <div key={id} className="flex items-center gap-2">
-                <input id={id} type="checkbox" className="size-4 accent-[var(--primary)]" />
+                <input id={id} type="checkbox" required={f.required} className="size-4 accent-primary" />
                 {label}
               </div>
             )
@@ -30,16 +30,16 @@ export function FormPreview({ name, fields }: { name: string; fields: FormFieldD
             <div key={id} className="space-y-1.5">
               {label}
               {f.type === 'TEXTAREA' ? (
-                <Textarea id={id} rows={3} placeholder={f.placeholder} />
+                <Textarea id={id} rows={3} required={f.required} placeholder={f.placeholder} />
               ) : f.type === 'SELECT' ? (
-                <select id={id} className="h-9 w-full rounded-md border bg-background px-3 text-sm">
+                <select id={id} required={f.required} className="h-9 w-full rounded-md border bg-background px-3 text-sm">
                   <option value="">Choose…</option>
                   {(f.options ?? []).filter((o) => o.trim()).map((o) => (
                     <option key={o}>{o}</option>
                   ))}
                 </select>
               ) : (
-                <Input id={id} type={f.type === 'EMAIL' ? 'email' : f.type === 'NUMBER' ? 'number' : f.type === 'DATE' ? 'date' : 'text'} placeholder={f.placeholder} />
+                <Input id={id} required={f.required} type={f.type === 'EMAIL' ? 'email' : f.type === 'NUMBER' ? 'number' : f.type === 'DATE' ? 'date' : 'text'} placeholder={f.placeholder} />
               )}
             </div>
           )
