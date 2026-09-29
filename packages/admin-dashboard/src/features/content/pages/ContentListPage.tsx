@@ -54,7 +54,7 @@ export function ContentListPage() {
   let body: React.ReactNode
   if (typesQuery.isSuccess && types.length === 0) {
     body = <TypeChooser types={[]} />
-  } else if (list.isPending) {
+  } else if (list.isPending || (rows?.length === 0 && (list.isPlaceholderData || (pagination && pagination.total > 0 && params.page > pagination.totalPages)))) {
     body = <ListSkeleton />
   } else if (list.isError) {
     body = <ErrorState message="Could not load content." onRetry={() => void list.refetch()} />

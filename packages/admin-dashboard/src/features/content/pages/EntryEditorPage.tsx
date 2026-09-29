@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { FileQuestion } from 'lucide-react'
 import { isAxiosError } from 'axios'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -13,6 +13,7 @@ import { EntryEditor } from '../editor/EntryEditor'
 export function EntryEditorPage() {
   const { id = 'new' } = useParams()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
   const isNew = id === 'new'
   const entryQuery = useEntry(isNew ? undefined : id)
   const typeId = isNew ? searchParams.get('type') ?? undefined : entryQuery.data ? entryTypeId(entryQuery.data) : undefined
@@ -46,7 +47,8 @@ export function EntryEditorPage() {
     )
   }
 
-  // Keyed by type only: after the first save the URL changes from /content/new to /content/:id
-  // and the editor must stay mounted so in-progress edits survive.
-  return <EntryEditor key={typeQuery.data.id} contentType={typeQuery.data} entry={isNew ? undefined : entryQuery.data} />
+  // One editor per entry. The create redirect (/content/new -> /content/:id) carries
+  // editorKey 'new' so the editor stays mounted and in-progress edits survive.
+  const editorKey = isNew ? 'new' : (location.state as { editorKey?: string } | null)?.editorKey ?? id
+  return <EntryEditor key={`${typeQuery.data.id}:${editorKey}`} contentType={typeQuery.data} entry={isNew ? undefined : entryQuery.data} />
 }

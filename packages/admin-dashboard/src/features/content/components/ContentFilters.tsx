@@ -20,10 +20,17 @@ export function ContentFilters({ types, counts, params, update }: ContentFilters
   const [search, setSearch] = useState(params.q ?? '')
   const debounced = useDebouncedValue(search, 300)
 
+  // Mirror URL changes made elsewhere (Clear filters, back/forward) into the input.
+  const [syncedQ, setSyncedQ] = useState(params.q)
+  if (params.q !== syncedQ) {
+    setSyncedQ(params.q)
+    if ((params.q ?? '') !== search.trim()) setSearch(params.q ?? '')
+  }
+
   useEffect(() => {
     const next = debounced.trim() || undefined
     if (next !== params.q) update({ q: next })
-    // Only react to the debounced text; params.q changes elsewhere are mirrored below.
+    // Only react to the debounced text; URL changes are mirrored above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounced])
 

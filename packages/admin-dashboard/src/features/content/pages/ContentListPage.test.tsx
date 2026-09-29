@@ -64,6 +64,21 @@ describe('ContentListPage', () => {
     await waitFor(() => expect(router.state.location.search).toBe('?page=2'))
   })
 
+  it('shows loading, not a false empty state, while jumping back from a page past the end', async () => {
+    vi.mocked(api.listEntries).mockImplementation((p) => (p.page === 9 ? Promise.resolve(page([], 23, 9)) : new Promise(() => {})))
+    renderRoutes(routes, { route: '/content?page=9' })
+    await waitFor(() => expect(api.listEntries).toHaveBeenCalledWith(expect.objectContaining({ page: 2 })))
+    expect(screen.getByLabelText('Loading entries')).toBeInTheDocument()
+    expect(screen.queryByText('No entries yet')).not.toBeInTheDocument()
+  })
+
+  it('clears the search box together with the filters', async () => {
+    vi.mocked(api.listEntries).mockResolvedValue(page([]))
+    renderRoutes(routes, { route: '/content?q=zzz' })
+    await userEvent.click(await screen.findByRole('button', { name: 'Clear filters' }))
+    await waitFor(() => expect(screen.getByRole('searchbox', { name: 'Search entries' })).toHaveValue(''))
+  })
+
   it('shows a clear-filters state when filters match nothing', async () => {
     vi.mocked(api.listEntries).mockResolvedValue(page([]))
     const { router } = renderRoutes(routes, { route: '/content?q=zzz' })

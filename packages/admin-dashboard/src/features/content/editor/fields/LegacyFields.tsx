@@ -7,7 +7,7 @@ import type { FieldControlProps } from './field-aria'
 export function RichTextField({ field, id, value, onChange, onBlur, error, disabled }: FieldControlProps) {
   return (
     <FieldShell field={field} id={id} error={error}>
-      <div id={id} onBlur={onBlur} className={disabled ? 'pointer-events-none opacity-60' : undefined}>
+      <div id={id} tabIndex={-1} onBlur={onBlur} className={disabled ? 'pointer-events-none opacity-60' : undefined}>
         <RichTextEditor value={typeof value === 'string' ? value : ''} onChange={onChange} placeholder={field.description} />
       </div>
     </FieldShell>
@@ -19,7 +19,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   const current = multiple ? (Array.isArray(value) ? (value as string[]) : []) : typeof value === 'string' ? value : ''
   return (
     <FieldShell field={field} id={id} error={error}>
-      <div id={id} className={disabled ? 'pointer-events-none opacity-60' : undefined}>
+      <div id={id} tabIndex={-1} className={disabled ? 'pointer-events-none opacity-60' : undefined}>
         <MediaPicker value={current} onChange={(v) => { onChange(v); onBlur() }} multiple={multiple} allowedMimeTypes={field.validation?.allowedMimeTypes} />
       </div>
     </FieldShell>

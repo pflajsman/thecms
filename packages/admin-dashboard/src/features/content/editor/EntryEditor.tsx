@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { ContentEntry, ContentType, EntryStatus } from '@/types'
@@ -47,6 +47,15 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
   // Saves run one after another; the id ref makes a queued save after a create become an update.
   const entryIdRef = useRef<string | undefined>(initialEntry?.id)
   const queueRef = useRef<Promise<unknown>>(Promise.resolve())
+  // A create can finish after the user has left the editor; never pull them back.
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+  const [resetCount, setResetCount] = useState(0)
 
   const persist = useCallback(
     (options: { status?: EntryStatus } = {}) => {
@@ -60,7 +69,10 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
           if (!entryIdRef.current) {
             saved = await writes.create({ typeId: contentType.id, body: { data, status: options.status ?? 'DRAFT' } })
             entryIdRef.current = saved.id
-            navigate(`/content/${saved.id}`, { replace: true, state: { skipGuard: true } })
+            if (mountedRef.current) {
+              // editorKey keeps this editor mounted across the /content/new -> /content/:id redirect.
+              navigate(`/content/${saved.id}`, { replace: true, state: { skipGuard: true, editorKey: 'new' } })
+            }
           } else {
             saved = await writes.update({ id: entryIdRef.current, body: { data } })
           }
@@ -98,9 +110,15 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     const count = Object.keys(form.errors).length
     toast.error(`Fix ${count} field${count === 1 ? '' : 's'} before saving`)
     const first = Object.keys(form.errors)[0]
-    document.getElementById(`field-${first}`)?.focus()
+    if (first === coverField?.name && !window.matchMedia('(min-width: 1024px)').matches) {
+      setDetailsOpen(true)
+      return false
+    }
+    const el = document.getElementById(`field-${first}`)
+    el?.focus()
+    el?.scrollIntoView?.({ block: 'center' })
     return false
-  }, [form])
+  }, [form, coverField?.name])
 
   const act = useCallback(
     async (action: EditorAction) => {
@@ -115,13 +133,15 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
             break
           case 'publish':
             if (!requireValid()) return
-            if (!id) {
-              await persist({ status: 'PUBLISHED' })
-            } else {
-              if (form.isDirty) await persist()
-              const published = await writes.publish(id)
-              setEntry(published)
-              setStatus('PUBLISHED')
+            {
+              // A blur or autosave may already be creating this entry as a draft, so the
+              // queued save can come back as a draft: publish explicitly in that case.
+              const saved = !id || form.isDirty ? await persist({ status: 'PUBLISHED' }) : undefined
+              if (saved?.status !== 'PUBLISHED') {
+                const published = await writes.publish(saved?.id ?? id!)
+                setEntry(published)
+                setStatus('PUBLISHED')
+              }
             }
             toast.success('Published')
             break
@@ -132,6 +152,8 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
             break
           case 'discard':
             form.reset(form.baseline)
+            // Remount the fields: TipTap reads its content only on mount.
+            setResetCount((n) => n + 1)
             break
           case 'unpublish': {
             const saved = await writes.unpublish(id!)
@@ -243,7 +265,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       status={status}
       isNew={isNew}
       entry={entry}
-      cover={coverField ? renderField(coverField.name) : undefined}
+      cover={coverField ? <div key={resetCount}>{renderField(coverField.name)}</div> : undefined}
       canArchive={status !== 'ARCHIVED'}
       onArchive={() => setConfirm('archive')}
       onDelete={() => setConfirm('delete')}
@@ -276,7 +298,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
           onSubmit={(e) => e.preventDefault()}
           aria-label={`${contentType.name} fields`}
         >
-          <fieldset disabled={readOnly} className="contents">
+          <fieldset key={resetCount} disabled={readOnly} className="contents">
             {titleKey && (
               <div>
                 <label htmlFor={`field-${titleKey}`} className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
