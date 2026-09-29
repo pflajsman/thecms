@@ -5,7 +5,7 @@ import { SiteModel } from '../../models/site.model';
 import { FormSubmissionModel, SubmissionStatus } from '../../models/form-submission.model';
 
 export interface DashboardStats {
-  entries: { total: number; draft: number; published: number; archived: number };
+  entries: { total: number; draft: number; published: number; archived: number; byType: Record<string, number> };
   contentTypes: number;
   media: number;
   sites: number;
@@ -13,9 +13,12 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [byStatus, contentTypes, media, sites, unread] = await Promise.all([
+  const [byStatus, byTypeRows, contentTypes, media, sites, unread] = await Promise.all([
     ContentEntryModel.aggregate<{ _id: ContentStatus; count: number }>([
       { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]),
+    ContentEntryModel.aggregate<{ _id: unknown; count: number }>([
+      { $group: { _id: '$contentTypeId', count: { $sum: 1 } } },
     ]),
     ContentTypeModel.countDocuments(),
     MediaModel.countDocuments(),
@@ -29,7 +32,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const archived = count(ContentStatus.ARCHIVED);
 
   return {
-    entries: { total: draft + published + archived, draft, published, archived },
+    entries: {
+      total: draft + published + archived,
+      draft,
+      published,
+      archived,
+      byType: Object.fromEntries(byTypeRows.map((r) => [String(r._id), r.count])),
+    },
     contentTypes,
     media,
     sites,

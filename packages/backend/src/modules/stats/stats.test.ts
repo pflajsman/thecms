@@ -18,7 +18,7 @@ useTestDb();
 
 it('returns zeros on an empty install', async () => {
   expect(await getDashboardStats()).toEqual({
-    entries: { total: 0, draft: 0, published: 0, archived: 0 },
+    entries: { total: 0, draft: 0, published: 0, archived: 0, byType: {} },
     contentTypes: 0,
     media: 0,
     sites: 0,
@@ -45,7 +45,13 @@ it('counts entries by status, types and unread submissions', async () => {
   ]);
 
   const stats = await getDashboardStats();
-  expect(stats.entries).toEqual({ total: 4, draft: 2, published: 1, archived: 1 });
+  expect(stats.entries).toEqual({
+    total: 4,
+    draft: 2,
+    published: 1,
+    archived: 1,
+    byType: { [type.id]: 4 },
+  });
   expect(stats.contentTypes).toBe(1);
   expect(stats.submissions.unread).toBe(1);
 });
