@@ -15,6 +15,7 @@ import type { AppModule, CreateAction } from './types'
 import { ModelsListPage } from '@/features/models/pages/ModelsListPage'
 import { ModelBuilderPage } from '@/features/models/pages/ModelBuilderPage'
 import { RedirectWithId } from '@/features/legacy-redirects'
+import { InboxPage } from '@/features/inbox/pages/InboxPage'
 import { FormsListPage } from '@/features/forms/pages/FormsListPage'
 import { FormBuilderPage } from '@/features/forms/pages/FormBuilderPage'
 import { useUnreadCount } from '@/lib/queries/stats'
@@ -23,10 +24,8 @@ import { ContentListPage } from '@/features/content/pages/ContentListPage'
 import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
 import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
 import { MediaLibraryPage } from '@/features/media/pages/MediaLibraryPage'
-import { SubmissionsList } from '@/pages/ContactForms/SubmissionsList'
 import { SitesList } from '@/pages/Sites/SitesList'
 import { SiteForm } from '@/pages/Sites/SiteForm'
-import { InboxPlaceholder } from '@/features/inbox/pages/InboxPlaceholder'
 import { WebhooksPlaceholder } from '@/features/webhooks/pages/WebhooksPlaceholder'
 
 export const modules: AppModule[] = [
@@ -72,7 +71,10 @@ export const modules: AppModule[] = [
     path: '/inbox',
     mobileTab: true,
     useBadge: useUnreadCount,
-    routes: [{ path: 'inbox', element: <InboxPlaceholder /> }],
+    routes: [
+      { path: 'inbox', element: <InboxPage /> },
+      { path: 'inbox/:submissionId', element: <InboxPage /> },
+    ],
   },
   {
     id: 'models',
@@ -102,7 +104,7 @@ export const modules: AppModule[] = [
       { path: 'contact-forms', element: <Navigate to="/forms" replace /> },
       { path: 'contact-forms/new', element: <Navigate to="/forms/new" replace /> },
       { path: 'contact-forms/:id/edit', element: <RedirectWithId to={(id) => `/forms/${id}`} /> },
-      { path: 'contact-forms/:formId/submissions', element: <SubmissionsList /> },
+      { path: 'contact-forms/:formId/submissions', element: <RedirectWithId to={(id) => `/inbox?form=${id}&view=all`} /> },
     ],
   },
   {

@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getSetupSteps, greeting, readSetupDismissed, writeSetupDismissed } from '../home-utils'
 import { SetupChecklist } from '../components/SetupChecklist'
+import { useInbox } from '@/features/inbox/inbox-queries'
+import { senderName } from '@/features/inbox/inbox-utils'
 import { ConnectSnippet } from '../components/ConnectSnippet'
 
 export function HomePage() {
@@ -19,6 +21,7 @@ export function HomePage() {
   const sites = useSites()
   const [dismissed, setDismissed] = useState(readSetupDismissed)
   const drafts = useEntryList({ status: 'DRAFT', sortBy: 'updatedAt', sortOrder: 'desc', limit: 5 })
+  const unread = useInbox({ status: 'UNREAD', limit: 3 })
 
   if (!stats.data) {
     return (
@@ -102,9 +105,18 @@ export function HomePage() {
         </section>
         <section className="rounded-xl border bg-card p-4">
           <h2 className="mb-2 font-serif text-lg font-semibold">Inbox</h2>
-          <p className="text-sm text-muted-foreground">
-            {s.submissions.unread === 0 ? 'You are all caught up.' : `${s.submissions.unread} message${s.submissions.unread === 1 ? '' : 's'} waiting for you.`}
-          </p>
+          {(unread.data?.data.length ?? 0) === 0 ? (
+            <p className="text-sm text-muted-foreground">You are all caught up.</p>
+          ) : (
+            <ul className="divide-y">
+              {unread.data!.data.map((m) => (
+                <li key={m.id} className="flex items-center justify-between gap-2 py-2 text-sm">
+                  <Link to={`/inbox/${m.id}`} className="min-w-0 flex-1 truncate font-medium hover:underline">{senderName(m)}</Link>
+                  <span className="shrink-0 text-xs text-muted-foreground">{m.form?.name ?? ''} · {formatRelative(m.createdAt)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <Button asChild variant="outline" size="sm" className="mt-3">
             <Link to="/inbox">Open inbox</Link>
           </Button>

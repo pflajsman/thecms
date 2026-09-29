@@ -18,6 +18,10 @@ vi.mock('@/features/content/content-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/features/content/content-api')>()
   return { ...actual, listEntries: vi.fn(), listContentTypes: vi.fn() }
 })
+vi.mock('@/features/inbox/inbox-api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/inbox/inbox-api')>()
+  return { ...actual, listInbox: vi.fn().mockResolvedValue({ success: true, data: [{ id: 's1', formId: 'f1', data: { email: 'jana@x.test', message: 'Dotaz' }, status: 'UNREAD', emailSent: true, createdAt: '2026-09-29T10:00:00Z', updatedAt: '', form: null }], pagination: { page: 1, limit: 3, total: 1, totalPages: 1 } }) }
+})
 vi.mock('@/services/sites', () => ({ sitesService: { list: vi.fn() } }))
 
 const base: DashboardStats = {
@@ -81,5 +85,6 @@ describe('HomePage', () => {
     expect(await screen.findByRole('link', { name: 'Krkonoše 2026' })).toHaveAttribute('href', '/content/e1')
     expect(screen.getByRole('link', { name: '+ Trip' })).toHaveAttribute('href', `/content/new?type=${tripType.id}`)
     expect(contentApi.listEntries).toHaveBeenCalledWith(expect.objectContaining({ status: 'DRAFT', sortBy: 'updatedAt', limit: 5 }))
+    expect(await screen.findByRole('link', { name: /jana@x\.test/ })).toHaveAttribute('href', '/inbox/s1')
   })
 })
