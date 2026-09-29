@@ -32,7 +32,15 @@ export const listMediaSchema = z.object({
       .optional()
       .transform((val) => (val ? val.split(',').map((t) => t.trim()) : undefined))
       .describe('Filter by tags (comma-separated)'),
-    search: z.string().optional().describe('Full-text search term'),
+    search: z.string().trim().max(100, 'Search must be at most 100 characters').optional().describe('Search name, alt text, description and tags'),
+    ids: z
+      .string()
+      .optional()
+      .transform((val) => (val ? val.split(',').map((s) => s.trim()).filter(Boolean) : undefined))
+      .refine((ids) => !ids || (ids.length <= 100 && ids.every((id) => /^[a-f0-9]{24}$/i.test(id))), {
+        message: 'ids must be up to 100 comma-separated media IDs',
+      })
+      .describe('Comma-separated media IDs (batch lookup)'),
     sortBy: z
       .string()
       .optional()

@@ -123,6 +123,7 @@ export class MediaController {
         search: validated.query.search,
         sortBy: validated.query.sortBy,
         sortOrder: validated.query.sortOrder,
+        ids: validated.query.ids,
       });
 
       res.status(200).json({

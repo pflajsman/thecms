@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import mongoose from 'mongoose';
+import { escapeRegex } from '../../utils/regex';
 import { MediaModel, IMedia, MediaVariant } from '../../models/media.model';
 import { storageService } from '../../config/storage';
 import {
@@ -45,6 +46,7 @@ export interface ListMediaOptions {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  ids?: string[];
 }
 
 /**
@@ -173,6 +175,7 @@ export class MediaService {
       search,
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      ids,
     } = options;
 
     // Build query
@@ -211,9 +214,15 @@ export class MediaService {
       query.tags = { $all: tags };
     }
 
-    // Full-text search
+    // Batch lookup by id
+    if (ids && ids.length > 0) {
+      query._id = { $in: ids };
+    }
+
+    // Literal, case-insensitive search (no $text: limited on Cosmos DB)
     if (search) {
-      query.$text = { $search: search };
+      const pattern = { $regex: escapeRegex(search), $options: 'i' };
+      query.$or = [{ originalName: pattern }, { altText: pattern }, { description: pattern }, { tags: pattern }];
     }
 
     // Calculate pagination
@@ -222,11 +231,6 @@ export class MediaService {
     // Build sort object
     const sort: any = {};
     sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-
-    // If searching, sort by text score
-    if (search) {
-      sort.score = { $meta: 'textScore' };
-    }
 
     // Execute query
     const [media, total] = await Promise.all([
