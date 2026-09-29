@@ -272,3 +272,27 @@ Environment: local mongod 6.0.14 and Azurite (Docker not available), backend and
 | Example site: trips list, contact form fields, empty posts state | Pass |
 | Example site: trip map with GPX | Not checked (no GPX media in seed data) |
 | `docker compose up` | Not checked (Docker not installed) |
+
+## Admin redesign Plan 2 verification (2026-09-29)
+
+Environment: local mongod and Azurite, backend and admin dev servers; 2 models (Trip with Text, Media, Number, Yes/No, Date, Relation fields; Blog post), 25 entries.
+
+| Check | Result |
+|---|---|
+| Backend tests (39) and admin tests (123) | Pass |
+| Admin production build | Pass |
+| `/content`: model chips with counts (Trip 13, Blog post 12), status and sort filters | Pass |
+| Search `šumavu` and `C++` (URL `?q=` updates) | Pass |
+| Pager "1–20 of 25", Next shows "21–25 of 25"; chip resets to page 1 | Pass |
+| Row menu Archive shows toast with Undo; Undo restores the previous status | Pass |
+| New Trip: required Title error on blur | Pass |
+| New Trip: autosave after 2 s creates the entry, URL becomes `/content/<id>`, no leave prompt, title kept | Pass |
+| Published entry: no autosave (server unchanged after 3.5 s), "Publish changes" and "Discard changes" appear, Discard restores | Pass |
+| Leaving with unsaved changes asks "Leave without saving?" | Pass |
+| Relation picker finds "Přes Šumavu na kole" and shows it as a chip with status; autosaved | Pass |
+| Date picker sets a date; autosaved | Pass |
+| Old URLs `/entries?contentType=…` and `/entries/<id>/edit` redirect | Pass |
+| ⌘K lists matching entries; Enter opens the entry | Pass |
+| 360px (iframe): list shows 20 cards, editor shows the Details button, no horizontal scroll | Pass |
+| Dark theme: list and editor readable | Pass |
+| Row menu Duplicate and Delete, editor ⌘S, archived read-only | Covered by component tests; not repeated by hand |
