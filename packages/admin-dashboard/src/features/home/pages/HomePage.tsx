@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getSetupSteps, greeting, readSetupDismissed, writeSetupDismissed } from '../home-utils'
 import { SetupChecklist } from '../components/SetupChecklist'
+import { ConnectSnippet } from '../components/ConnectSnippet'
 
 export function HomePage() {
   const { user } = useAuth()
@@ -44,6 +45,12 @@ export function HomePage() {
   }
 
   const s = stats.data
+  const dismiss = () => {
+    writeSetupDismissed()
+    setDismissed(true)
+  }
+  const firstSite = sites.data?.[0]
+  const firstType = types.data?.[0]
   const tiles = [
     { label: 'entries', value: s.entries.total, to: '/content' },
     { label: 'drafts', value: s.entries.draft, to: '/content?status=DRAFT' },
@@ -54,6 +61,17 @@ export function HomePage() {
   return (
     <>
       <h1 className="mb-6 font-serif text-3xl font-semibold">{greeting(new Date(), user?.name)}</h1>
+      {!dismissed && firstSite && firstType && (
+        // The last setup step completes the checklist; keep its payoff (a working snippet) visible until dismissed.
+        <section className="mb-6 rounded-xl border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-serif text-lg font-semibold">Your site is connected</h2>
+            <Button variant="ghost" size="sm" onClick={dismiss}>Hide setup guide</Button>
+          </div>
+          <p className="text-sm text-muted-foreground">Paste this into {firstSite.name} to load your published {firstType.name} entries.</p>
+          <ConnectSnippet apiKey={firstSite.apiKey} slug={firstType.slug} />
+        </section>
+      )}
       <ul className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         {tiles.map((t) => (
           <li key={t.label}>

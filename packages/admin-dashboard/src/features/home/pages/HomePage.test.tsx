@@ -63,6 +63,16 @@ describe('HomePage', () => {
     expect(await screen.findByRole('heading', { name: /Good (morning|afternoon|evening), Pavel/ })).toBeInTheDocument()
   })
 
+  it('keeps the API snippet on Home after the last setup step, until dismissed', async () => {
+    statsState.value = { ...base, contentTypes: 1, sites: 1, entries: { total: 1, draft: 0, published: 1, archived: 0, byType: {} } }
+    vi.mocked(sitesService.list).mockResolvedValue({ success: true, data: [{ id: 's1', name: 'Blog', domain: 'blog.test', apiKey: 'cms_secret_123', isActive: true, requestCount: 0, createdAt: '', updatedAt: '' }], pagination: { page: 1, limit: 100, total: 1, totalPages: 1 } })
+    renderRoutes(routes)
+    expect(await screen.findByRole('heading', { name: /Good (morning|afternoon|evening), Pavel/ })).toBeInTheDocument()
+    expect(await screen.findByLabelText('Fetch example')).toHaveTextContent('cms_secret_123')
+    await userEvent.click(screen.getByRole('button', { name: 'Hide setup guide' }))
+    expect(screen.queryByLabelText('Fetch example')).not.toBeInTheDocument()
+  })
+
   it('shows the work queue for an active install', async () => {
     statsState.value = { ...base, contentTypes: 1, sites: 1, media: 61, entries: { total: 23, draft: 4, published: 18, archived: 1, byType: {} }, submissions: { unread: 3 } }
     renderRoutes(routes)
