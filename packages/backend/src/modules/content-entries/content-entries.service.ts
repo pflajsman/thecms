@@ -4,6 +4,7 @@ import { ContentTypeModel } from '../../models/content-type.model';
 import { ContentEntryValidator } from './validation.helper';
 import { WebhookService } from '../../services/webhook.service';
 import { WebhookEvent } from '../../models/webhook.model';
+import { computeEntryTitle } from '../../utils/entryTitle';
 
 /**
  * Query options for listing content entries
@@ -86,6 +87,7 @@ export class ContentEntriesService {
     const entry = new ContentEntryModel({
       contentTypeId: entryData.contentTypeId,
       data: entryData.data,
+      title: computeEntryTitle(entryData.data, contentType.fields, contentType.titleField),
       status: entryData.status || ContentStatus.DRAFT,
       createdBy: entryData.createdBy,
       updatedBy: entryData.createdBy,
@@ -222,6 +224,7 @@ export class ContentEntriesService {
       }
 
       entry.data = updateData.data;
+      entry.title = computeEntryTitle(updateData.data, contentType.fields, contentType.titleField);
     }
 
     // Update status if provided

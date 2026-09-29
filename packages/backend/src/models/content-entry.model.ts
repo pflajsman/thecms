@@ -15,6 +15,7 @@ export enum ContentStatus {
 export interface IContentEntry extends Document {
   contentTypeId: mongoose.Types.ObjectId;
   data: Record<string, any>;
+  title: string;
   status: ContentStatus;
   publishedAt?: Date;
   createdBy?: mongoose.Types.ObjectId;
@@ -38,6 +39,12 @@ const ContentEntrySchema = new Schema<IContentEntry>(
       type: Schema.Types.Mixed,
       required: [true, 'Content data is required'],
       default: {},
+    },
+    title: {
+      type: String,
+      trim: true,
+      default: 'Untitled',
+      index: true,
     },
     status: {
       type: String,

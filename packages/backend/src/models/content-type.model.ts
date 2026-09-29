@@ -9,6 +9,7 @@ export interface IContentType extends Document {
   slug: string;
   description?: string;
   fields: FieldDefinition[];
+  titleField?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -109,6 +110,10 @@ const ContentTypeSchema = new Schema<IContentType>(
         },
         message: 'Content type must have at least one field',
       },
+    },
+    titleField: {
+      type: String,
+      trim: true,
     },
   },
   {

@@ -59,6 +59,26 @@ const fieldDefinitionSchema = z.object({
   validation: fieldValidationSchema,
 });
 
+const titleFieldSchema = z
+  .string()
+  .max(50, 'titleField must be less than 50 characters')
+  .optional();
+
+function checkTitleField(
+  data: { titleField?: string; fields?: { name: string; type: string }[] },
+  ctx: z.RefinementCtx
+): void {
+  if (!data.titleField || !data.fields) return;
+  const ok = data.fields.some((f) => f.name === data.titleField && f.type === FieldType.TEXT);
+  if (!ok) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['titleField'],
+      message: 'titleField must name a TEXT field of this content type',
+    });
+  }
+}
+
 /**
  * Create Content Type schema
  */
@@ -80,6 +100,7 @@ export const createContentTypeSchema = z
       .max(500, 'Description must be less than 500 characters')
       .transform((val) => val.trim())
       .optional(),
+    titleField: titleFieldSchema,
     fields: z
       .array(fieldDefinitionSchema)
       .min(1, 'At least one field is required')
@@ -93,7 +114,8 @@ export const createContentTypeSchema = z
         }
       ),
   })
-  .strict();
+  .strict()
+  .superRefine(checkTitleField);
 
 /**
  * Update Content Type schema (all fields optional except what's being updated)
@@ -118,6 +140,7 @@ export const updateContentTypeSchema = z
       .max(500, 'Description must be less than 500 characters')
       .transform((val) => val.trim())
       .optional(),
+    titleField: titleFieldSchema,
     fields: z
       .array(fieldDefinitionSchema)
       .min(1, 'At least one field is required')
@@ -135,7 +158,8 @@ export const updateContentTypeSchema = z
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided for update',
-  });
+  })
+  .superRefine(checkTitleField);
 
 /**
  * Type exports for TypeScript

@@ -1,6 +1,7 @@
 import { ContentTypeModel, IContentType } from '../../models/content-type.model';
 import { ContentEntryModel } from '../../models/content-entry.model';
 import { CreateContentTypeInput, UpdateContentTypeInput } from './content-types.schema';
+import { recomputeTitlesForType } from '../content-entries/entry-titles.service';
 
 /**
  * Content Types Service
@@ -87,6 +88,10 @@ export class ContentTypesService {
       { $set: data },
       { new: true, runValidators: true }
     );
+
+    if (contentType && (data.titleField !== undefined || data.fields !== undefined)) {
+      await recomputeTitlesForType(contentType);
+    }
 
     return contentType;
   }
