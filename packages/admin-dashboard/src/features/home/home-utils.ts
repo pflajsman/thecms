@@ -12,7 +12,7 @@ export interface SetupStep {
 export function getSetupSteps(stats: DashboardStats): SetupStep[] {
   return [
     { id: 'signin', title: 'Sign in', description: 'You are in.', done: true },
-    { id: 'model', title: 'Create a content model', description: 'Define the fields your content has, for example a blog post.', done: stats.contentTypes > 0, to: '/content-types/new', cta: 'Create a model' },
+    { id: 'model', title: 'Create a content model', description: 'Define the fields your content has, for example a blog post.', done: stats.contentTypes > 0, to: '/models/new', cta: 'Create a model' },
     { id: 'entry', title: 'Write your first entry', description: 'Add content using your model.', done: stats.entries.total > 0, to: '/content/new', cta: 'Write an entry' },
     { id: 'site', title: 'Connect a site', description: 'Get an API key so your website can read published content.', done: stats.sites > 0, to: '/sites/new', cta: 'Connect a site' },
   ]

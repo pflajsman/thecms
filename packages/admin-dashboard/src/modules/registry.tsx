@@ -10,15 +10,17 @@ import {
   Upload,
   Webhook,
 } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
 import type { AppModule, CreateAction } from './types'
+import { ModelsListPage } from '@/features/models/pages/ModelsListPage'
+import { ModelBuilderPage } from '@/features/models/pages/ModelBuilderPage'
+import { RedirectWithId } from '@/features/legacy-redirects'
 import { useUnreadCount } from '@/lib/queries/stats'
 import { HomePage } from '@/features/home/pages/HomePage'
 import { ContentListPage } from '@/features/content/pages/ContentListPage'
 import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
 import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
 import { MediaLibraryPage } from '@/features/media/pages/MediaLibraryPage'
-import { ContentTypesList } from '@/pages/ContentTypes/ContentTypesList'
-import { ContentTypeForm } from '@/pages/ContentTypes/ContentTypeForm'
 import { ContactFormsList } from '@/pages/ContactForms/ContactFormsList'
 import { ContactFormForm } from '@/pages/ContactForms/ContactFormForm'
 import { SubmissionsList } from '@/pages/ContactForms/SubmissionsList'
@@ -80,10 +82,11 @@ export const modules: AppModule[] = [
     path: '/models',
     matches: ['/content-types'],
     routes: [
-      { path: 'models', element: <ContentTypesList /> },
-      { path: 'content-types', element: <ContentTypesList /> },
-      { path: 'content-types/new', element: <ContentTypeForm /> },
-      { path: 'content-types/:id/edit', element: <ContentTypeForm /> },
+      { path: 'models', element: <ModelsListPage /> },
+      { path: 'models/:id', element: <ModelBuilderPage /> },
+      { path: 'content-types', element: <Navigate to="/models" replace /> },
+      { path: 'content-types/new', element: <Navigate to="/models/new" replace /> },
+      { path: 'content-types/:id/edit', element: <RedirectWithId to={(id) => `/models/${id}`} /> },
     ],
   },
   {

@@ -43,7 +43,7 @@ describe('HomePage', () => {
     renderRoutes(routes)
     expect(await screen.findByRole('heading', { name: 'Welcome to TheCMS' })).toBeInTheDocument()
     const steps = screen.getByRole('list', { name: 'Setup steps' })
-    expect(within(steps).getByRole('link', { name: 'Create a model' })).toHaveAttribute('href', '/content-types/new')
+    expect(within(steps).getByRole('link', { name: 'Create a model' })).toHaveAttribute('href', '/models/new')
     expect(within(steps).getByText('Sign in')).toBeInTheDocument()
   })
 

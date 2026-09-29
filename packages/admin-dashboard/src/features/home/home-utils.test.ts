@@ -17,7 +17,7 @@ describe('getSetupSteps', () => {
     expect(done.every((s) => s.done)).toBe(true)
   })
   it('links each open step to where it is done', () => {
-    expect(getSetupSteps(stats()).map((s) => s.to)).toEqual([undefined, '/content-types/new', '/content/new', '/sites/new'])
+    expect(getSetupSteps(stats()).map((s) => s.to)).toEqual([undefined, '/models/new', '/content/new', '/sites/new'])
   })
 })
 
