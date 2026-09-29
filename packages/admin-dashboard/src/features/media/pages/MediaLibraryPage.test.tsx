@@ -77,4 +77,12 @@ describe('MediaLibraryPage', () => {
     renderRoutes(routes, { route: '/media' })
     expect(await screen.findByText('No media yet')).toBeInTheDocument()
   })
+
+  it('does not allow deleting before usage is known', async () => {
+    vi.mocked(api.getMediaUsage).mockImplementation(() => new Promise(() => {}))
+    renderRoutes(routes, { route: '/media?item=m1' })
+    const sheet = await screen.findByRole('dialog', { name: 'sumava.jpg' })
+    expect(within(sheet).getByRole('button', { name: 'Delete file' })).toBeDisabled()
+  })
 })
+

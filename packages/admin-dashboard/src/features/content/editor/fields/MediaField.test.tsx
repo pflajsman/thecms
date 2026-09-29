@@ -77,4 +77,35 @@ describe('MediaField', () => {
     fireEvent.drop(zone, { dataTransfer: { types: ['Files'], files: [new File(['x'], 'c.jpg', { type: 'image/jpeg' })] } })
     await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('"c"'))
   })
+
+  it('keeps every file when several uploads finish close together', async () => {
+    const resolvers: ((m: ReturnType<typeof makeMedia>) => void)[] = []
+    vi.mocked(api.uploadMedia).mockImplementation(() => new Promise((r) => resolvers.push(r)))
+    renderWithProviders(<Harness field={gallery} initial={['a']} />)
+    const zone = await screen.findByRole('group', { name: 'Gallery' })
+    fireEvent.drop(zone, { dataTransfer: { types: ['Files'], files: [new File(['x'], 'c.jpg', { type: 'image/jpeg' }), new File(['y'], 'd.jpg', { type: 'image/jpeg' })] } })
+    await waitFor(() => expect(resolvers).toHaveLength(2))
+    resolvers[0](makeMedia({ id: 'c', originalName: 'c.jpg' }))
+    await new Promise((r) => setTimeout(r, 0))
+    resolvers[1](makeMedia({ id: 'd', originalName: 'd.jpg' }))
+    await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('["a","c","d"]'))
+  })
+
+  it('shows size errors and failed uploads in the field', async () => {
+    vi.mocked(api.uploadMedia).mockRejectedValue(new Error('boom'))
+    renderWithProviders(<Harness field={gallery} initial={[]} />)
+    const zone = await screen.findByRole('group', { name: 'Gallery' })
+    fireEvent.drop(zone, { dataTransfer: { types: ['Files'], files: [new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'big.jpg', { type: 'image/jpeg' }), new File(['x'], 'ok.jpg', { type: 'image/jpeg' })] } })
+    expect(await screen.findByText(/big\.jpg is larger than 10 MB\./)).toBeInTheDocument()
+    expect(await screen.findByText(/ok\.jpg: Something went wrong/)).toBeInTheDocument()
+  })
+
+  it('does not call files missing when the lookup fails', async () => {
+    vi.mocked(api.listMedia).mockRejectedValue(new Error('down'))
+    renderWithProviders(<Harness field={gallery} initial={['a']} />)
+    expect(await screen.findByText('Could not load files.')).toBeInTheDocument()
+    expect(screen.queryByText('Missing file')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
+  })
 })
+

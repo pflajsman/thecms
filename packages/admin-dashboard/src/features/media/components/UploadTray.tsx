@@ -2,13 +2,17 @@ import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { UploadItem } from '../useUploadQueue'
 
-export function UploadTray({ items, onClear }: { items: UploadItem[]; onClear: () => void }) {
+export function UploadTray({ items, onClear, inline = false }: { items: UploadItem[]; onClear: () => void; inline?: boolean }) {
   if (items.length === 0) return null
   const active = items.filter((i) => i.status === 'queued' || i.status === 'uploading').length
   return (
     <section
       aria-label="Uploads"
-      className="fixed right-4 bottom-20 z-40 w-[min(22rem,calc(100vw-2rem))] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg md:bottom-4"
+      className={
+        inline
+          ? 'rounded-xl border bg-popover p-3 text-popover-foreground'
+          : 'fixed right-4 bottom-20 z-40 w-[min(22rem,calc(100vw-2rem))] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg md:bottom-4'
+      }
     >
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-medium" aria-live="polite">

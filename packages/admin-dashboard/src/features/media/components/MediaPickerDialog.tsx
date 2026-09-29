@@ -38,6 +38,7 @@ function PickerBody({ onSelect, multiple, accept }: { onSelect: (m: MediaFile[])
   const [filters, setFilters] = useState<MediaFilterValue>({ search: '', category: imagesOnly ? 'image' : undefined })
   const [pageNo, setPageNo] = useState(1)
   const [selected, setSelected] = useState<MediaFile[]>([])
+  const [rejected, setRejected] = useState<string | null>(null)
   const writes = useMediaWrites()
   const list = useMediaList({ category: filters.category, search: filters.search || undefined, page: pageNo, limit: PAGE_SIZE })
 
@@ -68,9 +69,23 @@ function PickerBody({ onSelect, multiple, accept }: { onSelect: (m: MediaFile[])
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm hover:bg-accent">
           <Upload aria-hidden className="size-4" />
           Upload
-          <input type="file" multiple={multiple} aria-label="Upload files" className="sr-only" onChange={(e) => { uploads.add(Array.from(e.target.files ?? [])); e.target.value = '' }} />
+          <input
+            type="file"
+            multiple={multiple}
+            accept={accept?.join(',')}
+            aria-label="Upload files"
+            className="sr-only"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? [])
+              const bad = files.filter((f) => !matchesAccept({ mimeType: f.type, originalName: f.name }, accept))
+              setRejected(bad.length ? bad.map((f) => `${f.name} is not allowed here.`).join(' ') : null)
+              uploads.add(files.filter((f) => !bad.includes(f)))
+              e.target.value = ''
+            }}
+          />
         </label>
       </div>
+      {rejected && <p role="alert" className="text-sm text-destructive">{rejected}</p>}
       <MediaFilters value={filters} hideCategories={imagesOnly} onChange={(v) => { setFilters(v); setPageNo(1) }} />
       {list.isPending ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="aspect-square w-full" />)}</div>
@@ -80,7 +95,7 @@ function PickerBody({ onSelect, multiple, accept }: { onSelect: (m: MediaFile[])
         <MediaGrid label="Files" mode="select" items={shown} selectedIds={selected.map((s) => s.id)} disabled={(m) => !matchesAccept(m, accept)} onActivate={toggle} />
       )}
       {list.data && <Pager page={pageNo} limit={PAGE_SIZE} total={list.data.pagination.total} onPageChange={setPageNo} />}
-      <UploadTray items={uploads.items} onClear={uploads.clearFinished} />
+      <UploadTray inline items={uploads.items} onClear={uploads.clearFinished} />
       <DialogFooter>
         <Button disabled={selected.length === 0} onClick={() => onSelect(selected)}>
           {selected.length === 0 ? 'Choose' : `Choose ${selected.length} file${selected.length === 1 ? '' : 's'}`}

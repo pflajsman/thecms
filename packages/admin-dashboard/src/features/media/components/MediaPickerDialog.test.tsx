@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/render'
 import * as api from '../media-api'
@@ -43,4 +43,16 @@ describe('MediaPickerDialog', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Choose 1 file' }))
     expect(onSelect).toHaveBeenCalledWith([expect.objectContaining({ id: 'm9' })])
   })
+
+  it('rejects uploads the field cannot use and keeps the tray inside the dialog', async () => {
+    vi.mocked(api.uploadMedia).mockResolvedValue(makeMedia({ id: 'm9' }))
+    renderWithProviders(<MediaPickerDialog open onOpenChange={() => {}} onSelect={vi.fn()} accept={['image/*']} />)
+    const input = await screen.findByLabelText('Upload files')
+    expect(input).toHaveAttribute('accept', 'image/*')
+    fireEvent.change(input, { target: { files: [new File(['x'], 'doc.pdf', { type: 'application/pdf' }), new File(['y'], 'ok.png', { type: 'image/png' })] } })
+    expect(await screen.findByText('doc.pdf is not allowed here.')).toBeInTheDocument()
+    await waitFor(() => expect(api.uploadMedia).toHaveBeenCalledTimes(1))
+    expect(screen.getByRole('region', { name: 'Uploads' })).not.toHaveClass('fixed')
+  })
 })
+

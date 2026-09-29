@@ -56,3 +56,25 @@ describe('GET /media', () => {
     expect((await request(app).get(`/media?search=${'a'.repeat(101)}`)).status).toBe(400);
   });
 });
+
+describe('document category', () => {
+  it('includes every non-image, non-video, non-GPX type', async () => {
+    const base = { size: 10, blobUrl: 'http://x/f' };
+    const types: [string, string][] = [
+      ['application/pdf', 'a.pdf'],
+      ['application/msword', 'b.doc'],
+      ['application/vnd.ms-excel', 'c.xls'],
+      ['application/vnd.ms-powerpoint', 'd.ppt'],
+      ['text/xml', 'e.xml'],
+      ['image/png', 'f.png'],
+      ['video/mp4', 'g.mp4'],
+      ['application/gpx+xml', 'h.gpx'],
+      ['application/xml', 'i.gpx'],
+    ];
+    for (const [mimeType, name] of types) {
+      await MediaModel.create({ ...base, mimeType, filename: name, originalName: name });
+    }
+    const res = await MediaService.listMedia({ category: 'document', limit: 100 });
+    expect(res.media.map((m) => m.originalName).sort()).toEqual(['a.pdf', 'b.doc', 'c.xls', 'd.ppt', 'e.xml']);
+  });
+});

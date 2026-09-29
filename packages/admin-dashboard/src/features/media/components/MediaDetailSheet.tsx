@@ -138,6 +138,8 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
           <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Used in</h3>
           {usage.isPending ? (
             <Skeleton className="h-8 w-full" />
+          ) : usage.isError ? (
+            <p className="text-sm text-destructive">Could not check which entries use this file.</p>
           ) : usedIn.length === 0 ? (
             <p className="text-sm text-muted-foreground">Not used in any entry.</p>
           ) : (
@@ -154,7 +156,7 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
         </section>
 
         <p className="text-xs text-muted-foreground">Uploaded {formatAbsolute(media.createdAt)}</p>
-        <Button variant="outline" className="self-start text-destructive" onClick={() => setConfirmDelete(true)}>
+        <Button variant="outline" className="self-start text-destructive" disabled={usage.isPending} onClick={() => setConfirmDelete(true)}>
           Delete file
         </Button>
       </div>
@@ -163,7 +165,9 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
         onOpenChange={setConfirmDelete}
         title={`Delete ${media.originalName}?`}
         description={
-          usedIn.length > 0
+          usage.isError
+            ? 'We could not check which entries use this file. Entries that use it will show a missing file.'
+            : usedIn.length > 0
             ? `${usedIn.length} ${usedIn.length === 1 ? 'entry uses' : 'entries use'} this file. They will show a missing file until you replace it.`
             : 'This permanently removes the file.'
         }

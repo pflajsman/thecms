@@ -36,7 +36,13 @@ export function useMediaByIds(ids: string[]) {
     staleTime: 60_000,
   })
   const byId = useMemo(() => new Map<string, MediaFile>((query.data?.data ?? []).map((m) => [m.id, m])), [query.data])
-  return { byId, isLoading: query.isLoading && unique.length > 0, isFetched: query.isFetched }
+  return {
+    byId,
+    isLoading: query.isLoading && unique.length > 0,
+    isFetched: query.isFetched,
+    isError: query.isError,
+    refetch: query.refetch,
+  }
 }
 
 export function useMediaUsage(id?: string) {

@@ -1,4 +1,4 @@
-import { useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { ArrowLeft, ArrowRight, GripVertical, ImagePlus, Upload, X } from 'lucide-react'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
@@ -18,7 +18,12 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   const multiple = !!field.validation?.multiple
   const accept = field.validation?.allowedMimeTypes
   const ids = multiple ? (Array.isArray(value) ? (value as string[]) : []) : typeof value === 'string' && value ? [value] : []
-  const { byId, isLoading } = useMediaByIds(ids)
+  const { byId, isLoading, isError, refetch } = useMediaByIds(ids)
+  // Uploads finish asynchronously; append to the latest value, not the one from their render.
+  const idsRef = useRef(ids)
+  useEffect(() => {
+    idsRef.current = ids
+  })
   const writes = useMediaWrites()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [dropError, setDropError] = useState<string | null>(null)
@@ -26,10 +31,14 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
 
   const commit = (next: string[]) => {
+    idsRef.current = next
     onChange(multiple ? next : next[0])
     onBlur()
   }
-  const add = (media: MediaFile[]) => commit(multiple ? [...ids, ...media.map((m) => m.id).filter((m) => !ids.includes(m))] : media.slice(-1).map((m) => m.id))
+  const add = (media: MediaFile[]) => {
+    const current = idsRef.current
+    commit(multiple ? [...current, ...media.map((m) => m.id).filter((m) => !current.includes(m))] : media.slice(-1).map((m) => m.id))
+  }
 
   const uploads = useUploadQueue({
     onUploaded: (m) => {
@@ -37,6 +46,10 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
       add([m])
     },
   })
+
+  const uploadErrors = uploads.items
+    .filter((u) => u.status === 'error' && u.error)
+    .map((u) => (u.error!.startsWith(u.name) ? u.error! : `${u.name}: ${u.error}`))
 
   const upload = (files: File[]) => {
     const label = field.label || field.name
@@ -60,7 +73,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   }
 
   return (
-    <FieldShell field={field} id={id} error={error ?? dropError ?? undefined}>
+    <FieldShell field={field} id={id} error={error ?? ([dropError, ...uploadErrors].filter(Boolean).join(' ') || undefined)}>
       <div
         role="group"
         aria-label={field.label || field.name}
@@ -69,7 +82,13 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
         onDrop={onDrop}
         className={`rounded-lg border border-dashed p-3 transition-colors ${dragOver ? 'border-primary bg-accent' : 'bg-card'}`}
       >
-        {ids.length > 0 && (
+        {ids.length > 0 && isError && (
+          <p className="mb-3 flex items-center gap-2 text-sm text-destructive" role="alert">
+            Could not load files.
+            <Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>Retry</Button>
+          </p>
+        )}
+        {ids.length > 0 && !isError && (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={ids} strategy={rectSortingStrategy}>
               <ul aria-label={`${field.label || field.name} files`} className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">

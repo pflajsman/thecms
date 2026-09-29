@@ -191,14 +191,9 @@ export class MediaService {
       if (category === 'image') {
         query.mimeType = { $regex: '^image/' };
       } else if (category === 'document') {
-        query.mimeType = {
-          $in: [
-            /application\/pdf/,
-            /document/,
-            /sheet/,
-            /presentation/,
-          ],
-        };
+        // Everything that is not an image, a video or a GPX track (matches the admin's categories).
+        query.mimeType = { $not: /^(image|video)\//, $ne: 'application/gpx+xml' };
+        query.originalName = { $not: /\.gpx$/i };
       } else if (category === 'video') {
         query.mimeType = { $regex: '^video/' };
       }
