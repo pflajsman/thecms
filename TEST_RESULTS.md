@@ -340,3 +340,28 @@ Environment: local mongod and Azurite, backend and admin dev servers, data from 
 | 360px (iframe): models list and builder, form builder and new form, inbox list and message; no horizontal scroll | Pass (after fix in this plan for the form builder) |
 | Dark theme on the Inbox | Pass |
 | Inbox does not refresh on its own while open (refetch on focus is off app-wide) | Noted (see minors) |
+
+## Admin redesign Plan 5 verification (2026-09-29)
+
+Environment: local mongod and Azurite, backend and admin dev servers from the Plan 5 worktree, a local request catcher on port 9999 for webhook deliveries. A throwaway site and webhook were created for the checks and deleted afterwards; the example blog's site key was not rotated.
+
+| Check | Result |
+|---|---|
+| Backend tests (51), admin tests (327), `pnpm lint` (0 errors) | Pass |
+| `/sites`: card shows domain, request count, masked key `cms_••••••••…`; Reveal and Copy | Pass |
+| New site: origin `verify.test` rejected with "Enter a full URL…"; `http://localhost:5174/` added as a chip without the trailing slash; save opens `/sites/<id>` | Pass |
+| Connect snippets use the real key and the first model; the `curl` snippet returns 200 | Pass |
+| Rotate key: wrong case of the site name keeps the button disabled; exact name rotates; old key gets 401, new key 200 | Pass |
+| New webhook: save without events shows "Choose at least one event"; after choosing one, the secret dialog shows the full secret once | Pass |
+| Send test: "Test delivered: 200 in 3 ms"; one request per click reaches the catcher | Pass |
+| Publishing an entry delivers `entry.published` with `X-Webhook-Signature`; the delivery log shows it (200, 2 ms); counts 1 total, 1 delivered | Pass |
+| Rotate secret: confirm dialog, then a new 43 character secret; `GET /webhooks/:id` still returns only `secretPreview` | Pass |
+| Rich text: headings, sizes, bold, italic, highlight, alignment, lists, quote; serif headings and quote border from the new content styles | Pass |
+| Link box refuses `javascript:alert(1)`; `example.com/docs` becomes an https link | Pass |
+| Image by URL and float buttons | Pass (after fix in this plan: the URL box submitted the surrounding entry form) |
+| Highlighted text in dark mode | Pass (after fix in this plan: text was light on the yellow highlight, 1.04:1, now 13.42:1) |
+| A crashing page shows "Something went wrong" inside the shell; sidebar navigation recovers | Pass |
+| Reload in dev mode: the sign-in screen never renders (polled every 5 ms) | Pass |
+| 360px (iframe): sites list, site form, new site, webhooks list, webhook form, new webhook, entry editor; no horizontal scroll | Pass |
+| Focus visible on every focusable control of the sites list, site form, webhook form and the editor toolbar (focused with `focusVisible`; real Tab key presses do not reach the page in this browser tooling) | Pass (after fix in this plan for the text color picker) |
+| Main bundle after removing MUI: 1,397.82 kB (gzip 439.02 kB) before, 1,314.49 kB (gzip 410.05 kB) after | Noted |

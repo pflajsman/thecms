@@ -8,7 +8,7 @@ A cost-effective headless CMS built with Node.js, TypeScript, and hosted on Azur
 - **Database**: Azure Cosmos DB (MongoDB API) - Free tier
 - **Authentication**: Azure AD B2C
 - **Media Storage**: Azure Blob Storage + CDN
-- **Admin Dashboard**: React + Vite + TypeScript
+- **Admin Dashboard**: React + Vite + TypeScript, Tailwind CSS and shadcn/ui (Radix), TanStack Query, TipTap
 - **Hosting**: Azure Container Apps + Static Web Apps
 
 ## Cost Estimate
