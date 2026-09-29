@@ -24,8 +24,8 @@ import { ContentListPage } from '@/features/content/pages/ContentListPage'
 import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
 import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
 import { MediaLibraryPage } from '@/features/media/pages/MediaLibraryPage'
-import { SitesList } from '@/pages/Sites/SitesList'
-import { SiteForm } from '@/pages/Sites/SiteForm'
+import { SitesListPage } from '@/features/sites/pages/SitesListPage'
+import { SiteFormPage } from '@/features/sites/pages/SiteFormPage'
 import { WebhooksPlaceholder } from '@/features/webhooks/pages/WebhooksPlaceholder'
 
 export const modules: AppModule[] = [
@@ -114,9 +114,9 @@ export const modules: AppModule[] = [
     group: 'setup',
     path: '/sites',
     routes: [
-      { path: 'sites', element: <SitesList /> },
-      { path: 'sites/new', element: <SiteForm /> },
-      { path: 'sites/:id/edit', element: <SiteForm /> },
+      { path: 'sites', element: <SitesListPage /> },
+      { path: 'sites/:id', element: <SiteFormPage /> },
+      { path: 'sites/:id/edit', element: <RedirectWithId to={(id) => `/sites/${id}`} /> },
     ],
   },
   {
