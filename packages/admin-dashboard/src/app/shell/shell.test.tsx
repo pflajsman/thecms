@@ -8,6 +8,13 @@ import { Sidebar } from './Sidebar'
 import { MobileTabs } from './MobileTabs'
 import { CommandPaletteProvider } from './CommandPalette'
 import { AppShell } from './AppShell'
+import * as contentApi from '@/features/content/content-api'
+import { makeListItem, page } from '@/features/content/test-fixtures'
+
+vi.mock('@/features/content/content-api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/content/content-api')>()
+  return { ...actual, listEntries: vi.fn() }
+})
 
 const auth = vi.hoisted(() => ({
   value: {
@@ -85,6 +92,30 @@ describe('Command palette', () => {
     await user.type(input, 'Content models')
     await user.keyboard('{Enter}')
     expect(screen.getByTestId('location')).toHaveTextContent('/models')
+  })
+
+  it('finds entries by title and opens them', async () => {
+    vi.mocked(contentApi.listEntries).mockResolvedValue(page([makeListItem({ id: 'e9', title: 'Přes Šumavu na kole' })]))
+    const user = userEvent.setup()
+    renderWithProviders(withPalette(<div />))
+    await user.keyboard('{Control>}k{/Control}')
+    await user.type(await screen.findByPlaceholderText('Search or jump to…'), 'šumavu')
+    await user.click(await screen.findByRole('option', { name: /Přes Šumavu na kole/ }))
+    expect(screen.getByTestId('location')).toHaveTextContent('/content/e9')
+    expect(contentApi.listEntries).toHaveBeenCalledWith(expect.objectContaining({ search: 'šumavu', limit: 8 }))
+  })
+
+  it('ignores key events without a key (autofill)', () => {
+    renderWithProviders(withPalette(<div />))
+    const errors: unknown[] = []
+    const onError = (e: ErrorEvent) => {
+      errors.push(e.error)
+      e.preventDefault()
+    }
+    window.addEventListener('error', onError)
+    window.dispatchEvent(new Event('keydown'))
+    window.removeEventListener('error', onError)
+    expect(errors).toEqual([])
   })
 })
 
