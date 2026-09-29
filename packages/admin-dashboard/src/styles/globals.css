@@ -3,6 +3,7 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/newsreader";
 @import "./tokens.css";
+@import "./prose.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
