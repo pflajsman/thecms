@@ -1,12 +1,12 @@
 import { BrowserRouter, Navigate, useRoutes, type RouteObject } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material'
 import { MsalProvider } from '@azure/msal-react'
 import { PublicClientApplication, EventType } from '@azure/msal-browser'
 import { AuthProvider } from './contexts/AuthContext'
 import { msalConfig, isEntraConfigured } from './config/msalConfig'
 import { setMsalInstance } from './lib/api'
 import { ThemeProvider } from './app/theme/ThemeProvider'
+import { LegacyMuiTheme } from './app/theme/LegacyMuiTheme'
 import { AppShell } from './app/shell/AppShell'
 import { Toaster } from './components/ui/sonner'
 import { collectRoutes } from './modules/nav'
@@ -19,15 +19,6 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
     },
   },
-})
-
-// Legacy MUI pages only. Removed in Plan 5 together with MUI.
-const legacyMuiTheme = createTheme({
-  palette: {
-    primary: { main: '#1f6f5c' },
-    background: { default: 'transparent', paper: '#ffffff' },
-  },
-  shape: { borderRadius: 10 },
 })
 
 // Initialize MSAL instance only when Entra is configured
@@ -62,14 +53,14 @@ function AppContent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <MuiThemeProvider theme={legacyMuiTheme}>
+        <LegacyMuiTheme>
           <AuthProvider>
             <BrowserRouter>
               <AppRoutes />
             </BrowserRouter>
             <Toaster position="bottom-right" />
           </AuthProvider>
-        </MuiThemeProvider>
+        </LegacyMuiTheme>
       </ThemeProvider>
     </QueryClientProvider>
   )
