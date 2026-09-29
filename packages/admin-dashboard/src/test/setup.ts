@@ -31,3 +31,7 @@ Element.prototype.scrollIntoView ??= function scrollIntoView() {}
 Element.prototype.hasPointerCapture ??= () => false
 Element.prototype.setPointerCapture ??= () => {}
 Element.prototype.releasePointerCapture ??= () => {}
+// ProseMirror measures ranges when it scrolls the selection into view; jsdom has no layout.
+const emptyRects = () => ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] }) as unknown as DOMRectList
+Range.prototype.getClientRects ??= emptyRects
+Range.prototype.getBoundingClientRect ??= () => new DOMRect()
