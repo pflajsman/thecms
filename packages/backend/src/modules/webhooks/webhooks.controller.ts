@@ -22,7 +22,8 @@ export class WebhooksController {
 
       res.status(201).json({
         success: true,
-        data: webhook,
+        // The only time the full signing secret is returned; later responses show secretPreview.
+        data: { ...webhook.toJSON(), secret: webhook.secret },
       });
     } catch (error) {
       next(error);
