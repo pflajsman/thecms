@@ -31,3 +31,34 @@ it('refuses a javascript: link', async () => {
   expect(screen.getByText('Use a web address (https://…), an email (mailto:…) or a page path (/about)')).toBeInTheDocument()
   expect(document.querySelector('.ProseMirror a')).toBeNull()
 })
+
+it('inserts an image by URL without submitting a surrounding form', async () => {
+  const onSubmit = vi.fn((e: { preventDefault: () => void }) => e.preventDefault())
+  renderWithProviders(
+    <form onSubmit={onSubmit}>
+      <RichTextEditor value="<p>Hi</p>" onChange={() => {}} />
+    </form>,
+  )
+  await userEvent.click(await screen.findByRole('button', { name: 'Insert image' }))
+  await userEvent.click(await screen.findByRole('menuitem', { name: 'By URL' }))
+  const input = await screen.findByLabelText('Image URL')
+  await userEvent.type(input, 'javascript:alert(1){Enter}')
+  expect(await screen.findByText('Enter an image address starting with https://')).toBeInTheDocument()
+  await userEvent.clear(input)
+  await userEvent.type(input, 'https://example.com/a.jpg{Enter}')
+  await waitFor(() => expect(document.querySelector('.ProseMirror img')).toHaveAttribute('src', 'https://example.com/a.jpg'))
+  expect(onSubmit).not.toHaveBeenCalled()
+})
+
+it('applies a link without submitting a surrounding form', async () => {
+  const onSubmit = vi.fn((e: { preventDefault: () => void }) => e.preventDefault())
+  renderWithProviders(
+    <form onSubmit={onSubmit}>
+      <RichTextEditor value="<p>Hi</p>" onChange={() => {}} />
+    </form>,
+  )
+  await userEvent.click(await screen.findByRole('button', { name: 'Link' }))
+  await userEvent.type(await screen.findByLabelText('Link URL'), 'https://example.com{Enter}')
+  await waitFor(() => expect(screen.queryByLabelText('Link URL')).not.toBeInTheDocument())
+  expect(onSubmit).not.toHaveBeenCalled()
+})

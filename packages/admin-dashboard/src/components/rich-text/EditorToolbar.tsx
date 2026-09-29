@@ -212,6 +212,8 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
             className="space-y-2"
             onSubmit={(e) => {
               e.preventDefault()
+              // The popover is portaled, but React still bubbles submit to the entry form around the editor.
+              e.stopPropagation()
               applyLink()
             }}
           >
@@ -277,13 +279,8 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
         </>
       )}
       {urlImageOpen && (
-        <form
-          className="flex w-full flex-wrap items-center gap-1 pt-1"
-          onSubmit={(e) => {
-            e.preventDefault()
-            applyImageUrl()
-          }}
-        >
+        // Not a <form>: the editor usually sits inside the entry form, and nested forms submit the outer one.
+        <div className="flex w-full flex-wrap items-center gap-1 pt-1">
           <label className="sr-only" htmlFor="rte-image-url">
             Image URL
           </label>
@@ -292,18 +289,26 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
             autoFocus
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                applyImageUrl()
+              } else if (e.key === 'Escape') {
+                setUrlImageOpen(false)
+              }
+            }}
             placeholder="https://…"
             className="h-8 min-w-0 flex-1"
             aria-invalid={imageError ? true : undefined}
           />
-          <Button type="submit" size="sm">
+          <Button type="button" size="sm" onClick={applyImageUrl}>
             Insert
           </Button>
           <Button type="button" size="sm" variant="ghost" onClick={() => setUrlImageOpen(false)}>
             Cancel
           </Button>
           {imageError && <p className="w-full text-xs text-destructive">Enter an image address starting with https://</p>}
-        </form>
+        </div>
       )}
     </div>
   )
