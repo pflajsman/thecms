@@ -13,8 +13,9 @@ import {
 import type { AppModule, CreateAction } from './types'
 import { useUnreadCount } from '@/lib/queries/stats'
 import { Dashboard } from '@/pages/Dashboard'
-import { ContentEntriesList } from '@/pages/ContentEntries/ContentEntriesList'
-import { ContentEntryForm } from '@/pages/ContentEntries/ContentEntryForm'
+import { ContentListPage } from '@/features/content/pages/ContentListPage'
+import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
+import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
 import { MediaLibrary } from '@/pages/Media/MediaLibrary'
 import { ContentTypesList } from '@/pages/ContentTypes/ContentTypesList'
 import { ContentTypeForm } from '@/pages/ContentTypes/ContentTypeForm'
@@ -45,10 +46,11 @@ export const modules: AppModule[] = [
     matches: ['/entries'],
     mobileTab: true,
     routes: [
-      { path: 'content', element: <ContentEntriesList /> },
-      { path: 'entries', element: <ContentEntriesList /> },
-      { path: 'entries/new', element: <ContentEntryForm /> },
-      { path: 'entries/:id/edit', element: <ContentEntryForm /> },
+      { path: 'content', element: <ContentListPage /> },
+      { path: 'content/:id', element: <EntryEditorPage /> },
+      { path: 'entries', element: <LegacyEntriesRedirect /> },
+      { path: 'entries/new', element: <LegacyNewEntryRedirect /> },
+      { path: 'entries/:id/edit', element: <LegacyEditEntryRedirect /> },
     ],
   },
   {
@@ -122,6 +124,6 @@ export const modules: AppModule[] = [
 ]
 
 export const createActions: CreateAction[] = [
-  { id: 'new-entry', label: 'New entry', to: '/content', icon: Plus },
+  { id: 'new-entry', label: 'New entry', to: '/content/new', icon: Plus },
   { id: 'upload-media', label: 'Upload media', to: '/media', icon: Upload },
 ]
