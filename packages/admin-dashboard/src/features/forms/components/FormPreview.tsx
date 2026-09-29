@@ -1,0 +1,53 @@
+import type { FormFieldDefinition } from '@/types'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+
+export function FormPreview({ name, fields }: { name: string; fields: FormFieldDefinition[] }) {
+  return (
+    <section aria-label="Preview" className="rounded-xl border bg-card p-4">
+      <h2 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Preview</h2>
+      <p className="mb-4 font-serif text-xl font-semibold">{name || 'Untitled form'}</p>
+      <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
+        {fields.map((f, i) => {
+          const id = `preview-${i}`
+          const label = (
+            <Label htmlFor={id}>
+              {f.label || 'Untitled field'}
+              {f.required && <span aria-hidden className="text-destructive"> *</span>}
+            </Label>
+          )
+          if (f.type === 'CHECKBOX') {
+            return (
+              <div key={id} className="flex items-center gap-2">
+                <input id={id} type="checkbox" className="size-4 accent-[var(--primary)]" />
+                {label}
+              </div>
+            )
+          }
+          return (
+            <div key={id} className="space-y-1.5">
+              {label}
+              {f.type === 'TEXTAREA' ? (
+                <Textarea id={id} rows={3} placeholder={f.placeholder} />
+              ) : f.type === 'SELECT' ? (
+                <select id={id} className="h-9 w-full rounded-md border bg-background px-3 text-sm">
+                  <option value="">Choose…</option>
+                  {(f.options ?? []).filter((o) => o.trim()).map((o) => (
+                    <option key={o}>{o}</option>
+                  ))}
+                </select>
+              ) : (
+                <Input id={id} type={f.type === 'EMAIL' ? 'email' : f.type === 'NUMBER' ? 'number' : f.type === 'DATE' ? 'date' : 'text'} placeholder={f.placeholder} />
+              )}
+            </div>
+          )
+        })}
+        <Button type="submit" className="self-start" disabled>
+          Send
+        </Button>
+      </form>
+    </section>
+  )
+}

@@ -15,14 +15,14 @@ import type { AppModule, CreateAction } from './types'
 import { ModelsListPage } from '@/features/models/pages/ModelsListPage'
 import { ModelBuilderPage } from '@/features/models/pages/ModelBuilderPage'
 import { RedirectWithId } from '@/features/legacy-redirects'
+import { FormsListPage } from '@/features/forms/pages/FormsListPage'
+import { FormBuilderPage } from '@/features/forms/pages/FormBuilderPage'
 import { useUnreadCount } from '@/lib/queries/stats'
 import { HomePage } from '@/features/home/pages/HomePage'
 import { ContentListPage } from '@/features/content/pages/ContentListPage'
 import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
 import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
 import { MediaLibraryPage } from '@/features/media/pages/MediaLibraryPage'
-import { ContactFormsList } from '@/pages/ContactForms/ContactFormsList'
-import { ContactFormForm } from '@/pages/ContactForms/ContactFormForm'
 import { SubmissionsList } from '@/pages/ContactForms/SubmissionsList'
 import { SitesList } from '@/pages/Sites/SitesList'
 import { SiteForm } from '@/pages/Sites/SiteForm'
@@ -97,10 +97,11 @@ export const modules: AppModule[] = [
     path: '/forms',
     matches: ['/contact-forms'],
     routes: [
-      { path: 'forms', element: <ContactFormsList /> },
-      { path: 'contact-forms', element: <ContactFormsList /> },
-      { path: 'contact-forms/new', element: <ContactFormForm /> },
-      { path: 'contact-forms/:id/edit', element: <ContactFormForm /> },
+      { path: 'forms', element: <FormsListPage /> },
+      { path: 'forms/:id', element: <FormBuilderPage /> },
+      { path: 'contact-forms', element: <Navigate to="/forms" replace /> },
+      { path: 'contact-forms/new', element: <Navigate to="/forms/new" replace /> },
+      { path: 'contact-forms/:id/edit', element: <RedirectWithId to={(id) => `/forms/${id}`} /> },
       { path: 'contact-forms/:formId/submissions', element: <SubmissionsList /> },
     ],
   },
