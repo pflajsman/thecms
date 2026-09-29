@@ -12,6 +12,10 @@ export interface ValidationRules {
   multiple?: boolean;
   allowedMimeTypes?: string[];
   maxFileSize?: number;
+  integer?: boolean;
+  minDate?: string;
+  maxDate?: string;
+  targetContentType?: string;
 }
 
 export interface Field {
@@ -35,19 +39,32 @@ export interface ContentType {
   updatedAt: string;
 }
 
+export type EntryStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+
+export interface EntryContentTypeRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface ContentEntry {
   id: string;
   contentTypeId: string;
   contentType?: ContentType;
   data: Record<string, any>;
   title?: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  status: EntryStatus;
   publishedAt?: string;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
   updatedBy?: string;
 }
+
+export type EntryListItem = Omit<ContentEntry, 'contentType'> & {
+  title: string;
+  contentType: EntryContentTypeRef | null;
+};
 
 export interface MediaFile {
   id: string;
@@ -153,7 +170,7 @@ export interface SubmissionStats {
 }
 
 export interface DashboardStats {
-  entries: { total: number; draft: number; published: number; archived: number };
+  entries: { total: number; draft: number; published: number; archived: number; byType: Record<string, number> };
   contentTypes: number;
   media: number;
   sites: number;

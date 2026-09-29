@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, useRoutes, type RouteObject } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MsalProvider } from '@azure/msal-react'
 import { PublicClientApplication, EventType } from '@azure/msal-browser'
@@ -7,10 +7,8 @@ import { msalConfig, isEntraConfigured } from './config/msalConfig'
 import { setMsalInstance } from './lib/api'
 import { ThemeProvider } from './app/theme/ThemeProvider'
 import { LegacyMuiTheme } from './app/theme/LegacyMuiTheme'
-import { AppShell } from './app/shell/AppShell'
 import { Toaster } from './components/ui/sonner'
-import { collectRoutes } from './modules/nav'
-import { modules } from './modules/registry'
+import { routes } from './app/routes'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,16 +36,7 @@ if (isEntraConfigured()) {
   setMsalInstance(msalInstance)
 }
 
-const routes: RouteObject[] = [
-  {
-    element: <AppShell />,
-    children: [...collectRoutes(modules), { path: '*', element: <Navigate to="/" replace /> }],
-  },
-]
-
-function AppRoutes() {
-  return useRoutes(routes)
-}
+const router = createBrowserRouter(routes)
 
 function AppContent() {
   return (
@@ -55,9 +44,7 @@ function AppContent() {
       <ThemeProvider>
         <LegacyMuiTheme>
           <AuthProvider>
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
+            <RouterProvider router={router} />
             <Toaster position="bottom-right" />
           </AuthProvider>
         </LegacyMuiTheme>
