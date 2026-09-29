@@ -246,3 +246,29 @@ curl http://localhost:3000/health
 # Stop services
 docker-compose down
 ```
+
+## Admin redesign Plan 1 verification (2026-09-29)
+
+Environment: local mongod 6.0.14 and Azurite (Docker not available), backend and admin dashboard dev servers, seeded with 2 content types, 4 entries, 1 site, 1 form, 2 submissions.
+
+| Check | Result |
+|---|---|
+| Backend unit and route tests (38) | Pass |
+| Admin dashboard tests (37) | Pass |
+| Backend, admin and example site production builds | Pass |
+| `pnpm@9 install --frozen-lockfile` on a clean checkout (CI setup) | Pass |
+| `GET /api/v1/entries` sort by title, pagination, `contentType` info | Pass |
+| `GET /api/v1/entries?search=šumavu` (case-insensitive, diacritics) | Pass |
+| `GET /api/v1/stats` counts, including 2 unread submissions | Pass |
+| `backfill:titles` script runs (0 updates, entries already had titles) | Pass |
+| Desktop 1280px: Workspace and Setup groups, every item opens a page | Pass |
+| Legacy MUI pages render inside the new shell | Pass |
+| `/content-types/new` highlights only "Content models" | Pass |
+| Medium 900px: sidebar collapses to icons, badge stays inside the rail | Pass (after fix 336a1d6) |
+| Phone 360px (iframe): no horizontal scroll on Home, Content, Media, Inbox, Models, Forms, Sites, Webhooks; bottom tabs with Create button | Pass |
+| ⌘K palette: "forms" + Enter goes to `/forms` | Pass |
+| Light and dark themes; stored preference survives reload | Pass |
+| Inbox badge shows unread count | Pass |
+| Example site: trips list, contact form fields, empty posts state | Pass |
+| Example site: trip map with GPX | Not checked (no GPX media in seed data) |
+| `docker compose up` | Not checked (Docker not installed) |
