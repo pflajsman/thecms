@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FileText, SearchX } from 'lucide-react'
-import type { EntryListItem } from '@/types'
+import type { EntryListItem, MediaFile } from '@/types'
 import { PageHeader } from '@/components/common/PageHeader'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ErrorState } from '@/components/common/ErrorState'
@@ -21,6 +21,10 @@ import { ContentFilters } from '../components/ContentFilters'
 import { NewEntryButton } from '../components/NewEntryButton'
 import { EntryRowMenu } from '../components/EntryRowMenu'
 import { TypeChooser } from '../components/TypeChooser'
+import { useMediaByIds } from '@/features/media/queries'
+import { MediaThumb } from '@/features/media/components/MediaTile'
+import { isImage } from '@/features/media/media-utils'
+import { coverMediaId } from '../cover'
 
 export function ContentListPage() {
   const navigate = useNavigate()
@@ -30,6 +34,15 @@ export function ContentListPage() {
   const list = useEntryList(toEntryQuery(params))
   const types = useMemo(() => typesQuery.data ?? [], [typesQuery.data])
   const typeById = useMemo(() => new Map(types.map((t) => [t.id, t])), [types])
+  const coverIds = useMemo(
+    () => (list.data?.data ?? []).map((e) => coverMediaId(e, e.contentType ? typeById.get(e.contentType.id) : undefined)).filter((id): id is string => !!id),
+    [list.data, typeById],
+  )
+  const covers = useMediaByIds(coverIds)
+  const coverFor = (e: EntryListItem) => {
+    const id = coverMediaId(e, e.contentType ? typeById.get(e.contentType.id) : undefined)
+    return id ? covers.byId.get(id) : undefined
+  }
   const filtersActive = !!(params.type || params.status || params.q)
 
   useHotkey('n', () => navigate(params.type ? `/content/new?type=${params.type}` : '/content/new'))
@@ -44,7 +57,7 @@ export function ContentListPage() {
   }, [rows, pagination, params.page, update])
 
   const columns: DataColumn<EntryListItem>[] = [
-    { id: 'title', header: 'Title', cell: (e) => <TitleLink entry={e} /> },
+    { id: 'title', header: 'Title', cell: (e) => <span className="flex items-center gap-3"><TypeBadge entry={e} cover={coverFor(e)} /><TitleLink entry={e} /></span> },
     { id: 'type', header: 'Model', cell: (e) => <TypeLabel entry={e} />, className: 'w-40' },
     { id: 'edited', header: 'Edited', cell: (e) => <Edited date={e.updatedAt} />, className: 'w-32 whitespace-nowrap' },
     { id: 'status', header: 'Status', cell: (e) => <StatusPill status={e.status} />, className: 'w-28' },
@@ -85,7 +98,7 @@ export function ContentListPage() {
           rowKey={(e) => e.id}
           mobileRow={(e) => (
             <div className="flex items-start gap-3">
-              <TypeBadge entry={e} />
+              <TypeBadge entry={e} cover={coverFor(e)} />
               <div className="min-w-0 flex-1">
                 <TitleLink entry={e} />
                 <p className="mt-0.5 text-xs text-muted-foreground">
@@ -125,14 +138,18 @@ function TitleLink({ entry }: { entry: EntryListItem }) {
 
 function TypeLabel({ entry }: { entry: EntryListItem }) {
   return (
-    <span className="flex items-center gap-2 text-muted-foreground">
-      <TypeBadge entry={entry} />
-      {entry.contentType?.name ?? 'Deleted model'}
-    </span>
+    <span className="text-muted-foreground">{entry.contentType?.name ?? 'Deleted model'}</span>
   )
 }
 
-function TypeBadge({ entry }: { entry: EntryListItem }) {
+function TypeBadge({ entry, cover }: { entry: EntryListItem; cover?: MediaFile }) {
+  if (cover && isImage(cover)) {
+    return (
+      <span className="size-8 shrink-0 overflow-hidden rounded-md border">
+        <MediaThumb media={cover} size="thumbnail" />
+      </span>
+    )
+  }
   return (
     <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-md bg-secondary font-serif text-sm font-semibold text-secondary-foreground">
       {(entry.contentType?.name ?? '?').charAt(0).toUpperCase()}

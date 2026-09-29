@@ -4,6 +4,8 @@ import { renderRoutes } from '@/test/render'
 import * as api from '../content-api'
 import { ContentListPage } from './ContentListPage'
 import { makeListItem, page, postType, tripType } from '../test-fixtures'
+import { makeMedia, mediaPage } from '@/features/media/test-fixtures'
+import * as mediaApi from '@/features/media/media-api'
 
 vi.mock('../content-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../content-api')>()
@@ -15,6 +17,10 @@ vi.mock('../content-api', async (importOriginal) => {
     archiveEntry: vi.fn(),
     deleteEntry: vi.fn(),
   }
+})
+vi.mock('@/features/media/media-api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/media/media-api')>()
+  return { ...actual, listMedia: vi.fn() }
 })
 vi.mock('@/lib/queries/stats', () => ({
   statsKeys: { all: ['stats'] },
@@ -33,6 +39,17 @@ beforeEach(() => {
 })
 
 describe('ContentListPage', () => {
+  it('shows the cover image as a thumbnail', async () => {
+    const coverType = { ...tripType, fields: [...tripType.fields, { name: 'cover', label: 'Cover', type: 'MEDIA' as const, required: false }] }
+    vi.mocked(api.listContentTypes).mockResolvedValue([coverType, postType])
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem({ data: { title: 'Přes Šumavu', cover: 'm1' } })]))
+    vi.mocked(mediaApi.listMedia).mockResolvedValue(mediaPage([makeMedia({ id: 'm1' })]))
+    renderRoutes(routes, { route: '/content' })
+    const table = await screen.findByRole('table', { name: 'Entries' })
+    await waitFor(() => expect(table.querySelector('img')).toHaveAttribute('src', 'http://blob/media/a1b2-sumava-thumbnail.jpg'))
+    expect(mediaApi.listMedia).toHaveBeenCalledWith({ ids: ['m1'], limit: 100 })
+  })
+
   it('lists entries across types with titles, type, status and pager', async () => {
     vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem(), makeListItem({ id: 'e2', title: 'Jak jsem stavěl CMS', status: 'PUBLISHED', contentType: { id: postType.id, name: 'Blog post', slug: 'blog-post' } })], 23))
     renderRoutes(routes, { route: '/content' })
