@@ -2,7 +2,8 @@ import type { FieldControlProps } from './field-aria'
 import { BooleanField, NumberField, TextField } from './BasicFields'
 import { DateField } from './DateField'
 import { RelationField } from './RelationField'
-import { MediaField, RichTextField } from './LegacyFields'
+import { RichTextField } from './LegacyFields'
+import { MediaField } from './MediaField'
 
 export function FieldControl(props: FieldControlProps) {
   switch (props.field.type) {

@@ -26,7 +26,7 @@ vi.mock('@/components/RichTextEditor', () => ({
     <textarea aria-label="Body editor" defaultValue={value} onChange={(e) => onChange(e.target.value)} />
   ),
 }))
-vi.mock('@/components/MediaPicker', () => ({ MediaPicker: () => <div>media picker</div> }))
+vi.mock('@/features/content/editor/fields/MediaField', () => ({ MediaField: () => <div>media field</div> }))
 
 const articleType: ContentType = {
   ...tripType,

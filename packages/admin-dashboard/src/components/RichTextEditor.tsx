@@ -41,7 +41,7 @@ import {
   FormatIndentDecrease,
   FormatIndentIncrease,
 } from '@mui/icons-material';
-import { MediaPickerDialog } from './MediaPickerDialog';
+import { MediaPickerDialog } from '@/features/media/components/MediaPickerDialog';
 import { ResizableImage } from './ResizableImage';
 import { FontSize } from './FontSize';
 import type { MediaFile } from '../types';
@@ -107,8 +107,8 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     }
   };
 
-  const handleGallerySelect = (media: MediaFile | MediaFile[]) => {
-    const file = Array.isArray(media) ? media[0] : media;
+  const handleGallerySelect = (media: MediaFile[]) => {
+    const file = media[0];
     if (file) {
       editor
         .chain()
@@ -395,9 +395,9 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
 
       <MediaPickerDialog
         open={galleryOpen}
-        onClose={() => setGalleryOpen(false)}
+        onOpenChange={setGalleryOpen}
         onSelect={handleGallerySelect}
-        allowedMimeTypes={['image/*']}
+        accept={['image/*']}
       />
 
       {/* Editor */}

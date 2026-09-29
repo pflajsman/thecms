@@ -20,7 +20,7 @@ vi.mock('../content-api', async (importOriginal) => {
   }
 })
 vi.mock('@/components/RichTextEditor', () => ({ RichTextEditor: () => <textarea aria-label="rich text" /> }))
-vi.mock('@/components/MediaPicker', () => ({ MediaPicker: () => <div>media picker</div> }))
+vi.mock('@/features/content/editor/fields/MediaField', () => ({ MediaField: () => <div>media field</div> }))
 
 const routes = [
   { path: '/content/:id', element: <><EntryEditorPage /><Link to="/elsewhere">elsewhere</Link></> },
