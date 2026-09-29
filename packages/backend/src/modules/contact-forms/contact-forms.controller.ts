@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ContactFormsService } from './contact-forms.service';
+import { z } from 'zod';
+import { SubmissionStatus } from '../../models/form-submission.model';
 
 /**
  * Contact Forms Controller
@@ -255,6 +257,30 @@ export class ContactFormsController {
         success: true,
         data: stats,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * List submissions across all forms
+   * GET /api/v1/submissions
+   */
+  async listAllSubmissions(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const querySchema = z.object({
+      formId: z.string().regex(/^[a-f0-9]{24}$/i, 'Invalid form ID').optional(),
+      status: z.nativeEnum(SubmissionStatus).optional(),
+      page: z.coerce.number().int().min(1).default(1),
+      limit: z.coerce.number().int().min(1).max(100).default(20),
+    });
+    try {
+      const parsed = querySchema.safeParse(req.query);
+      if (!parsed.success) {
+        res.status(400).json({ success: false, error: 'Validation error', details: parsed.error.errors });
+        return;
+      }
+      const result = await ContactFormsService.listAllSubmissions(parsed.data);
+      res.status(200).json({ success: true, data: result.submissions, pagination: result.pagination });
     } catch (error) {
       next(error);
     }

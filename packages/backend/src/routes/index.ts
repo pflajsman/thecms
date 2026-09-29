@@ -8,6 +8,7 @@ import publicRoutes from '../modules/public/public.routes';
 import webhooksRoutes from '../modules/webhooks/webhooks.routes';
 import contactFormsRoutes from '../modules/contact-forms/contact-forms.routes';
 import statsRoutes from '../modules/stats/stats.routes';
+import submissionsRoutes from '../modules/contact-forms/submissions.routes';
 
 const router: IRouter = Router();
 
@@ -21,5 +22,6 @@ router.use('/public', publicRoutes);
 router.use('/webhooks', webhooksRoutes);
 router.use('/contact-forms', contactFormsRoutes);
 router.use('/stats', statsRoutes);
+router.use('/submissions', submissionsRoutes);
 
 export { router as apiRoutes };

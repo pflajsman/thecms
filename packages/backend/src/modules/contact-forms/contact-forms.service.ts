@@ -217,6 +217,51 @@ export class ContactFormsService {
   }
 
   /**
+   * List submissions across all forms (admin Inbox)
+   */
+  static async listAllSubmissions(options: {
+    formId?: string;
+    status?: SubmissionStatus;
+    page?: number;
+    limit?: number;
+  }) {
+    const { formId, status, page = 1, limit = 20 } = options;
+    const query: any = {};
+    if (formId) query.formId = formId;
+    if (status) query.status = status;
+
+    const [submissions, total] = await Promise.all([
+      FormSubmissionModel.find(query).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * limit).limit(limit).exec(),
+      FormSubmissionModel.countDocuments(query),
+    ]);
+
+    const formIds = [...new Set(submissions.map((s) => String(s.formId)))];
+    const forms = await ContactFormModel.find({ _id: { $in: formIds } }).select('name slug fields').lean();
+    const formMap = new Map(
+      forms.map((f) => [
+        String(f._id),
+        {
+          id: String(f._id),
+          name: f.name,
+          slug: f.slug,
+          fields: f.fields.map((field) => ({ name: field.name, label: field.label, type: field.type })),
+        },
+      ])
+    );
+
+    return {
+      // toJSON() is typed loosely by Mongoose; the JSON shape is the submission document.
+      submissions: submissions.map(
+        (s): Record<string, any> & { form: typeof formMap extends Map<string, infer F> ? F | null : never } => ({
+          ...(s.toJSON() as Record<string, any>),
+          form: formMap.get(String(s.formId)) ?? null,
+        })
+      ),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  /**
    * Get a single submission
    */
   static async getSubmissionById(submissionId: string): Promise<IFormSubmission | null> {
