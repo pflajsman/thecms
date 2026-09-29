@@ -147,7 +147,7 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <section>
           <h2 className="mb-2 font-serif text-lg font-semibold">Fields</h2>
           {visible.fields && <p className="mb-2 text-sm text-destructive">{visible.fields}</p>}

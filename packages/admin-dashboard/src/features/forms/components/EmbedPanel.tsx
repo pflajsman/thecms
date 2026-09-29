@@ -16,7 +16,7 @@ export function EmbedPanel({ slug, fields, apiKey }: { slug: string; fields: For
     <section className="rounded-xl border bg-card p-4">
       <h2 className="mb-1 font-serif text-lg font-semibold">Embed</h2>
       <p className="mb-2 text-sm text-muted-foreground">
-        Your site can load this form from <code className="font-mono text-xs">{publicApiBase()}/forms/{slug || 'your-form'}</code> and send answers like this:
+        Your site can load this form from <code className="font-mono text-xs break-all">{publicApiBase()}/forms/{slug || 'your-form'}</code> and send answers like this:
       </p>
       <div className="rounded-lg border bg-muted/60">
         <div className="flex items-center justify-end border-b px-2 py-1">

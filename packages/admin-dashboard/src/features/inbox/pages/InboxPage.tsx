@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Inbox, MailCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -10,7 +10,7 @@ import { ErrorState } from '@/components/common/ErrorState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useForms } from '@/features/forms/forms-api'
-import type { InboxView } from '../inbox-api'
+import type { InboxItem, InboxView } from '../inbox-api'
 import { useInbox, useSubmissionWrites } from '../inbox-queries'
 import { preview, senderName, viewStatus } from '../inbox-utils'
 import { MessageView } from '../components/MessageView'
@@ -32,7 +32,12 @@ export function InboxPage() {
   const inbox = useInbox({ status: viewStatus(view), formId, limit: 30 })
   const writes = useSubmissionWrites()
   const items = inbox.data?.data ?? []
-  const selected = items.find((i) => i.id === submissionId)
+  // Keep the open message on screen when it leaves the current view (for example once it is marked read).
+  const found = items.find((i) => i.id === submissionId)
+  // `source` is the list copy last adopted; only a newer copy from the server replaces the held one.
+  const [held, setHeld] = useState<{ source?: InboxItem; item?: InboxItem }>({})
+  if (found && found !== held.source) setHeld({ source: found, item: found })
+  const selected = found && found !== held.source ? found : held.item && held.item.id === submissionId ? held.item : undefined
   const query = sp.toString() ? `?${sp.toString()}` : ''
 
   // Opening an unread message marks it read, once per message.
@@ -40,7 +45,10 @@ export function InboxPage() {
   useEffect(() => {
     if (selected && selected.status === 'UNREAD' && !marked.current.has(selected.id)) {
       marked.current.add(selected.id)
-      void writes.setStatus(selected, 'READ')
+      const id = selected.id
+      void writes.setStatus(selected, 'READ').then(() =>
+        setHeld((h) => (h.item && h.item.id === id ? { ...h, item: { ...h.item, status: 'READ' } } : h)),
+      )
     }
   }, [selected, writes])
 

@@ -48,6 +48,25 @@ describe('InboxPage', () => {
     expect(apiClient.patch).toHaveBeenCalledWith('/contact-forms/f1/submissions/s1', { status: 'READ' })
   })
 
+  it('keeps an opened unread message on screen after it is marked read', async () => {
+    vi.mocked(apiClient.patch).mockImplementation(async (url: string, body?: unknown) => {
+      const id = url.split('/').pop()
+      const target = items.find((i) => i.id === id)
+      if (target) target.status = (body as { status: InboxItem['status'] }).status
+      return { data: { success: true } }
+    })
+    try {
+      renderRoutes(routes, { route: '/inbox/s1' })
+      expect(await screen.findByRole('article', { name: /jana@x\.test/ })).toBeInTheDocument()
+      await waitFor(() => expect(apiClient.patch).toHaveBeenCalled())
+      await new Promise((r) => setTimeout(r, 50))
+      expect(screen.getByRole('article', { name: /jana@x\.test/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Mark unread' })).toBeInTheDocument()
+    } finally {
+      items[0].status = 'UNREAD'
+    }
+  })
+
   it('offers no Reply link without an email and archives', async () => {
     renderRoutes(routes, { route: '/inbox/s2?view=all' })
     const message = await screen.findByRole('article', { name: /Anonymous/ })
