@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import type { AppModule, CreateAction } from './types'
 import { useUnreadCount } from '@/lib/queries/stats'
-import { Dashboard } from '@/pages/Dashboard'
+import { HomePage } from '@/features/home/pages/HomePage'
 import { ContentListPage } from '@/features/content/pages/ContentListPage'
 import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
 import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
@@ -35,7 +35,7 @@ export const modules: AppModule[] = [
     group: 'workspace',
     path: '/',
     mobileTab: true,
-    routes: [{ index: true, element: <Dashboard /> }],
+    routes: [{ index: true, element: <HomePage /> }],
   },
   {
     id: 'content',
