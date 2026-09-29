@@ -1,12 +1,11 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MsalProvider } from '@azure/msal-react'
-import { PublicClientApplication, EventType } from '@azure/msal-browser'
+import { PublicClientApplication, EventType, type AuthenticationResult } from '@azure/msal-browser'
 import { AuthProvider } from './contexts/AuthContext'
 import { msalConfig, isEntraConfigured } from './config/msalConfig'
 import { setMsalInstance } from './lib/api'
 import { ThemeProvider } from './app/theme/ThemeProvider'
-import { LegacyMuiTheme } from './app/theme/LegacyMuiTheme'
 import { Toaster } from './components/ui/sonner'
 import { routes } from './app/routes'
 
@@ -27,7 +26,7 @@ if (isEntraConfigured()) {
   // Set the active account after login
   msalInstance.addEventCallback((event) => {
     if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
-      const payload = event.payload as { account: any }
+      const payload = event.payload as AuthenticationResult
       msalInstance!.setActiveAccount(payload.account)
     }
   })
@@ -42,12 +41,10 @@ function AppContent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <LegacyMuiTheme>
-          <AuthProvider>
-            <RouterProvider router={router} />
-            <Toaster position="bottom-right" />
-          </AuthProvider>
-        </LegacyMuiTheme>
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster position="bottom-right" />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

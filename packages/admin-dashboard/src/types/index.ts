@@ -25,6 +25,8 @@ export interface Field {
   description?: string;
   required?: boolean;
   validation?: ValidationRules;
+  // Free-form JSON chosen by content editors; narrowed where it is read.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any;
 }
 
@@ -51,6 +53,8 @@ export interface ContentEntry {
   id: string;
   contentTypeId: string;
   contentType?: ContentType;
+  // Free-form JSON chosen by content editors; narrowed where it is read.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;
   title?: string;
   status: EntryStatus;
@@ -108,7 +112,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data: T;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 // Contact Forms
@@ -152,6 +156,8 @@ export type SubmissionStatus = 'UNREAD' | 'READ' | 'ARCHIVED';
 export interface FormSubmission {
   id: string;
   formId: string;
+  // Free-form JSON chosen by content editors; narrowed where it is read.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;
   status: SubmissionStatus;
   submitterIp?: string;
