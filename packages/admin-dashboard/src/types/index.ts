@@ -30,6 +30,7 @@ export interface ContentType {
   slug: string;
   description?: string;
   fields: Field[];
+  titleField?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,6 +40,7 @@ export interface ContentEntry {
   contentTypeId: string;
   contentType?: ContentType;
   data: Record<string, any>;
+  title?: string;
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   publishedAt?: string;
   createdAt: string;
@@ -148,4 +150,12 @@ export interface SubmissionStats {
   unread: number;
   read: number;
   archived: number;
+}
+
+export interface DashboardStats {
+  entries: { total: number; draft: number; published: number; archived: number };
+  contentTypes: number;
+  media: number;
+  sites: number;
+  submissions: { unread: number };
 }
