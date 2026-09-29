@@ -65,7 +65,7 @@ function NavItem({ module, active }: { module: AppModule; active: boolean }) {
       aria-current={active ? 'page' : undefined}
       title={module.label}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors',
+        'relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors',
         active ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground',
       )}
     >
@@ -80,7 +80,7 @@ function NavBadge({ useCount }: { useCount: () => number | undefined }) {
   const count = useCount()
   if (!count) return null
   return (
-    <span className="rounded-full bg-status-unread-fg px-1.5 text-[10px] font-semibold leading-4 text-background">
+    <span className="absolute top-0.5 right-0.5 rounded-full bg-status-unread-fg px-1 text-[10px] font-semibold leading-4 text-background lg:static lg:px-1.5">
       {count > 99 ? '99+' : count}
     </span>
   )
