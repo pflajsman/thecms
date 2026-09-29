@@ -267,6 +267,22 @@ router.get('/', (req, res, next) => mediaController.listMedia(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+/**
+ * @swagger
+ * /media/{id}/usage:
+ *   get:
+ *     summary: Entries that reference this media item
+ *     tags: [Media]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: string } }
+ *     responses:
+ *       200: { description: List of referencing entries }
+ *       400: { description: Invalid media ID }
+ *       404: { description: Media file not found }
+ */
+router.get('/:id/usage', (req, res, next) => mediaController.getMediaUsage(req, res, next));
 router.get('/:id', (req, res, next) => mediaController.getMedia(req, res, next));
 router.patch('/:id', (req, res, next) => mediaController.updateMedia(req, res, next));
 router.delete('/:id', (req, res, next) => mediaController.deleteMedia(req, res, next));

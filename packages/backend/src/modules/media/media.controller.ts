@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { MediaService } from './media.service';
+import { findMediaUsage } from './media-usage.service';
 import {
   listMediaSchema,
   getMediaSchema,
@@ -14,6 +15,27 @@ import { z } from 'zod';
  * Handles HTTP requests for media management
  */
 export class MediaController {
+  /**
+   * Entries that reference a media item
+   * GET /api/v1/media/:id/usage
+   */
+  async getMediaUsage(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const usage = await findMediaUsage(req.params.id);
+      if (usage === null) {
+        res.status(404).json({ success: false, error: 'Media file not found' });
+        return;
+      }
+      res.status(200).json({ success: true, data: usage });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Invalid media ID') {
+        res.status(400).json({ success: false, error: error.message });
+        return;
+      }
+      next(error);
+    }
+  }
+
   /**
    * Upload a media file
    * POST /api/v1/media/upload
