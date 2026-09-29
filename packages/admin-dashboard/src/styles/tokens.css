@@ -1,0 +1,76 @@
+/* Warm editorial design tokens. Components use these via Tailwind utilities only. */
+:root {
+  --radius: 0.625rem;
+
+  --background: #fbf8f3;
+  --foreground: #2b2620;
+  --card: #ffffff;
+  --card-foreground: #2b2620;
+  --popover: #ffffff;
+  --popover-foreground: #2b2620;
+  --primary: #1f6f5c;
+  --primary-foreground: #ffffff;
+  --secondary: #f3ede3;
+  --secondary-foreground: #2b2620;
+  --muted: #f3ede3;
+  --muted-foreground: #6b6257;
+  --accent: #efe6d8;
+  --accent-foreground: #2b2620;
+  --destructive: #b3401f;
+  --destructive-foreground: #ffffff;
+  --border: #ebe3d6;
+  --input: #e6dccb;
+  --ring: #1f6f5c;
+
+  --sidebar: #f3ede3;
+  --sidebar-foreground: #5d554a;
+  --sidebar-border: #e6dccb;
+  --sidebar-accent: #2b2620;
+  --sidebar-accent-foreground: #fbf8f3;
+
+  --status-published-bg: #dff0ea;
+  --status-published-fg: #1a5e4e;
+  --status-draft-bg: #f6ead2;
+  --status-draft-fg: #7a5512;
+  --status-archived-bg: #ecebe8;
+  --status-archived-fg: #55524d;
+  --status-unread-bg: #f7dfd5;
+  --status-unread-fg: #93391a;
+}
+
+.dark {
+  --background: #1c1916;
+  --foreground: #f3ede3;
+  --card: #24201c;
+  --card-foreground: #f3ede3;
+  --popover: #24201c;
+  --popover-foreground: #f3ede3;
+  --primary: #5cc0a6;
+  --primary-foreground: #0f231d;
+  --secondary: #2d2823;
+  --secondary-foreground: #f3ede3;
+  --muted: #2d2823;
+  --muted-foreground: #b3a898;
+  --accent: #342e28;
+  --accent-foreground: #f3ede3;
+  --destructive: #e58766;
+  --destructive-foreground: #1c1916;
+  --border: #3a332c;
+  --input: #463d35;
+  --ring: #5cc0a6;
+
+  --sidebar: #201c19;
+  --sidebar-foreground: #c9bfb1;
+  --sidebar-border: #3a332c;
+  --sidebar-accent: #f3ede3;
+  --sidebar-accent-foreground: #1c1916;
+
+  --status-published-bg: #173a31;
+  --status-published-fg: #8fd8c2;
+  --status-draft-bg: #3d3018;
+  --status-draft-fg: #f0cf8a;
+  --status-archived-bg: #2f2c29;
+  --status-archived-fg: #c9c4bd;
+  --status-unread-bg: #45261b;
+  --status-unread-fg: #f4ab8e;
+}
