@@ -16,7 +16,7 @@ import { Dashboard } from '@/pages/Dashboard'
 import { ContentListPage } from '@/features/content/pages/ContentListPage'
 import { EntryEditorPage } from '@/features/content/pages/EntryEditorPage'
 import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect } from '@/features/content/LegacyRedirects'
-import { MediaLibrary } from '@/pages/Media/MediaLibrary'
+import { MediaLibraryPage } from '@/features/media/pages/MediaLibraryPage'
 import { ContentTypesList } from '@/pages/ContentTypes/ContentTypesList'
 import { ContentTypeForm } from '@/pages/ContentTypes/ContentTypeForm'
 import { ContactFormsList } from '@/pages/ContactForms/ContactFormsList'
@@ -60,7 +60,7 @@ export const modules: AppModule[] = [
     group: 'workspace',
     path: '/media',
     mobileTab: true,
-    routes: [{ path: 'media', element: <MediaLibrary /> }],
+    routes: [{ path: 'media', element: <MediaLibraryPage /> }],
   },
   {
     id: 'inbox',
