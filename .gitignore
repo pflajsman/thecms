@@ -55,3 +55,4 @@ temp/
 
 # Claude
 .claude/
+.superpowers/
