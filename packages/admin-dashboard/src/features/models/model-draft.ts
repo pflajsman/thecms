@@ -131,11 +131,27 @@ export function validateModel(d: ModelDraft): ModelErrors {
   if (d.fields.length === 0) errors.fields = 'Add at least one field'
   for (const f of d.fields) {
     if (!f.label.trim()) errors[`label:${f.cid}`] = 'Label is required'
+    else if (f.label.trim().length > 100) errors[`label:${f.cid}`] = 'Label must be at most 100 characters'
     const others = d.fields.filter((o) => o.cid !== f.cid).map((o) => o.name)
     const keyError = apiKeyError(f.name, others)
     if (keyError) errors[`key:${f.cid}`] = keyError
+    const ruleError = fieldRuleError(f)
+    if (ruleError) errors[`rules:${f.cid}`] = ruleError
   }
   return errors
+}
+
+const isCount = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1
+
+/** Mirrors the backend field schema so saving never fails with a vague server error. */
+function fieldRuleError(f: DraftField): string | null {
+  const v = f.validation ?? {}
+  if (v.minLength !== undefined && !isCount(v.minLength)) return 'Min length must be a whole number of at least 1'
+  if (v.maxLength !== undefined && !isCount(v.maxLength)) return 'Max length must be a whole number of at least 1'
+  if (v.minLength !== undefined && v.maxLength !== undefined && v.maxLength < v.minLength) return 'Max length must be at least the min length'
+  if (v.min !== undefined && v.max !== undefined && v.max < v.min) return 'Maximum must be at least the minimum'
+  if ((f.description ?? '').trim().length > 500) return 'Help text must be at most 500 characters'
+  return null
 }
 
 function cleanValidation(v?: ValidationRules): ValidationRules | undefined {

@@ -28,8 +28,9 @@ export function InboxPage() {
   const desktop = useIsDesktop()
   const view = (VIEWS.find((v) => v.id === sp.get('view'))?.id ?? 'unread') as InboxView
   const formId = sp.get('form') ?? undefined
+  const pageNo = Math.max(1, Number.parseInt(sp.get('page') ?? '1', 10) || 1)
   const forms = useForms()
-  const inbox = useInbox({ status: viewStatus(view), formId, limit: 30 })
+  const inbox = useInbox({ status: viewStatus(view), formId, limit: 30, page: pageNo })
   const writes = useSubmissionWrites()
   const items = inbox.data?.data ?? []
   // Keep the open message on screen when it leaves the current view (for example once it is marked read).
@@ -56,6 +57,7 @@ export function InboxPage() {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value)
     else next.delete(key)
+    if (key !== 'page') next.delete('page')
     setSp(next, { replace: true })
   }
 
@@ -121,11 +123,32 @@ export function InboxPage() {
         </div>
       )}
       <div className={cn(desktop && 'grid grid-cols-[minmax(0,22rem)_minmax(0,1fr)] gap-4')}>
-        {showList && <div>{list}</div>}
+        {showList && (
+          <div>
+            {list}
+            {inbox.data && inbox.data.pagination.totalPages > 1 && (
+              <nav aria-label="Message pages" className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Page {pageNo} of {inbox.data.pagination.totalPages}</span>
+                <span className="flex gap-2">
+                  <button type="button" className="rounded-full border px-3 py-1 disabled:opacity-40" disabled={pageNo <= 1} onClick={() => setParam('page', pageNo > 2 ? String(pageNo - 1) : undefined)}>Newer</button>
+                  <button type="button" className="rounded-full border px-3 py-1 disabled:opacity-40" disabled={pageNo >= inbox.data.pagination.totalPages} onClick={() => setParam('page', String(pageNo + 1))}>Older</button>
+                </span>
+              </nav>
+            )}
+          </div>
+        )}
         {showMessage && (
           <div>
             {selected ? (
-              <MessageView item={selected} backTo={desktop ? undefined : `/inbox${query}`} onDeleted={() => navigate(`/inbox${query}`, { replace: true })} />
+              <MessageView
+                item={selected}
+                backTo={desktop ? undefined : `/inbox${query}`}
+                onDeleted={() => navigate(`/inbox${query}`, { replace: true })}
+                onStatusChange={(status) => {
+                  const id = selected.id
+                  setHeld((h) => (h.item && h.item.id === id ? { ...h, item: { ...h.item, status } } : h))
+                }}
+              />
             ) : desktop && items.length > 0 ? (
               <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Select a message to read it.</p>
             ) : submissionId && !inbox.isPending ? (

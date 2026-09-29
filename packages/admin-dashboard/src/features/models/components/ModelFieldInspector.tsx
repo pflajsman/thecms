@@ -13,7 +13,7 @@ interface ModelFieldInspectorProps {
   field: DraftField
   isTitle: boolean
   locked: boolean
-  errors: { label?: string; key?: string }
+  errors: { label?: string; key?: string; rules?: string }
   models: ContentType[]
   onLabel: (label: string) => void
   onKey: (key: string) => void
@@ -150,6 +150,7 @@ export function ModelFieldInspector({ field, isTitle, locked, errors, models, on
         </div>
       )}
 
+      {errors.rules && <p role="alert" className="text-sm text-destructive">{errors.rules}</p>}
       <Button type="button" variant="outline" size="sm" className="self-start text-destructive" onClick={onRemove}>
         <Trash2 aria-hidden />
         Remove field

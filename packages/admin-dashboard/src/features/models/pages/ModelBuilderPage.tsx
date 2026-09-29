@@ -55,7 +55,7 @@ export function ModelBuilderPage() {
       return (
         <>
           <PageHeader title="New content model" description="Start from a template or from scratch. You can change everything later." breadcrumb={<Link to="/models">Content models</Link>} />
-          <TemplateChooser onChoose={(t) => setParams({ template: t ? t.id : 'scratch' })} />
+          <TemplateChooser onChoose={(t) => setParams({ template: t ? t.id : 'scratch' }, { replace: true })} />
         </>
       )
     }
@@ -85,6 +85,8 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
   const dirty = stableStringify(toModelPayload(draft)) !== baseline
   const blocker = useUnsavedGuard(dirty)
   const count = entryCount.data ?? 0
+  // Unknown count (loading or failed) is treated as "may have entries" for the key guardrail.
+  const countKnown = entryCount.isSuccess
   const diff = diffKeys(draft)
   const selectedField = draft.fields.find((f) => f.cid === selected)
 
@@ -117,7 +119,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
       toast.error('Fix the highlighted fields before saving')
       return
     }
-    if (model && count > 0 && (diff.renamed.length || diff.removed.length)) {
+    if (model && (!countKnown || count > 0) && (diff.renamed.length || diff.removed.length)) {
       setConfirm('save')
       return
     }
@@ -135,7 +137,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
     }
   }
 
-  const fieldError = (cid: string) => ({ label: visible[`label:${cid}`], key: visible[`key:${cid}`] })
+  const fieldError = (cid: string) => ({ label: visible[`label:${cid}`], key: visible[`key:${cid}`], rules: visible[`rules:${cid}`] })
 
   return (
     <>
@@ -186,7 +188,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
               apiKey: f.name,
               typeLabel: FIELD_TYPE_LABELS[f.type],
               isTitle: f.cid === draft.titleCid && f.type === 'TEXT',
-              hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`]),
+              hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`] || visible[`rules:${f.cid}`]),
             }))}
             selectedId={selected}
             onSelect={setSelected}
@@ -244,7 +246,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
         description={
           <span className="block space-y-2">
             <span className="block">
-              {count} {count === 1 ? 'entry uses' : 'entries use'} this model. Sites reading these keys stop receiving their values:
+              {countKnown ? `${count} ${count === 1 ? 'entry uses' : 'entries use'} this model.` : 'This model may have entries.'} Sites reading these keys stop receiving their values:
             </span>
             <span className="block font-mono text-xs">
               {[...diff.renamed.map((r) => `${r.from} → ${r.to}`), ...diff.removed.map((r) => `${r} (removed)`)].join(', ')}

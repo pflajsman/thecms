@@ -85,6 +85,11 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
       setBaseline(stableStringify(payload))
       toast.success(form ? 'Form saved' : 'Form created')
       if (!form) navigate(`/forms/${saved.id}`, { replace: true, state: { skipGuard: true } })
+      else {
+        // Re-draft from the server so saved fields keep their keys when labels change.
+        setDraft(draftFromForm(saved))
+        setSelected(undefined)
+      }
     } catch (error) {
       toast.error(apiErrorMessage(error))
     } finally {
@@ -153,7 +158,7 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
           {visible.fields && <p className="mb-2 text-sm text-destructive">{visible.fields}</p>}
           <FieldList
             label="Form fields"
-            items={draft.fields.map((f) => ({ id: f.cid, label: f.label, apiKey: f.name, typeLabel: FORM_FIELD_LABELS[f.type], hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`] || visible[`options:${f.cid}`]) }))}
+            items={draft.fields.map((f) => ({ id: f.cid, label: f.label, apiKey: f.name, typeLabel: FORM_FIELD_LABELS[f.type], hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`] || visible[`options:${f.cid}`] || visible[`rules:${f.cid}`]) }))}
             selectedId={selected}
             onSelect={setSelected}
             onReorder={(cids) => setDraft(reorderFormFields(draft, cids))}
@@ -171,7 +176,7 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
                 <FormFieldInspector
                   key={selectedField.cid}
                   field={selectedField}
-                  errors={{ label: visible[`label:${selectedField.cid}`], key: visible[`key:${selectedField.cid}`], options: visible[`options:${selectedField.cid}`] }}
+                  errors={{ label: visible[`label:${selectedField.cid}`], key: visible[`key:${selectedField.cid}`], options: visible[`options:${selectedField.cid}`], rules: visible[`rules:${selectedField.cid}`] }}
                   onLabel={(label) => setDraft(setFormFieldLabel(draft, selectedField.cid, label))}
                   onKey={(key) => setDraft(setFormFieldKey(draft, selectedField.cid, key))}
                   onChange={(patch) => setDraft(updateFormField(draft, selectedField.cid, patch))}

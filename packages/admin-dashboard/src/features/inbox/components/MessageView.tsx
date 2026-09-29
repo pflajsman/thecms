@@ -14,9 +14,11 @@ interface MessageViewProps {
   item: InboxItem
   backTo?: string
   onDeleted: () => void
+  /** Called after a status change so the page can update a message held outside the current view. */
+  onStatusChange?: (status: InboxItem['status']) => void
 }
 
-export function MessageView({ item, backTo, onDeleted }: MessageViewProps) {
+export function MessageView({ item, backTo, onDeleted, onStatusChange }: MessageViewProps) {
   const writes = useSubmissionWrites()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const sender = senderName(item)
@@ -68,14 +70,14 @@ export function MessageView({ item, backTo, onDeleted }: MessageViewProps) {
           </Button>
         )}
         {item.status === 'UNREAD' ? (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ'), 'Marked as read')}>Mark read</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ').then(() => onStatusChange?.('READ')), 'Marked as read')}>Mark read</Button>
         ) : item.status === 'READ' ? (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'UNREAD'), 'Marked as unread')}>Mark unread</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'UNREAD').then(() => onStatusChange?.('UNREAD')), 'Marked as unread')}>Mark unread</Button>
         ) : null}
         {item.status === 'ARCHIVED' ? (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ'), 'Moved back to inbox')}>Restore</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ').then(() => onStatusChange?.('READ')), 'Moved back to inbox')}>Restore</Button>
         ) : (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'ARCHIVED'), 'Archived')}>Archive</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'ARCHIVED').then(() => onStatusChange?.('ARCHIVED')), 'Archived')}>Archive</Button>
         )}
         <Button variant="outline" className="text-destructive" onClick={() => setConfirmDelete(true)}>Delete</Button>
       </div>

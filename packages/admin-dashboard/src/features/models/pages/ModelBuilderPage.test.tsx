@@ -116,3 +116,21 @@ describe('existing model with entries', () => {
     expect(await screen.findByRole('dialog', { name: 'Field settings' })).toBeInTheDocument()
   })
 })
+
+it('replaces the history entry when a template is chosen, so Back leaves through the guard', async () => {
+  const { router } = renderRoutes(routes, { route: '/models/new' })
+  await userEvent.click(await screen.findByRole('button', { name: /Blog post/ }))
+  expect(router.state.historyAction).toBe('REPLACE')
+})
+
+it('still confirms key renames when the entry count cannot be loaded', async () => {
+  vi.mocked(modelsApi.getEntryCount).mockRejectedValue(new Error('down'))
+  renderRoutes(routes, { route: '/models/t1' })
+  await userEvent.click(await screen.findByRole('button', { name: /^GPX track/ }))
+  const key = within(screen.getByRole('complementary', { name: 'Field settings' })).getByLabelText('API key')
+  await userEvent.clear(key)
+  await userEvent.type(key, 'gpxUrl')
+  await userEvent.click(screen.getByRole('button', { name: 'Save model' }))
+  expect(await screen.findByRole('alertdialog')).toHaveTextContent('This model may have entries')
+  expect(modelsApi.updateModel).not.toHaveBeenCalled()
+})

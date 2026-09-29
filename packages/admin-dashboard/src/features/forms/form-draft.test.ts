@@ -43,3 +43,13 @@ describe('form drafts', () => {
     expect(setFormFieldLabel(d, d.fields[0].cid, 'Your message').fields[0].name).toBe('msg')
   })
 })
+
+describe('form rule validation', () => {
+  it('flags lengths the server rejects', () => {
+    const base = setFormName({ ...newFormDraft(), recipientEmail: 'me@x.test' }, 'Booking')
+    const { draft, cid } = addFormField(base, 'TEXT')
+    expect(validateForm(updateFormField(draft, cid, { validation: { maxLength: 0 } }))[`rules:${cid}`]).toBe('Max length must be a whole number of at least 1')
+    expect(validateForm(updateFormField(draft, cid, { validation: { minLength: -1 } }))[`rules:${cid}`]).toBe('Min length must be a whole number of 0 or more')
+    expect(validateForm(updateFormField(draft, cid, { validation: { min: 5, max: 1 } }))[`rules:${cid}`]).toBe('Maximum must be at least the minimum')
+  })
+})

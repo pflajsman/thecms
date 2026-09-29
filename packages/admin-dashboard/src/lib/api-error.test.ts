@@ -17,4 +17,9 @@ describe('apiErrorMessage', () => {
     expect(apiErrorMessage(new AxiosError('Network Error'))).toBe('Could not reach the server. Check your connection and try again.')
     expect(apiErrorMessage('boom')).toBe('Something went wrong. Please try again.')
   })
+
+  it('adds the first validation detail', () => {
+    expect(apiErrorMessage(axiosError(400, { error: 'Validation error', details: [{ path: ['fields', 0, 'validation', 'minLength'], message: 'Number must be greater than 0' }] })))
+      .toBe('Validation error: Number must be greater than 0')
+  })
 })

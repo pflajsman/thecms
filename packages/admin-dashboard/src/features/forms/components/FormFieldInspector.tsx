@@ -9,7 +9,7 @@ import { FORM_FIELD_LABELS, type DraftFormField } from '../form-draft'
 
 interface Props {
   field: DraftFormField
-  errors: { label?: string; key?: string; options?: string }
+  errors: { label?: string; key?: string; options?: string; rules?: string }
   onLabel: (label: string) => void
   onKey: (key: string) => void
   onChange: (patch: Partial<FormFieldDefinition>) => void
@@ -78,6 +78,7 @@ export function FormFieldInspector({ field, errors, onLabel, onKey, onChange, on
           </div>
         </div>
       )}
+      {errors.rules && <p role="alert" className="text-sm text-destructive">{errors.rules}</p>}
       <Button type="button" variant="outline" size="sm" className="self-start text-destructive" onClick={onRemove}>
         <Trash2 aria-hidden />
         Remove field

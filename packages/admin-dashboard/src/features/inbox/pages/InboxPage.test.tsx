@@ -97,4 +97,36 @@ describe('InboxPage', () => {
     expect(screen.queryByRole('list', { name: 'Messages' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to messages' })).toHaveAttribute('href', '/inbox')
   })
+
+  it('updates the open message after archiving it from outside its view', async () => {
+    vi.mocked(apiClient.patch).mockImplementation(async (url: string, body?: unknown) => {
+      const target = items.find((i) => i.id === url.split('/').pop())
+      if (target) target.status = (body as { status: InboxItem['status'] }).status
+      return { data: { success: true } }
+    })
+    try {
+      renderRoutes(routes, { route: '/inbox/s1' })
+      const message = await screen.findByRole('article', { name: /jana@x\.test/ })
+      await waitFor(() => expect(apiClient.patch).toHaveBeenCalledTimes(1))
+      await userEvent.click(within(message).getByRole('button', { name: 'Archive' }))
+      expect(await screen.findByRole('button', { name: 'Restore' })).toBeInTheDocument()
+    } finally {
+      items[0].status = 'UNREAD'
+    }
+  })
+
+  it('pages to older messages', async () => {
+    vi.mocked(apiClient.get).mockImplementation(async (url: string, config?: { params?: Record<string, unknown> }) => {
+      if (url === '/submissions') {
+        const pageNo = Number(config?.params?.page ?? 1)
+        return { data: { success: true, data: pageNo === 1 ? items : [], pagination: { page: pageNo, limit: 30, total: 45, totalPages: 2 } } }
+      }
+      return { data: { success: true, data: [] } }
+    })
+    const { router } = renderRoutes(routes, { route: '/inbox?view=all' })
+    await userEvent.click(await screen.findByRole('button', { name: 'Older' }))
+    await waitFor(() => expect(router.state.location.search).toContain('page=2'))
+    expect(apiClient.get).toHaveBeenLastCalledWith('/submissions', { params: expect.objectContaining({ page: 2 }) })
+  })
 })
+

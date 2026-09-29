@@ -142,3 +142,20 @@ describe('templates', () => {
     }
   })
 })
+
+describe('rule validation', () => {
+  it('flags values the server rejects', () => {
+    let d = setModelName(emptyDraft(), 'Trip')
+    const a = addField(d, 'TEXT')
+    d = updateField(a.draft, a.cid, { validation: { minLength: 0 } })
+    expect(validateModel(d)[`rules:${a.cid}`]).toBe('Min length must be a whole number of at least 1')
+    d = updateField(d, a.cid, { validation: { minLength: 10, maxLength: 5 } })
+    expect(validateModel(d)[`rules:${a.cid}`]).toBe('Max length must be at least the min length')
+    d = updateField(d, a.cid, { validation: { minLength: 1.5 } })
+    expect(validateModel(d)[`rules:${a.cid}`]).toBe('Min length must be a whole number of at least 1')
+    d = updateField(d, a.cid, { validation: {}, label: 'x'.repeat(101) })
+    expect(validateModel(d)[`label:${a.cid}`]).toBe('Label must be at most 100 characters')
+    d = updateField(d, a.cid, { label: 'Ok', description: 'x'.repeat(501) })
+    expect(validateModel(d)[`rules:${a.cid}`]).toBe('Help text must be at most 500 characters')
+  })
+})

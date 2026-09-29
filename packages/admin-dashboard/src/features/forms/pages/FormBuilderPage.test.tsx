@@ -58,3 +58,17 @@ it('warns that deleting removes the submissions', async () => {
   await userEvent.click(await screen.findByRole('button', { name: 'Delete form' }))
   expect(await screen.findByRole('alertdialog')).toHaveTextContent('5 submissions')
 })
+
+it('keeps the key of a field once the form is saved', async () => {
+  vi.mocked(apiClient.put).mockImplementation(async (_url: string, body?: unknown) => ({ data: { success: true, data: { ...form, ...(body as object) } } }))
+  renderRoutes(routes, { route: '/forms/f1' })
+  await userEvent.click(await screen.findByRole('button', { name: 'Add Short text field' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Save form' }))
+  await waitFor(() => expect(apiClient.put).toHaveBeenCalled())
+  await userEvent.click(await screen.findByRole('button', { name: /^Short text/ }))
+  const inspector = screen.getByRole('complementary', { name: 'Field settings' })
+  const label = within(inspector).getByLabelText('Label')
+  await userEvent.clear(label)
+  await userEvent.type(label, 'Phone')
+  expect(within(inspector).getByLabelText('API key')).toHaveValue('shortText')
+})

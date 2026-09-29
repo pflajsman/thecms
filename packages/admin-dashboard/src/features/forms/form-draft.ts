@@ -110,8 +110,22 @@ export function validateForm(d: FormDraft): Record<string, string> {
     const keyError = apiKeyError(f.name, d.fields.filter((o) => o.cid !== f.cid).map((o) => o.name))
     if (keyError) errors[`key:${f.cid}`] = keyError
     if (f.type === 'SELECT' && !(f.options ?? []).some((o) => o.trim())) errors[`options:${f.cid}`] = 'Add at least one option'
+    const ruleError = formRuleError(f)
+    if (ruleError) errors[`rules:${f.cid}`] = ruleError
   }
   return errors
+}
+
+const isInt = (n: unknown) => typeof n === 'number' && Number.isInteger(n)
+
+/** Mirrors the backend form field schema (minLength >= 0, maxLength >= 1). */
+function formRuleError(f: DraftFormField): string | null {
+  const v = f.validation ?? {}
+  if (v.minLength !== undefined && !(isInt(v.minLength) && v.minLength >= 0)) return 'Min length must be a whole number of 0 or more'
+  if (v.maxLength !== undefined && !(isInt(v.maxLength) && v.maxLength >= 1)) return 'Max length must be a whole number of at least 1'
+  if (v.minLength !== undefined && v.maxLength !== undefined && v.maxLength < v.minLength) return 'Max length must be at least the min length'
+  if (v.min !== undefined && v.max !== undefined && v.max < v.min) return 'Maximum must be at least the minimum'
+  return null
 }
 
 export function toFormPayload(d: FormDraft): FormPayload {
