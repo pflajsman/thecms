@@ -12,6 +12,28 @@ router.use(authMiddleware);
 
 /**
  * @swagger
+ * /entries:
+ *   get:
+ *     summary: List entries across all content types
+ *     tags: [Content Entries]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - { in: query, name: contentTypeId, schema: { type: array, items: { type: string } }, style: form, explode: true }
+ *       - { in: query, name: status, schema: { type: string, enum: [DRAFT, PUBLISHED, ARCHIVED] } }
+ *       - { in: query, name: search, schema: { type: string, maxLength: 100 } }
+ *       - { in: query, name: sortBy, schema: { type: string, enum: [updatedAt, createdAt, title], default: updatedAt } }
+ *       - { in: query, name: sortOrder, schema: { type: string, enum: [asc, desc], default: desc } }
+ *       - { in: query, name: page, schema: { type: integer, default: 1 } }
+ *       - { in: query, name: limit, schema: { type: integer, default: 20, maximum: 100 } }
+ *     responses:
+ *       200:
+ *         description: Paginated entries with contentType { id, name, slug } or null
+ */
+router.get('/', (req, res, next) => contentEntriesController.listAllEntries(req, res, next));
+
+/**
+ * @swagger
  * /api/v1/entries/search:
  *   get:
  *     summary: Search content entries across all content types

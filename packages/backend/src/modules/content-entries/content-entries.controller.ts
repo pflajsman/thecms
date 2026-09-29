@@ -11,6 +11,7 @@ import {
   unpublishContentEntrySchema,
   archiveContentEntrySchema,
   searchContentEntriesSchema,
+  listAllEntriesSchema,
 } from './content-entries.schema';
 import { z } from 'zod';
 
@@ -123,6 +124,42 @@ export class ContentEntriesController {
         return;
       }
 
+      next(error);
+    }
+  }
+
+  /**
+   * List entries across all content types
+   * GET /api/v1/entries
+   */
+  async listAllEntries(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { query } = listAllEntriesSchema.parse({ query: req.query });
+
+      const result = await ContentEntriesService.listAllEntries({
+        page: query.page,
+        limit: query.limit,
+        status: query.status,
+        contentTypeIds: query.contentTypeId,
+        search: query.search || undefined,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: result.entries,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        });
+        return;
+      }
       next(error);
     }
   }

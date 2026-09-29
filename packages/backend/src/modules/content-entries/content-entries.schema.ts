@@ -216,6 +216,36 @@ export const searchContentEntriesSchema = z.object({
   }),
 });
 
+const objectIdSchema = z.string().regex(/^[a-f0-9]{24}$/i, 'Invalid content type ID');
+
+/**
+ * Schema for listing entries across all content types
+ */
+export const listAllEntriesSchema = z.object({
+  query: z.object({
+    page: z
+      .string()
+      .optional()
+      .default('1')
+      .transform((val) => parseInt(val, 10))
+      .refine((val) => val > 0, { message: 'Page must be greater than 0' }),
+    limit: z
+      .string()
+      .optional()
+      .default('20')
+      .transform((val) => parseInt(val, 10))
+      .refine((val) => val > 0 && val <= 100, { message: 'Limit must be between 1 and 100' }),
+    status: z.nativeEnum(ContentStatus).optional(),
+    contentTypeId: z
+      .union([objectIdSchema, z.array(objectIdSchema)])
+      .optional()
+      .transform((val) => (val === undefined ? undefined : Array.isArray(val) ? val : [val])),
+    search: z.string().trim().max(100, 'Search must be at most 100 characters').optional(),
+    sortBy: z.enum(['updatedAt', 'createdAt', 'title']).optional().default('updatedAt'),
+    sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+  }),
+});
+
 // Type exports for TypeScript
 export type CreateContentEntryInput = z.infer<typeof createContentEntrySchema>;
 export type UpdateContentEntryInput = z.infer<typeof updateContentEntrySchema>;
@@ -224,3 +254,4 @@ export type GetContentEntryInput = z.infer<typeof getContentEntrySchema>;
 export type CreateEntryForTypeInput = z.infer<typeof createEntryForTypeSchema>;
 export type ListEntriesForTypeInput = z.infer<typeof listEntriesForTypeSchema>;
 export type SearchContentEntriesInput = z.infer<typeof searchContentEntriesSchema>;
+export type ListAllEntriesInput = z.infer<typeof listAllEntriesSchema>;

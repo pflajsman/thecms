@@ -5,6 +5,7 @@ import { ContentEntryValidator } from './validation.helper';
 import { WebhookService } from '../../services/webhook.service';
 import { WebhookEvent } from '../../models/webhook.model';
 import { computeEntryTitle } from '../../utils/entryTitle';
+import { escapeRegex } from '../../utils/regex';
 
 /**
  * Query options for listing content entries
@@ -29,6 +30,32 @@ export interface PaginatedEntries {
     total: number;
     totalPages: number;
   };
+}
+
+export interface ListAllEntriesOptions {
+  page?: number;
+  limit?: number;
+  status?: ContentStatus;
+  contentTypeIds?: string[];
+  search?: string;
+  sortBy?: 'updatedAt' | 'createdAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface EntryContentTypeRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export type EntryListItem = ReturnType<IContentEntry['toJSON']> & {
+  title: string;
+  contentType: EntryContentTypeRef | null;
+};
+
+export interface PaginatedEntryListItems {
+  entries: EntryListItem[];
+  pagination: PaginatedEntries['pagination'];
 }
 
 /**
@@ -165,6 +192,50 @@ export class ContentEntriesService {
         total,
         totalPages: Math.ceil(total / limit),
       },
+    };
+  }
+
+  /**
+   * List entries across all content types (admin Content list, pickers, search)
+   */
+  static async listAllEntries(options: ListAllEntriesOptions = {}): Promise<PaginatedEntryListItems> {
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      contentTypeIds,
+      search,
+      sortBy = 'updatedAt',
+      sortOrder = 'desc',
+    } = options;
+
+    // `any` matches the existing query-building style in this service.
+    const query: any = {};
+    if (contentTypeIds && contentTypeIds.length > 0) query.contentTypeId = { $in: contentTypeIds };
+    if (status) query.status = status;
+    if (search) query.title = { $regex: escapeRegex(search), $options: 'i' };
+
+    const direction = sortOrder === 'asc' ? 1 : -1;
+    const sort: Record<string, 1 | -1> = { [sortBy]: direction, _id: direction };
+
+    const [entries, total] = await Promise.all([
+      ContentEntryModel.find(query).sort(sort).skip((page - 1) * limit).limit(limit).exec(),
+      ContentEntryModel.countDocuments(query),
+    ]);
+
+    const typeIds = [...new Set(entries.map((e) => String(e.contentTypeId)))];
+    const types = await ContentTypeModel.find({ _id: { $in: typeIds } }).select('name slug').lean();
+    const typeMap = new Map<string, EntryContentTypeRef>(
+      types.map((t) => [String(t._id), { id: String(t._id), name: t.name, slug: t.slug }])
+    );
+
+    return {
+      entries: entries.map((e) => ({
+        ...e.toJSON(),
+        title: e.title,
+        contentType: typeMap.get(String(e.contentTypeId)) ?? null,
+      })),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
   }
 
