@@ -151,7 +151,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
       <Tool label="Strikethrough" active={editor.isActive('strike')} onClick={() => chain().toggleStrike().run()}>
         <Strikethrough aria-hidden className="size-4" />
       </Tool>
-      <label className={cn(toolClass, 'relative cursor-pointer')} title="Text color">
+      <label className={cn(toolClass, 'relative cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring')} title="Text color">
         <span className="sr-only">Text color</span>
         <span aria-hidden className="font-serif text-sm font-semibold underline decoration-2">
           A
