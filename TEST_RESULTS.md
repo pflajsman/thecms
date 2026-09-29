@@ -296,3 +296,25 @@ Environment: local mongod and Azurite, backend and admin dev servers; 2 models (
 | 360px (iframe): list shows 20 cards, editor shows the Details button, no horizontal scroll | Pass |
 | Dark theme: list and editor readable | Pass |
 | Row menu Duplicate and Delete, editor ⌘S, archived read-only | Covered by component tests; not repeated by hand |
+
+## Admin redesign Plan 3 verification (2026-09-29)
+
+Environment: local mongod and Azurite, backend and admin dev servers; Plan 2 data plus uploads; a second empty database for the new-install check.
+
+| Check | Result |
+|---|---|
+| Backend tests (44) and admin tests (186) | Pass |
+| Admin production build | Pass |
+| Home (existing data): greeting, 4 tiles, Continue editing, Inbox card, Create buttons | Pass |
+| Home (empty database): 4-step checklist; after model, entry and site, the snippet shows real URL and key; `curl` of that URL with the key returns the entry | Pass (after a fix in this plan: snippet card on Home) |
+| Drop 3 PNGs, 1 GPX, an 11 MB file and a `.exe` on the Media page | Pass: 4 uploaded with the tray; 2 rejected with messages, others unaffected |
+| Detail sheet: preview, missing alt text hint, save alt text and tags (stored), copy links per size, Used in lists the entry | Pass |
+| Delete warns "1 entry uses this file" | Pass (wording "They will show" is plural for one entry, see minors) |
+| Content list shows the cover thumbnail | Pass |
+| Gallery field: Move earlier reorders and autosaves | Pass |
+| Picker for an image-only field lists only images, no type chips | Pass |
+| Picker adds a chosen file to the gallery | Pass |
+| Rich text "From media library" inserts the chosen image | Pass |
+| 360px (iframe): Home, Media, Media detail, editor have no horizontal scroll | Pass |
+| Dark theme on Media with the sheet open | Pass |
+| Drag-to-reorder with a pointer | Not checked by hand (dnd-kit pointer drag; keyboard path verified) |
