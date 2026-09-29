@@ -26,7 +26,8 @@ import { LegacyEditEntryRedirect, LegacyEntriesRedirect, LegacyNewEntryRedirect 
 import { MediaLibraryPage } from '@/features/media/pages/MediaLibraryPage'
 import { SitesListPage } from '@/features/sites/pages/SitesListPage'
 import { SiteFormPage } from '@/features/sites/pages/SiteFormPage'
-import { WebhooksPlaceholder } from '@/features/webhooks/pages/WebhooksPlaceholder'
+import { WebhooksListPage } from '@/features/webhooks/pages/WebhooksListPage'
+import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
 
 export const modules: AppModule[] = [
   {
@@ -125,7 +126,10 @@ export const modules: AppModule[] = [
     icon: Webhook,
     group: 'setup',
     path: '/webhooks',
-    routes: [{ path: 'webhooks', element: <WebhooksPlaceholder /> }],
+    routes: [
+      { path: 'webhooks', element: <WebhooksListPage /> },
+      { path: 'webhooks/:id', element: <WebhookFormPage /> },
+    ],
   },
 ]
 
