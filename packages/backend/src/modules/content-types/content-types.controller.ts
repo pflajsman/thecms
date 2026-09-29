@@ -177,6 +177,11 @@ export class ContentTypesController {
         return;
       }
 
+      if (error instanceof Error && error.message.startsWith('Invalid titleField')) {
+        res.status(400).json({ success: false, error: error.message });
+        return;
+      }
+
       next(error);
     }
   }

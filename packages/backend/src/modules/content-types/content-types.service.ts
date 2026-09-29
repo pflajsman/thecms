@@ -1,6 +1,7 @@
 import { ContentTypeModel, IContentType } from '../../models/content-type.model';
 import { ContentEntryModel } from '../../models/content-entry.model';
 import { CreateContentTypeInput, UpdateContentTypeInput } from './content-types.schema';
+import { FieldType } from '../../types/field-types';
 import { recomputeTitlesForType } from '../content-entries/entry-titles.service';
 
 /**
@@ -79,6 +80,16 @@ export class ContentTypesService {
       }).select('_id').lean();
       if (existingContentType) {
         throw new Error(`Content type with slug '${data.slug}' already exists`);
+      }
+    }
+
+    // A titleField sent without fields is checked against the stored fields
+    // (the schema can only check it when both arrive together).
+    if (data.titleField && !data.fields) {
+      const existing = await ContentTypeModel.findById(id).select('fields').lean();
+      const ok = existing?.fields.some((f) => f.name === data.titleField && f.type === FieldType.TEXT);
+      if (existing && !ok) {
+        throw new Error('Invalid titleField: must name a TEXT field of this content type');
       }
     }
 

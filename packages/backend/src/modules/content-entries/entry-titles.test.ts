@@ -62,6 +62,15 @@ describe('entry titles', () => {
     expect(after?.updatedAt.getTime()).toBe(before?.updatedAt.getTime());
   });
 
+  it('rejects a titleField update without fields when it does not name a stored TEXT field', async () => {
+    const type = await createTripType();
+    await expect(
+      contentTypesService.updateContentType(type.id, { titleField: 'missing' } as any)
+    ).rejects.toThrow('Invalid titleField');
+    const stored = await contentTypesService.getContentTypeById(type.id);
+    expect(stored?.titleField).toBeUndefined();
+  });
+
   it('rejects a titleField that is not a TEXT field on create', async () => {
     const { createContentTypeSchema } = await import('../content-types/content-types.schema');
     const result = createContentTypeSchema.safeParse({
