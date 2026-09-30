@@ -1,0 +1,83 @@
+{
+  "title": "Media",
+  "upload": {
+    "uploadingCount_one": "Uploading {{count}} file",
+    "uploadingCount_other": "Uploading {{count}} files",
+    "uploadingTray_one": "Uploading {{count}} file…",
+    "uploadingTray_other": "Uploading {{count}} files…",
+    "finished": "Uploads finished",
+    "clear": "Clear",
+    "trayLabel": "Uploads",
+    "uploadingItem": "Uploading {{name}}",
+    "tooLarge": "{{name}} is larger than 10 MB.",
+    "unsupported": "{{name}} is not a supported file type."
+  },
+  "library": {
+    "description": "Images, documents, videos and GPX tracks. Drop files anywhere to upload.",
+    "loading": "Loading media",
+    "loadError": "Could not load media.",
+    "noMatch": "No files match",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No media yet",
+    "emptyText": "Drop files anywhere on this page, or choose them from your computer.",
+    "uploadFiles": "Upload files",
+    "dropOverlay": "Drop files to upload"
+  },
+  "filters": {
+    "all": "All",
+    "image": "Images",
+    "document": "Documents",
+    "video": "Video",
+    "fileType": "File type",
+    "search": "Search media",
+    "searchPlaceholder": "Search by name, alt text or tag…"
+  },
+  "picker": {
+    "titleOne": "Choose a file",
+    "titleMany": "Choose files",
+    "description": "Pick from your library or upload new files.",
+    "notAllowed": "{{name}} is not allowed here.",
+    "empty": "No files found. Upload one to get started.",
+    "gridLabel": "Files",
+    "choose": "Choose",
+    "chooseCount_one": "Choose {{count}} file",
+    "chooseCount_other": "Choose {{count}} files"
+  },
+  "grid": {
+    "notAllowed": "Not allowed for this field"
+  },
+  "detail": {
+    "loading": "Loading file",
+    "saved": "Details saved",
+    "deleted": "Deleted {{name}}",
+    "urlCopied": "{{label}} URL copied",
+    "original": "Original",
+    "variant": "{{name}} ({{size}})",
+    "variants": {
+      "thumbnail": "Thumbnail",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "altText": "Alt text",
+    "altHint": "Add alt text so people using screen readers know what the image shows.",
+    "description": "Description",
+    "tags": "Tags",
+    "tagsPlaceholder": "Separate tags with commas",
+    "saving": "Saving…",
+    "links": "Links",
+    "copyUrl": "Copy {{label}} URL",
+    "usedIn": "Used in",
+    "usageError": "Could not check which entries use this file.",
+    "unused": "Not used in any entry.",
+    "uploaded": "Uploaded {{date}}",
+    "deleteFile": "Delete file",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteUnknown": "We could not check which entries use this file. Entries that use it will show a missing file.",
+    "usedBy_one": "{{count}} entry uses this file.",
+    "usedBy_other": "{{count}} entries use this file.",
+    "usedByConsequence": "They will show a missing file until you replace it.",
+    "deletePermanent": "This permanently removes the file."
+  },
+  "uploadButton": "Upload"
+}

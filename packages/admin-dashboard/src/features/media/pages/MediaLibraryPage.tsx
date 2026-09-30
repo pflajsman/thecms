@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ImagePlus, Upload } from 'lucide-react'
@@ -21,6 +22,7 @@ const CATEGORIES = ['image', 'document', 'video'] as const
 
 export function MediaLibraryPage() {
   const [sp, setSp] = useSearchParams()
+  const { t } = useTranslation('media')
   const category = CATEGORIES.find((c) => c === sp.get('category'))
   const search = (sp.get('q') ?? '').slice(0, 100)
   const pageNo = Math.max(1, Number.parseInt(sp.get('page') ?? '1', 10) || 1)
@@ -45,8 +47,8 @@ export function MediaLibraryPage() {
 
   const addFiles = useCallback((files: File[]) => {
     uploads.add(files)
-    if (files.length) toast.message(`Uploading ${files.length} file${files.length === 1 ? '' : 's'}`)
-  }, [uploads])
+    if (files.length) toast.message(t('upload.uploadingCount', { count: files.length }))
+  }, [uploads, t])
   const { dragging } = useFileDrop(addFiles)
 
   const filters: MediaFilterValue = useMemo(() => ({ category, search }), [category, search])
@@ -54,20 +56,20 @@ export function MediaLibraryPage() {
   let body: React.ReactNode
   if (list.isPending) {
     body = (
-      <div role="status" aria-busy="true" aria-label="Loading media" className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+      <div role="status" aria-busy="true" aria-label={t('library.loading')} className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
         {Array.from({ length: 10 }, (_, i) => <Skeleton key={i} className="aspect-square w-full rounded-lg" />)}
       </div>
     )
   } else if (list.isError) {
-    body = <ErrorState message="Could not load media." onRetry={() => void list.refetch()} />
+    body = <ErrorState message={t('library.loadError')} onRetry={() => void list.refetch()} />
   } else if (list.data.data.length === 0) {
     body = category || search
-      ? <EmptyState icon={ImagePlus} title="No files match" action={<Button variant="outline" onClick={() => setParams({ category: undefined, q: undefined, page: undefined })}>Clear filters</Button>} />
-      : <EmptyState icon={ImagePlus} title="No media yet" description="Drop files anywhere on this page, or choose them from your computer." action={<Button onClick={() => fileInput.current?.click()}>Upload files</Button>} />
+      ? <EmptyState icon={ImagePlus} title={t('library.noMatch')} action={<Button variant="outline" onClick={() => setParams({ category: undefined, q: undefined, page: undefined })}>{t('library.clearFilters')}</Button>} />
+      : <EmptyState icon={ImagePlus} title={t('library.emptyTitle')} description={t('library.emptyText')} action={<Button onClick={() => fileInput.current?.click()}>{t('library.uploadFiles')}</Button>} />
   } else {
     body = (
       <>
-        <MediaGrid label="Media" items={list.data.data} onActivate={(m) => setParams({ item: m.id })} />
+        <MediaGrid label={t('title')} items={list.data.data} onActivate={(m) => setParams({ item: m.id })} />
         <Pager page={pageNo} limit={PAGE_SIZE} total={list.data.pagination.total} onPageChange={(p) => setParams({ page: p > 1 ? String(p) : undefined })} />
       </>
     )
@@ -76,12 +78,12 @@ export function MediaLibraryPage() {
   return (
     <>
       <PageHeader
-        title="Media"
-        description="Images, documents, videos and GPX tracks. Drop files anywhere to upload."
+        title={t('title')}
+        description={t('library.description')}
         actions={
           <Button onClick={() => fileInput.current?.click()}>
             <Upload aria-hidden />
-            Upload
+            {t('uploadButton')}
           </Button>
         }
       />
@@ -102,7 +104,7 @@ export function MediaLibraryPage() {
       <UploadTray items={uploads.items} onClear={uploads.clearFinished} />
       {dragging && (
         <div aria-hidden className="pointer-events-none fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm">
-          <div className="rounded-2xl border-2 border-dashed border-primary px-10 py-8 font-serif text-2xl">Drop files to upload</div>
+          <div className="rounded-2xl border-2 border-dashed border-primary px-10 py-8 font-serif text-2xl">{t('library.dropOverlay')}</div>
         </div>
       )}
     </>

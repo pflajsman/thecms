@@ -65,7 +65,8 @@ export default defineConfig([
         'error',
         {
           mode: 'all',
-          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'https?://\\S*'] },
+          // Single lowercase words here are identifiers (categories, statuses), not copy.
+          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'https?://\\S*', '[a-z][a-zA-Z0-9]*'] },
           callees: { exclude: ['i18n(ext)?', 't', 'useTranslation', 'includes', 'startsWith', 'endsWith', 'RegExp', 'test', 'split', 'join', 'replace'] },
           'object-properties': { exclude: ['[A-Z_-]+', 'action', 'status', 'type', 'queryKey', 'labelKey', 'id', 'to'] },
         },

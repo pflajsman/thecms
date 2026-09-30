@@ -1,4 +1,6 @@
 import type { MediaFile } from '@/types'
+import { i18n } from '@/i18n'
+import { formatNumber } from '@/lib/format'
 
 export type MediaCategory = 'image' | 'document' | 'video' | 'gpx'
 type MediaLike = Pick<MediaFile, 'mimeType' | 'originalName'>
@@ -43,14 +45,14 @@ export function previewUrl(m: MediaFile, size: 'thumbnail' | 'small' | 'medium' 
 }
 
 export function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  if (bytes < 1024) return `${formatNumber(bytes)} B`
+  if (bytes < 1024 * 1024) return `${formatNumber(Math.round(bytes / 1024))} KB`
+  return `${formatNumber(bytes / (1024 * 1024), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MB`
 }
 
 export function validateUpload(file: File): string | null {
-  if (file.size > MAX_UPLOAD_BYTES) return `${file.name} is larger than 10 MB.`
-  if (!ALLOWED_TYPES.has(file.type) && !isGpxName(file.name)) return `${file.name} is not a supported file type.`
+  if (file.size > MAX_UPLOAD_BYTES) return i18n.t('media:upload.tooLarge', { name: file.name })
+  if (!ALLOWED_TYPES.has(file.type) && !isGpxName(file.name)) return i18n.t('media:upload.unsupported', { name: file.name })
   return null
 }
 

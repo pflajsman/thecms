@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Copy, AlertTriangle } from 'lucide-react'
@@ -24,6 +25,7 @@ interface MediaDetailSheetProps {
 
 export function MediaDetailSheet({ mediaId, onOpenChange }: MediaDetailSheetProps) {
   const media = useMedia(mediaId)
+  const { t } = useTranslation('media')
   return (
     <Sheet open={!!mediaId} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
@@ -32,7 +34,7 @@ export function MediaDetailSheet({ mediaId, onOpenChange }: MediaDetailSheetProp
         ) : (
           <>
             <SheetHeader>
-              <SheetTitle>Loading file</SheetTitle>
+              <SheetTitle>{t('detail.loading')}</SheetTitle>
             </SheetHeader>
             <div className="space-y-3 px-4"><Skeleton className="aspect-video w-full" /><Skeleton className="h-10 w-full" /></div>
           </>
@@ -43,6 +45,7 @@ export function MediaDetailSheet({ mediaId, onOpenChange }: MediaDetailSheetProp
 }
 
 function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () => void }) {
+  const { t } = useTranslation('media')
   const writes = useMediaWrites()
   const usage = useMediaUsage(media.id)
   const [altText, setAltText] = useState(media.altText ?? '')
@@ -59,7 +62,7 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
     setSaving(true)
     try {
       await writes.update(media.id, { altText, description, tags: parsedTags })
-      toast.success('Details saved')
+      toast.success(t('detail.saved'))
     } catch (error) {
       toast.error(apiErrorMessage(error))
     } finally {
@@ -71,7 +74,7 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
     setConfirmDelete(false)
     try {
       await writes.remove(media.id)
-      toast.success(`Deleted ${media.originalName}`)
+      toast.success(t('detail.deleted', { name: media.originalName }))
       onDeleted()
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -79,10 +82,10 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
   }
 
   const copy = (url: string, label: string) => {
-    void navigator.clipboard?.writeText(url).then(() => toast.success(`${label} URL copied`))
+    void navigator.clipboard?.writeText(url).then(() => toast.success(t('detail.urlCopied', { label })))
   }
 
-  const urls = [{ label: 'Original', url: originalUrl(media) }, ...(media.variants ?? []).map((v) => ({ label: `${v.name[0].toUpperCase()}${v.name.slice(1)} (${v.width}×${v.height})`, url: v.url }))]
+  const urls = [{ label: t('detail.original'), url: originalUrl(media) }, ...(media.variants ?? []).map((v) => ({ label: t('detail.variant', { name: t(`detail.variants.${v.name}`, { defaultValue: `${v.name[0].toUpperCase()}${v.name.slice(1)}` }), size: `${v.width}×${v.height}` }), url: v.url }))]
 
   return (
     <>
@@ -98,36 +101,36 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="media-alt">Alt text</Label>
+          <Label htmlFor="media-alt">{t('detail.altText')}</Label>
           <Input id="media-alt" value={altText} onChange={(e) => setAltText(e.target.value)} maxLength={200} />
           {isImage(media) && !altText.trim() && (
             <p className="flex items-start gap-1.5 text-sm text-status-draft-fg">
               <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
-              Add alt text so people using screen readers know what the image shows.
+              {t('detail.altHint')}
             </p>
           )}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="media-description">Description</Label>
+          <Label htmlFor="media-description">{t('detail.description')}</Label>
           <Textarea id="media-description" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} rows={3} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="media-tags">Tags</Label>
-          <Input id="media-tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="Separate tags with commas" />
+          <Label htmlFor="media-tags">{t('detail.tags')}</Label>
+          <Input id="media-tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder={t('detail.tagsPlaceholder')} />
         </div>
         <Button onClick={() => void save()} disabled={!dirty || saving} className="self-start">
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? t('detail.saving') : t('actions.save', { ns: 'common' })}
         </Button>
 
         <section>
-          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Links</h3>
+          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('detail.links')}</h3>
           <ul className="flex flex-col gap-1">
             {urls.map((u) => (
               <li key={u.url} className="flex items-center justify-between gap-2 text-sm">
                 <span className="truncate">{u.label}</span>
-                <Button variant="ghost" size="sm" onClick={() => copy(u.url, u.label)} aria-label={`Copy ${u.label} URL`}>
+                <Button variant="ghost" size="sm" onClick={() => copy(u.url, u.label)} aria-label={t('detail.copyUrl', { label: u.label })}>
                   <Copy aria-hidden />
-                  Copy
+                  {t('actions.copy', { ns: 'common' })}
                 </Button>
               </li>
             ))}
@@ -135,13 +138,13 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
         </section>
 
         <section>
-          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Used in</h3>
+          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('detail.usedIn')}</h3>
           {usage.isPending ? (
             <Skeleton className="h-8 w-full" />
           ) : usage.isError ? (
-            <p className="text-sm text-destructive">Could not check which entries use this file.</p>
+            <p className="text-sm text-destructive">{t('detail.usageError')}</p>
           ) : usedIn.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Not used in any entry.</p>
+            <p className="text-sm text-muted-foreground">{t('detail.unused')}</p>
           ) : (
             <ul className="flex flex-col gap-1.5">
               {usedIn.map((u) => (
@@ -155,23 +158,23 @@ function MediaDetails({ media, onDeleted }: { media: MediaFile; onDeleted: () =>
           )}
         </section>
 
-        <p className="text-xs text-muted-foreground">Uploaded {formatAbsolute(media.createdAt)}</p>
+        <p className="text-xs text-muted-foreground">{t('detail.uploaded', { date: formatAbsolute(media.createdAt) })}</p>
         <Button variant="outline" className="self-start text-destructive" disabled={usage.isPending} onClick={() => setConfirmDelete(true)}>
-          Delete file
+          {t('detail.deleteFile')}
         </Button>
       </div>
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={`Delete ${media.originalName}?`}
+        title={t('detail.deleteTitle', { name: media.originalName })}
         description={
           usage.isError
-            ? 'We could not check which entries use this file. Entries that use it will show a missing file.'
+            ? t('detail.deleteUnknown')
             : usedIn.length > 0
-            ? `${usedIn.length} ${usedIn.length === 1 ? 'entry uses' : 'entries use'} this file. They will show a missing file until you replace it.`
-            : 'This permanently removes the file.'
+            ? `${t('detail.usedBy', { count: usedIn.length })} ${t('detail.usedByConsequence')}`
+            : t('detail.deletePermanent')
         }
-        confirmLabel="Delete"
+        confirmLabel={t('actions.delete', { ns: 'common' })}
         destructive
         onConfirm={() => void remove()}
       />

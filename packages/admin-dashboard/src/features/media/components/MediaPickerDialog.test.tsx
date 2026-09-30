@@ -1,9 +1,10 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderWithProviders } from '@/test/render'
+import { renderWithProviders, setTestLanguage } from '@/test/render'
 import * as api from '../media-api'
 import { MediaPickerDialog } from './MediaPickerDialog'
 import { makeMedia, mediaPage } from '../test-fixtures'
+import { i18n } from '@/i18n'
 
 vi.mock('../media-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../media-api')>()
@@ -56,3 +57,9 @@ describe('MediaPickerDialog', () => {
   })
 })
 
+it('labels the multi-select button with Czech plurals', async () => {
+  await setTestLanguage('cs')
+  expect(i18n.t('media:picker.chooseCount', { count: 1 })).toBe('Vybrat 1 soubor')
+  expect(i18n.t('media:picker.chooseCount', { count: 3 })).toBe('Vybrat 3 soubory')
+  expect(i18n.t('media:picker.chooseCount', { count: 5 })).toBe('Vybrat 5 souborů')
+})

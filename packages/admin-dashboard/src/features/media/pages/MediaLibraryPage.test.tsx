@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import * as api from '../media-api'
 import { MediaLibraryPage } from './MediaLibraryPage'
 import { makeMedia, mediaPage } from '../test-fixtures'
@@ -86,3 +86,26 @@ describe('MediaLibraryPage', () => {
   })
 })
 
+describe('in Czech', () => {
+  it('shows the library in Czech', async () => {
+    await setTestLanguage('cs')
+    renderRoutes(routes, { route: '/media' })
+    expect(await screen.findByRole('heading', { level: 1, name: 'Média' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /Nahrát/ }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: 'Obrázky' })).toBeInTheDocument()
+  })
+
+  it('counts entries that use a file with Czech plurals', async () => {
+    await setTestLanguage('cs')
+    vi.mocked(api.getMediaUsage).mockResolvedValue([
+      { id: 'e1', title: 'Přes Šumavu', status: 'PUBLISHED', contentType: { id: 't', name: 'Trip', slug: 'trip' } },
+      { id: 'e2', title: 'Krkonoše', status: 'DRAFT', contentType: { id: 't', name: 'Trip', slug: 'trip' } },
+    ])
+    renderRoutes(routes, { route: '/media?item=m1' })
+    const sheet = await screen.findByRole('dialog', { name: 'sumava.jpg' })
+    await within(sheet).findByRole('link', { name: 'Přes Šumavu' })
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Smazat soubor' }))
+    const confirm = await screen.findByRole('alertdialog')
+    expect(within(confirm).getByText(/2 položky používají tento soubor/)).toBeInTheDocument()
+  })
+})

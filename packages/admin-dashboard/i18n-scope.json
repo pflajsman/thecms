@@ -45,6 +45,14 @@
     "src/components/RichTextEditor.tsx",
     "src/components/rich-text/EditorToolbar.tsx",
     "src/components/ResizableImage.tsx",
-    "src/lib/api-error.ts"
+    "src/lib/api-error.ts",
+    "src/features/media/pages/MediaLibraryPage.tsx",
+    "src/features/media/components/MediaFilters.tsx",
+    "src/features/media/components/UploadTray.tsx",
+    "src/features/media/media-utils.ts",
+    "src/features/media/components/MediaPickerDialog.tsx",
+    "src/features/media/components/MediaDetailSheet.tsx",
+    "src/features/media/components/MediaGrid.tsx",
+    "src/features/media/components/MediaTile.tsx"
   ]
 }

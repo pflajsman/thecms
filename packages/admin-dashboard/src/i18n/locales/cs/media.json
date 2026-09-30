@@ -1,0 +1,87 @@
+{
+  "title": "Média",
+  "upload": {
+    "uploadingCount_one": "Nahrává se {{count}} soubor",
+    "uploadingCount_few": "Nahrávají se {{count}} soubory",
+    "uploadingCount_other": "Nahrává se {{count}} souborů",
+    "uploadingTray_one": "Nahrává se {{count}} soubor…",
+    "uploadingTray_few": "Nahrávají se {{count}} soubory…",
+    "uploadingTray_other": "Nahrává se {{count}} souborů…",
+    "finished": "Nahrávání dokončeno",
+    "clear": "Vymazat",
+    "trayLabel": "Nahrávání",
+    "uploadingItem": "Nahrává se {{name}}",
+    "tooLarge": "Soubor {{name}} je větší než 10 MB.",
+    "unsupported": "Soubor {{name}} má nepodporovaný typ."
+  },
+  "library": {
+    "description": "Obrázky, dokumenty, videa a trasy GPX. Soubory nahrajete přetažením kamkoli na stránku.",
+    "loading": "Načítání médií",
+    "loadError": "Média se nepodařilo načíst.",
+    "noMatch": "Žádné soubory neodpovídají",
+    "clearFilters": "Zrušit filtry",
+    "emptyTitle": "Zatím žádná média",
+    "emptyText": "Přetáhněte soubory kamkoli na tuto stránku nebo je vyberte v počítači.",
+    "uploadFiles": "Nahrát soubory",
+    "dropOverlay": "Pusťte soubory pro nahrání"
+  },
+  "filters": {
+    "all": "Vše",
+    "image": "Obrázky",
+    "document": "Dokumenty",
+    "video": "Video",
+    "fileType": "Typ souboru",
+    "search": "Hledat média",
+    "searchPlaceholder": "Hledat podle názvu, popisu nebo štítku…"
+  },
+  "picker": {
+    "titleOne": "Vyberte soubor",
+    "titleMany": "Vyberte soubory",
+    "description": "Vyberte z knihovny nebo nahrajte nové soubory.",
+    "notAllowed": "Soubor {{name}} sem nelze vložit.",
+    "empty": "Žádné soubory. Nahrajte první.",
+    "gridLabel": "Soubory",
+    "choose": "Vybrat",
+    "chooseCount_one": "Vybrat {{count}} soubor",
+    "chooseCount_few": "Vybrat {{count}} soubory",
+    "chooseCount_other": "Vybrat {{count}} souborů"
+  },
+  "grid": {
+    "notAllowed": "Pro toto pole není povoleno"
+  },
+  "detail": {
+    "loading": "Načítání souboru",
+    "saved": "Údaje uloženy",
+    "deleted": "Soubor {{name}} smazán",
+    "urlCopied": "Adresa {{label}} zkopírována",
+    "original": "Originál",
+    "variant": "{{name}} ({{size}})",
+    "variants": {
+      "thumbnail": "Náhled",
+      "small": "Malý",
+      "medium": "Střední",
+      "large": "Velký"
+    },
+    "altText": "Alternativní text",
+    "altHint": "Přidejte alternativní text, aby lidé se čtečkou obrazovky věděli, co obrázek zobrazuje.",
+    "description": "Popis",
+    "tags": "Štítky",
+    "tagsPlaceholder": "Štítky oddělte čárkami",
+    "saving": "Ukládání…",
+    "links": "Odkazy",
+    "copyUrl": "Kopírovat adresu {{label}}",
+    "usedIn": "Použito v",
+    "usageError": "Nepodařilo se zjistit, které položky soubor používají.",
+    "unused": "Nepoužito v žádné položce.",
+    "uploaded": "Nahráno {{date}}",
+    "deleteFile": "Smazat soubor",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteUnknown": "Nepodařilo se zjistit, které položky soubor používají. Položky, které ho používají, zobrazí chybějící soubor.",
+    "usedBy_one": "{{count}} položka používá tento soubor.",
+    "usedBy_few": "{{count}} položky používají tento soubor.",
+    "usedBy_other": "{{count}} položek používá tento soubor.",
+    "usedByConsequence": "Dokud ho nenahradíte, zobrazí chybějící soubor.",
+    "deletePermanent": "Soubor bude trvale odstraněn."
+  },
+  "uploadButton": "Nahrát"
+}

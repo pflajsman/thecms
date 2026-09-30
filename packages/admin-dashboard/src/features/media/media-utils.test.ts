@@ -1,5 +1,6 @@
 import { formatBytes, isImage, matchesAccept, mediaCategory, originalUrl, previewUrl, validateUpload } from './media-utils'
 import { makeMedia } from './test-fixtures'
+import { i18n } from '@/i18n'
 
 const file = (name: string, type: string, size = 1000) => new File([new Uint8Array(size)], name, { type })
 
@@ -56,5 +57,21 @@ describe('matchesAccept', () => {
     expect(matchesAccept(img, ['image/*'])).toBe(true)
     expect(matchesAccept(gpx, ['image/*'])).toBe(false)
     expect(matchesAccept(gpx, ['application/gpx+xml'])).toBe(true)
+  })
+})
+
+describe('in Czech', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('cs')
+  })
+
+  it('formats sizes with a decimal comma', () => {
+    expect(formatBytes(1536 * 1024)).toBe('1,5 MB')
+    expect(formatBytes(2048)).toBe('2 KB')
+  })
+
+  it('explains rejected uploads in Czech', () => {
+    expect(validateUpload(file('mapa.png', 'image/png', 11 * 1024 * 1024))).toBe('Soubor mapa.png je větší než 10 MB.')
+    expect(validateUpload(file('skript.exe', 'application/x-msdownload'))).toBe('Soubor skript.exe má nepodporovaný typ.')
   })
 })

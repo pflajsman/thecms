@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Upload } from 'lucide-react'
 import type { MediaFile } from '@/types'
@@ -38,7 +39,8 @@ function PickerBody({ onSelect, multiple, accept }: { onSelect: (m: MediaFile[])
   const [filters, setFilters] = useState<MediaFilterValue>({ search: '', category: imagesOnly ? 'image' : undefined })
   const [pageNo, setPageNo] = useState(1)
   const [selected, setSelected] = useState<MediaFile[]>([])
-  const [rejected, setRejected] = useState<string | null>(null)
+  const { t } = useTranslation('media')
+  const [rejected, setRejected] = useState<string[]>([])
   const writes = useMediaWrites()
   const list = useMediaList({ category: filters.category, search: filters.search || undefined, page: pageNo, limit: PAGE_SIZE })
 
@@ -62,43 +64,43 @@ function PickerBody({ onSelect, multiple, accept }: { onSelect: (m: MediaFile[])
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="font-serif text-xl">Choose {multiple ? 'files' : 'a file'}</DialogTitle>
-        <DialogDescription>Pick from your library or upload new files.</DialogDescription>
+        <DialogTitle className="font-serif text-xl">{multiple ? t('picker.titleMany') : t('picker.titleOne')}</DialogTitle>
+        <DialogDescription>{t('picker.description')}</DialogDescription>
       </DialogHeader>
       <div className="flex items-center gap-2">
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm hover:bg-accent">
           <Upload aria-hidden className="size-4" />
-          Upload
+          {t('uploadButton')}
           <input
             type="file"
             multiple={multiple}
             accept={accept?.join(',')}
-            aria-label="Upload files"
+            aria-label={t('library.uploadFiles')}
             className="sr-only"
             onChange={(e) => {
               const files = Array.from(e.target.files ?? [])
               const bad = files.filter((f) => !matchesAccept({ mimeType: f.type, originalName: f.name }, accept))
-              setRejected(bad.length ? bad.map((f) => `${f.name} is not allowed here.`).join(' ') : null)
+              setRejected(bad.map((f) => f.name))
               uploads.add(files.filter((f) => !bad.includes(f)))
               e.target.value = ''
             }}
           />
         </label>
       </div>
-      {rejected && <p role="alert" className="text-sm text-destructive">{rejected}</p>}
+      {rejected.length > 0 && <p role="alert" className="text-sm text-destructive">{rejected.map((name) => t('picker.notAllowed', { name })).join(' ')}</p>}
       <MediaFilters value={filters} hideCategories={imagesOnly} onChange={(v) => { setFilters(v); setPageNo(1) }} />
       {list.isPending ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="aspect-square w-full" />)}</div>
       ) : shown.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">No files found. Upload one to get started.</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">{t('picker.empty')}</p>
       ) : (
-        <MediaGrid label="Files" mode="select" items={shown} selectedIds={selected.map((s) => s.id)} disabled={(m) => !matchesAccept(m, accept)} onActivate={toggle} />
+        <MediaGrid label={t('picker.gridLabel')} mode="select" items={shown} selectedIds={selected.map((s) => s.id)} disabled={(m) => !matchesAccept(m, accept)} onActivate={toggle} />
       )}
       {list.data && <Pager page={pageNo} limit={PAGE_SIZE} total={list.data.pagination.total} onPageChange={setPageNo} />}
       <UploadTray inline items={uploads.items} onClear={uploads.clearFinished} />
       <DialogFooter>
         <Button disabled={selected.length === 0} onClick={() => onSelect(selected)}>
-          {selected.length === 0 ? 'Choose' : `Choose ${selected.length} file${selected.length === 1 ? '' : 's'}`}
+          {selected.length === 0 ? t('picker.choose') : t('picker.chooseCount', { count: selected.length })}
         </Button>
       </DialogFooter>
     </>

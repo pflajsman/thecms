@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -9,14 +10,15 @@ export interface MediaFilterValue {
   search: string
 }
 
-const CATEGORIES: { value?: MediaFilterValue['category']; label: string }[] = [
-  { value: undefined, label: 'All' },
-  { value: 'image', label: 'Images' },
-  { value: 'document', label: 'Documents' },
-  { value: 'video', label: 'Video' },
-]
+const CATEGORIES = [
+  { value: undefined, labelKey: 'filters.all' },
+  { value: 'image', labelKey: 'filters.image' },
+  { value: 'document', labelKey: 'filters.document' },
+  { value: 'video', labelKey: 'filters.video' },
+] as const satisfies readonly { value?: MediaFilterValue['category']; labelKey: string }[]
 
 export function MediaFilters({ value, onChange, hideCategories = false }: { value: MediaFilterValue; onChange: (v: MediaFilterValue) => void; hideCategories?: boolean }) {
+  const { t } = useTranslation('media')
   const [search, setSearch] = useState(value.search)
   const debounced = useDebouncedValue(search, 300)
 
@@ -37,18 +39,18 @@ export function MediaFilters({ value, onChange, hideCategories = false }: { valu
   return (
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
       {!hideCategories && (
-        <div role="group" aria-label="File type" className="flex gap-1.5 overflow-x-auto">
+        <div role="group" aria-label={t('filters.fileType')} className="flex gap-1.5 overflow-x-auto">
           {CATEGORIES.map((c) => {
             const active = value.category === c.value
             return (
               <button
-                key={c.label}
+                key={c.labelKey}
                 type="button"
                 aria-pressed={active}
                 onClick={() => onChange({ search: value.search, category: c.value })}
                 className={cn('shrink-0 rounded-full border px-3 py-1 text-sm', active ? 'border-foreground bg-foreground text-background' : 'bg-card hover:bg-accent')}
               >
-                {c.label}
+                {t(c.labelKey)}
               </button>
             )
           })}
@@ -56,7 +58,7 @@ export function MediaFilters({ value, onChange, hideCategories = false }: { valu
       )}
       <div className="relative flex-1">
         <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input type="search" aria-label="Search media" placeholder="Search by name, alt text or tag…" value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-full pl-9" />
+        <Input type="search" aria-label={t('filters.search')} placeholder={t('filters.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-full pl-9" />
       </div>
     </div>
   )

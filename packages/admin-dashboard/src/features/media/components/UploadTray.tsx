@@ -1,13 +1,15 @@
+import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { UploadItem } from '../useUploadQueue'
 
 export function UploadTray({ items, onClear, inline = false }: { items: UploadItem[]; onClear: () => void; inline?: boolean }) {
+  const { t } = useTranslation('media')
   if (items.length === 0) return null
   const active = items.filter((i) => i.status === 'queued' || i.status === 'uploading').length
   return (
     <section
-      aria-label="Uploads"
+      aria-label={t('upload.trayLabel')}
       className={
         inline
           ? 'rounded-xl border bg-popover p-3 text-popover-foreground'
@@ -16,11 +18,11 @@ export function UploadTray({ items, onClear, inline = false }: { items: UploadIt
     >
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-medium" aria-live="polite">
-          {active > 0 ? `Uploading ${active} file${active === 1 ? '' : 's'}…` : 'Uploads finished'}
+          {active > 0 ? t('upload.uploadingTray', { count: active }) : t('upload.finished')}
         </h2>
         {active === 0 && (
           <Button variant="ghost" size="sm" onClick={onClear}>
-            Clear
+            {t('upload.clear')}
           </Button>
         )}
       </div>
@@ -34,7 +36,7 @@ export function UploadTray({ items, onClear, inline = false }: { items: UploadIt
               <span className="min-w-0 flex-1 truncate">{item.name}</span>
             </div>
             {item.status === 'uploading' && (
-              <div role="progressbar" aria-label={`Uploading ${item.name}`} aria-valuenow={Math.round(item.progress * 100)} aria-valuemin={0} aria-valuemax={100} className="mt-1 h-1 rounded-full bg-muted">
+              <div role="progressbar" aria-label={t('upload.uploadingItem', { name: item.name })} aria-valuenow={Math.round(item.progress * 100)} aria-valuemin={0} aria-valuemax={100} className="mt-1 h-1 rounded-full bg-muted">
                 <div className="h-1 rounded-full bg-primary transition-[width]" style={{ width: `${Math.round(item.progress * 100)}%` }} />
               </div>
             )}
