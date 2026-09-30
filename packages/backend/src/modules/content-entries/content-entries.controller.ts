@@ -146,6 +146,8 @@ export class ContentEntriesController {
         search: query.search || undefined,
         sortBy: query.sortBy,
         sortOrder: query.sortOrder,
+        language: query.language,
+        missing: query.missing,
       });
 
       res.status(200).json({

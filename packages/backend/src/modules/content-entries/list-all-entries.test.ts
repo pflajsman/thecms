@@ -13,6 +13,7 @@ import { ContentEntriesService } from './content-entries.service';
 import { ContentTypeModel } from '../../models/content-type.model';
 import { ContentStatus } from '../../models/content-entry.model';
 import { FieldType } from '../../types/field-types';
+import { LanguageModel } from '../../models/language.model';
 import entriesRoutes from './content-entries.routes';
 
 useTestDb();
@@ -117,5 +118,48 @@ describe('GET /entries', () => {
   it('rejects an unknown sortBy with 400', async () => {
     const res = await request(app).get('/entries?sortBy=data.secret');
     expect(res.status).toBe(400);
+  });
+});
+
+describe('content languages in the entry list', () => {
+  async function seedVersions() {
+    await LanguageModel.create([
+      { code: 'en', name: 'English', isDefault: true, order: 0 },
+      { code: 'cs', name: 'Čeština', order: 1 },
+    ]);
+    const type = await ContentTypeModel.create({
+      name: 'Trip',
+      slug: 'trip-langs',
+      fields: [{ name: 'title', label: 'Title', type: FieldType.TEXT, required: false }],
+    });
+    const a = await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'A' } });
+    await ContentEntriesService.createEntry({
+      contentTypeId: String(type._id),
+      data: { title: 'A cs' },
+      language: 'cs',
+      itemId: String(a.itemId),
+    });
+    await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'B' } });
+  }
+
+  it('filters by language and lists each item’s languages', async () => {
+    await seedVersions();
+    const cs = await request(app).get('/entries').query({ language: 'cs' });
+    expect(cs.body.data.map((e: { title: string }) => e.title)).toEqual(['A cs']);
+    expect(cs.body.data[0]).toMatchObject({ language: 'cs', languages: ['cs', 'en'] });
+    expect(typeof cs.body.data[0].itemId).toBe('string');
+  });
+
+  it('finds items missing a language', async () => {
+    await seedVersions();
+    const missing = await request(app).get('/entries').query({ missing: 'cs' });
+    expect(missing.body.data.map((e: { title: string }) => e.title)).toEqual(['B']);
+    expect(missing.body.pagination.total).toBe(1);
+  });
+
+  it('lists every version without a language filter', async () => {
+    await seedVersions();
+    const all = await request(app).get('/entries');
+    expect(all.body.pagination.total).toBe(3);
   });
 });

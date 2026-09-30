@@ -43,6 +43,10 @@ export interface ListAllEntriesOptions {
   search?: string;
   sortBy?: 'updatedAt' | 'createdAt' | 'title';
   sortOrder?: 'asc' | 'desc';
+  /** Only versions in this language. */
+  language?: string;
+  /** Items with no version in this language (their default-language version unless `language` is set). */
+  missing?: string;
 }
 
 export interface EntryContentTypeRef {
@@ -54,6 +58,8 @@ export interface EntryContentTypeRef {
 export type EntryListItem = ReturnType<IContentEntry['toJSON']> & {
   title: string;
   contentType: EntryContentTypeRef | null;
+  /** Codes of every version of the item, sorted. */
+  languages: string[];
 };
 
 export interface PaginatedEntryListItems {
@@ -226,6 +232,8 @@ export class ContentEntriesService {
       search,
       sortBy = 'updatedAt',
       sortOrder = 'desc',
+      language,
+      missing,
     } = options;
 
     // `any` matches the existing query-building style in this service.
@@ -233,6 +241,12 @@ export class ContentEntriesService {
     if (contentTypeIds && contentTypeIds.length > 0) query.contentTypeId = { $in: contentTypeIds };
     if (status) query.status = status;
     if (search) query.title = { $regex: escapeRegex(search), $options: 'i' };
+    if (language) query.language = language;
+    if (missing) {
+      const covered = await ContentEntryModel.distinct('itemId', { language: missing });
+      query.itemId = { $nin: covered };
+      if (!language) query.language = await LanguagesService.defaultCode();
+    }
 
     const direction = sortOrder === 'asc' ? 1 : -1;
     // One sort key only: Cosmos DB (production) needs an index that matches the sort exactly, and
@@ -250,11 +264,21 @@ export class ContentEntriesService {
       types.map((t) => [String(t._id), { id: String(t._id), name: t.name, slug: t.slug }])
     );
 
+    const siblings = await ContentEntryModel.find({ itemId: { $in: entries.map((e) => e.itemId) } })
+      .select('itemId language')
+      .lean();
+    const languagesByItem = new Map<string, string[]>();
+    for (const s of siblings) {
+      const key = String(s.itemId);
+      languagesByItem.set(key, [...(languagesByItem.get(key) ?? []), s.language]);
+    }
+
     return {
       entries: entries.map((e) => ({
         ...e.toJSON(),
         title: e.title,
         contentType: typeMap.get(String(e.contentTypeId)) ?? null,
+        languages: [...(languagesByItem.get(String(e.itemId)) ?? [])].sort(),
       })),
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };

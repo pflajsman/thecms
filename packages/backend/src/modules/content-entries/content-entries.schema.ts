@@ -258,6 +258,8 @@ export const listAllEntriesSchema = z.object({
     search: z.string().trim().max(100, 'Search must be at most 100 characters').optional(),
     sortBy: z.enum(['updatedAt', 'createdAt', 'title']).optional().default('updatedAt'),
     sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+    language: z.string().trim().toLowerCase().regex(LANGUAGE_CODE).optional(),
+    missing: z.string().trim().toLowerCase().regex(LANGUAGE_CODE).optional(),
   }),
 });
 

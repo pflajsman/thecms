@@ -13,13 +13,17 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [byStatus, byTypeRows, contentTypes, media, sites, unread] = await Promise.all([
+  const [byStatus, byTypeRows, itemIds, contentTypes, media, sites, unread] = await Promise.all([
+    // Status counts count language versions.
     ContentEntryModel.aggregate<{ _id: ContentStatus; count: number }>([
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]),
+    // Totals count items: one per itemId, however many language versions it has.
     ContentEntryModel.aggregate<{ _id: unknown; count: number }>([
-      { $group: { _id: '$contentTypeId', count: { $sum: 1 } } },
+      { $group: { _id: { type: '$contentTypeId', item: '$itemId' } } },
+      { $group: { _id: '$_id.type', count: { $sum: 1 } } },
     ]),
+    ContentEntryModel.distinct('itemId'),
     ContentTypeModel.countDocuments(),
     MediaModel.countDocuments(),
     SiteModel.countDocuments(),
@@ -33,7 +37,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   return {
     entries: {
-      total: draft + published + archived,
+      total: itemIds.length,
       draft,
       published,
       archived,

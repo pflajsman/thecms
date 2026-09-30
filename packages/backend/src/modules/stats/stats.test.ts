@@ -13,6 +13,8 @@ import { ContentTypeModel } from '../../models/content-type.model';
 import { ContentEntryModel, ContentStatus } from '../../models/content-entry.model';
 import { FormSubmissionModel, SubmissionStatus } from '../../models/form-submission.model';
 import { FieldType } from '../../types/field-types';
+import { LanguageModel } from '../../models/language.model';
+import { ContentEntriesService } from '../content-entries/content-entries.service';
 
 useTestDb();
 
@@ -67,4 +69,27 @@ it('GET /stats responds with the stats envelope', async () => {
   expect(res.status).toBe(200);
   expect(res.body.success).toBe(true);
   expect(res.body.data.entries.total).toBe(0);
+});
+
+it('counts entries as items, not versions; status counts count versions', async () => {
+  await LanguageModel.create([
+    { code: 'en', name: 'English', isDefault: true, order: 0 },
+    { code: 'cs', name: 'Čeština', order: 1 },
+  ]);
+  const type = await ContentTypeModel.create({
+    name: 'Trip',
+    slug: 'trip',
+    fields: [{ name: 'title', label: 'Title', type: FieldType.TEXT, required: false }],
+  });
+  const a = await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'A' } });
+  await ContentEntriesService.createEntry({
+    contentTypeId: String(type._id),
+    data: { title: 'A cs' },
+    language: 'cs',
+    itemId: String(a.itemId),
+  });
+  const stats = await getDashboardStats();
+  expect(stats.entries.total).toBe(1);
+  expect(stats.entries.byType[String(type._id)]).toBe(1);
+  expect(stats.entries.draft).toBe(2);
 });

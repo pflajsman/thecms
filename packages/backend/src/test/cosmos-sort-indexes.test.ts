@@ -10,6 +10,8 @@ import { ContentEntriesService } from '../modules/content-entries/content-entrie
 import { ContactFormsService } from '../modules/contact-forms/contact-forms.service';
 import { ContentEntryModel } from '../models/content-entry.model';
 import { FormSubmissionModel } from '../models/form-submission.model';
+import { LanguageModel } from '../models/language.model';
+import { LanguagesService } from '../modules/languages/languages.service';
 
 useTestDb();
 
@@ -63,4 +65,16 @@ it('inbox submission list is served by a declared index', async () => {
   const sorts = await captureSorts(FormSubmissionModel.collection.name, () => ContactFormsService.listAllSubmissions({}));
   expect(sorts).toHaveLength(1);
   expect({ sort: sorts[0], served: servedByIndex(sorts[0], FormSubmissionModel) }).toEqual({ sort: sorts[0], served: true });
+});
+
+it('languages list is served by a declared index', async () => {
+  const sorts = await captureSorts(LanguageModel.collection.name, () => LanguagesService.list());
+  expect(sorts).toHaveLength(1);
+  expect({ sort: sorts[0], served: servedByIndex(sorts[0], LanguageModel) }).toEqual({ sort: sorts[0], served: true });
+});
+
+it.each([{ language: 'en' }, { missing: 'cs' }])('entry list filtered by %o is served by a declared index', async (filter) => {
+  const sorts = await captureSorts(ContentEntryModel.collection.name, () => ContentEntriesService.listAllEntries(filter));
+  expect(sorts).toHaveLength(1);
+  expect({ sort: sorts[0], served: servedByIndex(sorts[0], ContentEntryModel) }).toEqual({ sort: sorts[0], served: true });
 });
