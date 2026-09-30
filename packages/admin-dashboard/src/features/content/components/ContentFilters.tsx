@@ -50,9 +50,9 @@ export function ContentFilters({ types, counts, params, update }: ContentFilters
             className="rounded-full pl-9"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select value={params.status ?? ANY} onValueChange={(v) => update({ status: v === ANY ? undefined : (v as EntryStatus) })}>
-            <SelectTrigger aria-label={t('filters.status')} className="w-36 rounded-full">
+            <SelectTrigger aria-label={t('filters.status')} className="w-auto min-w-36 rounded-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -63,7 +63,7 @@ export function ContentFilters({ types, counts, params, update }: ContentFilters
             </SelectContent>
           </Select>
           <Select value={params.sort} onValueChange={(v) => update({ sort: v as ContentSort })}>
-            <SelectTrigger aria-label={t('filters.sort')} className="w-40 rounded-full">
+            <SelectTrigger aria-label={t('filters.sort')} className="w-auto min-w-40 rounded-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

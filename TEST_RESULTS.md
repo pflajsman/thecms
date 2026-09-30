@@ -365,3 +365,21 @@ Environment: local mongod and Azurite, backend and admin dev servers from the Pl
 | 360px (iframe): sites list, site form, new site, webhooks list, webhook form, new webhook, entry editor; no horizontal scroll | Pass |
 | Focus visible on every focusable control of the sites list, site form, webhook form and the editor toolbar (focused with `focusVisible`; real Tab key presses do not reach the page in this browser tooling) | Pass (after fix in this plan for the text color picker) |
 | Main bundle after removing MUI: 1,397.82 kB (gzip 439.02 kB) before, 1,314.49 kB (gzip 410.05 kB) after | Noted |
+
+## Localization Plan 1 verification (2026-09-30)
+
+Environment: local mongod and Azurite, backend and admin dev servers from the localization worktree, browser language `en-GB`.
+
+| Check | Result |
+|---|---|
+| Admin tests (426), `pnpm lint` (0 errors, 0 warnings), build | Pass |
+| First visit with an English browser and nothing saved: English, `<html lang="en">` | Pass |
+| First visit with a Czech browser language | Covered by unit tests only (the browser language cannot be changed from the tooling) |
+| Account menu, Language, Čeština: sidebar, groups, Home and headings switch at once; `thecms.language` = `cs`; `<html lang="cs">` | Pass |
+| Reload keeps Czech | Pass |
+| Home in Czech: greeting, connected-site card, tiles with Czech plurals (27 položek, 18 konceptů, 2 nepřečtené zprávy, 4 mediální soubory), relative dates (včera) | Pass |
+| Content list in Czech: heading, filters, statuses, column headers, dates | Pass (after fix in this plan: the sort select was cut off, "Naposledy uprav…") |
+| Entry editor in Czech: actions, save status, toolbar, side panel, Czech date format (29. 9. 2026, 14:41); user field labels stay as typed | Pass |
+| 360px in Czech (iframe): Home, Content list, entry editor, new entry; no horizontal scroll, no clipped labels | Pass (after the same fix: filter selects now wrap) |
+| Dark theme in Czech (Home, Content list, editor) | Pass |
+| Console: React key warning in `EntryEditor` (`renderField` inside a map) | Noted, predates this plan |
