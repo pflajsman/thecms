@@ -157,7 +157,7 @@ describe('in Czech', () => {
     await screen.findByRole('button', { name: 'Add Text field' })
     await setTestLanguage('cs')
     expect(screen.getByRole('button', { name: 'Přidat pole Formátovaný text' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Přidat pole Ano, nebo ne' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Přidat pole Ano/ne' })).toBeInTheDocument()
   })
 })
 

@@ -97,7 +97,7 @@ describe('HomePage in Czech', () => {
     expect(await screen.findByRole('heading', { name: 'Vítejte v TheCMS' })).toBeInTheDocument()
     const steps = screen.getByRole('list', { name: 'Kroky nastavení' })
     expect(within(steps).getByRole('link', { name: 'Vytvořit model' })).toHaveAttribute('href', '/models/new')
-    expect(within(steps).getByText('Přihlásit se')).toBeInTheDocument()
+    expect(within(steps).getByText('Přihlaste se')).toBeInTheDocument()
   })
 
   it('agrees tile labels with the count in Czech', async () => {

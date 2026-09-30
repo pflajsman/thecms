@@ -4,7 +4,7 @@
     "RICH_TEXT": "Formátovaný text",
     "NUMBER": "Číslo",
     "DATE": "Datum",
-    "BOOLEAN": "Ano, nebo ne",
+    "BOOLEAN": "Ano/ne",
     "MEDIA": "Média",
     "RELATION": "Odkaz na položku"
   },
@@ -13,7 +13,7 @@
     "RICH_TEXT": "Formátovaný text",
     "NUMBER": "Číslo",
     "DATE": "Datum",
-    "BOOLEAN": "Ano, nebo ne",
+    "BOOLEAN": "Ano/ne",
     "MEDIA": "Média",
     "RELATION": "Odkaz na položku"
   },
@@ -109,7 +109,7 @@
     "addField": "Přidat pole {{type}}",
     "fieldOfType": "Pole typu {{type}}",
     "fieldSettings": "Nastavení pole",
-    "renameTitle": "Změnit klíče API?",
+    "renameTitle": "Změnit API klíče?",
     "usedBy_one": "Tento model má {{count}} položku.",
     "usedBy_few": "Tento model má {{count}} položky.",
     "usedBy_other": "Tento model má {{count}} položek.",
@@ -126,7 +126,7 @@
   },
   "inspector": {
     "label": "Popisek",
-    "apiKey": "Klíč API",
+    "apiKey": "API klíč",
     "lockedHint": "Pokud klíč přejmenujete, weby, které ho čtou, přestanou hodnotu dostávat.",
     "keyHint": "Vytvořen z popisku. Web čte hodnotu podle tohoto klíče.",
     "helpText": "Nápověda",

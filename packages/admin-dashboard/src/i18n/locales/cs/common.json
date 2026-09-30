@@ -38,11 +38,11 @@
   },
   "dnd": {
     "instructions": "Pro zvednutí položky stiskněte mezerník. Během přetahování ji posouvejte šipkami. Dalším stisknutím mezerníku ji položíte na nové místo, klávesou Escape přetahování zrušíte.",
-    "picked": "Zvednuto: {{name}}.",
-    "over": "{{name}} je nad pozicí {{target}}.",
-    "notOver": "{{name}} už není nad žádnou pozicí.",
-    "dropped": "{{name}} položeno na pozici {{target}}.",
-    "droppedNowhere": "{{name}} položeno.",
-    "cancelled": "Přetahování zrušeno. {{name}} vráceno zpět."
+    "picked": "Zvednuta položka {{name}}.",
+    "over": "Položka {{name}} je nad pozicí {{target}}.",
+    "notOver": "Položka {{name}} už není nad žádnou pozicí.",
+    "dropped": "Položka {{name}} byla položena na pozici {{target}}.",
+    "droppedNowhere": "Položka {{name}} byla položena.",
+    "cancelled": "Přetahování zrušeno. Položka {{name}} se vrátila zpět."
   }
 }

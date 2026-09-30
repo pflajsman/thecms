@@ -1,12 +1,12 @@
 {
   "key": {
-    "required": "Klíč API je povinný",
+    "required": "API klíč je povinný",
     "pattern": "Začněte písmenem a používejte jen písmena, číslice a podtržítka",
     "taken": "Tento klíč už používá jiné pole"
   },
   "list": {
     "untitled": "Pole bez názvu",
-    "titleField": "Pole s názvem",
+    "titleField": "Pole pro název",
     "hasErrors": "Obsahuje chyby",
     "moveUp": "Posunout {{name}} nahoru",
     "moveDown": "Posunout {{name}} dolů",

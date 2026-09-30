@@ -58,7 +58,7 @@
   },
   "inspector": {
     "label": "Popisek",
-    "apiKey": "Klíč API",
+    "apiKey": "API klíč",
     "keyHint": "Web odesílá hodnotu pod tímto klíčem.",
     "placeholder": "Zástupný text",
     "required": "Povinné",

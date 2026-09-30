@@ -11,7 +11,7 @@
     "rotated": "Nový klíč vytvořen. Nastavte ho na webu.",
     "copied": "API klíč zkopírován",
     "active": "Aktivní",
-    "disabled": "Vypnuto",
+    "disabled": "Neaktivní",
     "requests_one": "{{count}} požadavek",
     "requests_few": "{{count}} požadavky",
     "requests_other": "{{count}} požadavků",
@@ -48,9 +48,9 @@
     "domainPlaceholder": "example.com"
   },
   "connect": {
-    "copied": "Ukázka {{label}} zkopírována",
-    "copyExample": "Kopírovat ukázku {{label}}",
-    "example": "Ukázka {{label}}",
+    "copied": "Ukázka pro {{label}} zkopírována",
+    "copyExample": "Kopírovat ukázku pro {{label}}",
+    "example": "Ukázka pro {{label}}",
     "title": "Připojte svůj web",
     "text": "Načítejte publikované položky pomocí API klíče tohoto webu.",
     "langJs": "JavaScript",
