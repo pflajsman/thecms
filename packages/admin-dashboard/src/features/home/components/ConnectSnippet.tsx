@@ -17,7 +17,7 @@ export function ConnectSnippet({ apiKey, slug }: { apiKey: string; slug: string 
         <span>{t('snippet.language')}</span>
         <Button variant="ghost" size="sm" onClick={() => void navigator.clipboard?.writeText(code).then(() => toast.success(t('snippet.copied')))}>
           <Copy aria-hidden />
-          {t('common:actions.copy')}
+          {t('actions.copy', { ns: 'common' })}
         </Button>
       </div>
       <pre aria-label={t('snippet.fetchExample')} className="overflow-x-auto p-3 text-xs"><code>{code}</code></pre>

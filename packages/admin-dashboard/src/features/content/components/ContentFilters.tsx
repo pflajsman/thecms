@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import type { ContentType, EntryStatus } from '@/types'
@@ -17,6 +18,7 @@ interface ContentFiltersProps {
 const ANY = 'any'
 
 export function ContentFilters({ types, counts, params, update }: ContentFiltersProps) {
+  const { t } = useTranslation('content')
   const [search, setSearch] = useState(params.q ?? '')
   const debounced = useDebouncedValue(search, 300)
 
@@ -41,8 +43,8 @@ export function ContentFilters({ types, counts, params, update }: ContentFilters
           <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            aria-label="Search entries"
-            placeholder="Search by title…"
+            aria-label={t('filters.search')}
+            placeholder={t('filters.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="rounded-full pl-9"
@@ -50,31 +52,31 @@ export function ContentFilters({ types, counts, params, update }: ContentFilters
         </div>
         <div className="flex gap-2">
           <Select value={params.status ?? ANY} onValueChange={(v) => update({ status: v === ANY ? undefined : (v as EntryStatus) })}>
-            <SelectTrigger aria-label="Status" className="w-36 rounded-full">
+            <SelectTrigger aria-label={t('filters.status')} className="w-36 rounded-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ANY}>Any status</SelectItem>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-              <SelectItem value="PUBLISHED">Published</SelectItem>
-              <SelectItem value="ARCHIVED">Archived</SelectItem>
+              <SelectItem value={ANY}>{t('filters.anyStatus')}</SelectItem>
+              <SelectItem value="DRAFT">{t('status.DRAFT', { ns: 'common' })}</SelectItem>
+              <SelectItem value="PUBLISHED">{t('status.PUBLISHED', { ns: 'common' })}</SelectItem>
+              <SelectItem value="ARCHIVED">{t('status.ARCHIVED', { ns: 'common' })}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={params.sort} onValueChange={(v) => update({ sort: v as ContentSort })}>
-            <SelectTrigger aria-label="Sort" className="w-40 rounded-full">
+            <SelectTrigger aria-label={t('filters.sort')} className="w-40 rounded-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="updatedAt">Last edited</SelectItem>
-              <SelectItem value="createdAt">Created</SelectItem>
-              <SelectItem value="title">Title A to Z</SelectItem>
+              <SelectItem value="updatedAt">{t('filters.sortUpdated')}</SelectItem>
+              <SelectItem value="createdAt">{t('filters.sortCreated')}</SelectItem>
+              <SelectItem value="title">{t('filters.sortTitle')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
-      <div className="flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Content model">
+      <div className="flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label={t('filters.model')}>
         <Chip active={!params.type} onClick={() => update({ type: undefined })}>
-          All types
+          {t('filters.allTypes')}
         </Chip>
         {types.map((t) => (
           <Chip key={t.id} active={params.type === t.id} onClick={() => update({ type: t.id })}>

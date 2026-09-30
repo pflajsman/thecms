@@ -1,1 +1,70 @@
-{}
+{
+  "list": {
+    "title": "Content",
+    "description": "Everything you publish, across all content models.",
+    "tableLabel": "Entries",
+    "loading": "Loading entries",
+    "loadError": "Could not load content.",
+    "noMatch": "No entries match these filters",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No entries yet",
+    "emptyText": "Create your first entry to see it here.",
+    "newEntry": "New entry",
+    "deletedModel": "Deleted model",
+    "untitled": "Untitled"
+  },
+  "columns": {
+    "title": "Title",
+    "model": "Model",
+    "edited": "Edited",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "filters": {
+    "search": "Search entries",
+    "searchPlaceholder": "Search by title…",
+    "status": "Status",
+    "anyStatus": "Any status",
+    "sort": "Sort",
+    "sortUpdated": "Last edited",
+    "sortCreated": "Created",
+    "sortTitle": "Title A to Z",
+    "model": "Content model",
+    "allTypes": "All types"
+  },
+  "rowMenu": {
+    "actionsFor": "Actions for {{title}}",
+    "open": "Open",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "restore": "Restore to draft",
+    "archive": "Archive",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{{title}}”?",
+    "deleteText": "This permanently removes the entry. Sites that show it will stop receiving it."
+  },
+  "newEntry": {
+    "button": "New entry",
+    "ofType": "New entry of type",
+    "createModel": "Create a content model",
+    "dialogTitle": "New entry",
+    "dialogText": "Choose what you want to create."
+  },
+  "typeChooser": {
+    "firstTitle": "Create a content model first",
+    "firstText": "Content models define the fields your entries have.",
+    "createModel": "Create a content model",
+    "fieldCount_one": "{{count}} field",
+    "fieldCount_other": "{{count}} fields"
+  },
+  "toast": {
+    "published": "Published “{{title}}”",
+    "unpublished": "Unpublished “{{title}}”",
+    "archived": "Archived “{{title}}”",
+    "restored": "Restored “{{title}}” to draft",
+    "duplicated": "Duplicated “{{title}}”",
+    "deleted": "Deleted “{{title}}”",
+    "undone": "Undone"
+  }
+}

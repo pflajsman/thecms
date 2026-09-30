@@ -1,6 +1,6 @@
 import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import * as api from '../content-api'
 import { ContentListPage } from './ContentListPage'
 import { makeListItem, page, postType, tripType } from '../test-fixtures'
@@ -140,5 +140,33 @@ describe('ContentListPage', () => {
     expect(api.deleteEntry).not.toHaveBeenCalled()
     await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }))
     expect(api.deleteEntry).toHaveBeenCalledWith('e1')
+  })
+})
+
+describe('in Czech', () => {
+  it('shows the list, statuses, pager and new entry in Czech', async () => {
+    await setTestLanguage('cs')
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem(), makeListItem({ id: 'e2', title: 'Jak jsem stavěl CMS', status: 'PUBLISHED' })], 23))
+    renderRoutes(routes, { route: '/content' })
+    expect(await screen.findByRole('heading', { level: 1, name: 'Obsah' })).toBeInTheDocument()
+    const table = await screen.findByRole('table', { name: 'Položky' })
+    expect(within(table).getByText('Publikováno')).toBeInTheDocument()
+    expect(screen.getByText('1–20 z 23')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Nová položka' })).toBeInTheDocument()
+    expect(screen.getByRole('searchbox', { name: 'Hledat položky' })).toBeInTheDocument()
+  })
+
+  it('counts model fields with Czech plurals', async () => {
+    await setTestLanguage('cs')
+    const field = tripType.fields[0]
+    const withFields = (id: string, name: string, n: number) => ({ ...tripType, id, name, description: undefined, fields: Array.from({ length: n }, (_, i) => ({ ...field, name: `f${i}` })) })
+    vi.mocked(api.listContentTypes).mockResolvedValue([withFields('t1', 'One', 1), withFields('t2', 'Two', 2), withFields('t5', 'Five', 5)])
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem()]))
+    renderRoutes(routes, { route: '/content' })
+    await userEvent.click(await screen.findByRole('button', { name: 'Nová položka' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('1 pole')).toBeInTheDocument()
+    expect(within(dialog).getByText('2 pole')).toBeInTheDocument()
+    expect(within(dialog).getByText('5 polí')).toBeInTheDocument()
   })
 })

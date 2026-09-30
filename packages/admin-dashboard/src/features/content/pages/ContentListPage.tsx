@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FileText, SearchX } from 'lucide-react'
@@ -28,6 +29,7 @@ import { coverMediaId } from '../cover'
 
 export function ContentListPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation('content')
   const [params, update] = useContentListParams()
   const typesQuery = useContentTypes()
   const stats = useStats()
@@ -57,11 +59,11 @@ export function ContentListPage() {
   }, [rows, pagination, params.page, update])
 
   const columns: DataColumn<EntryListItem>[] = [
-    { id: 'title', header: 'Title', cell: (e) => <span className="flex items-center gap-3"><TypeBadge entry={e} cover={coverFor(e)} /><TitleLink entry={e} /></span> },
-    { id: 'type', header: 'Model', cell: (e) => <TypeLabel entry={e} />, className: 'w-40' },
-    { id: 'edited', header: 'Edited', cell: (e) => <Edited date={e.updatedAt} />, className: 'w-32 whitespace-nowrap' },
-    { id: 'status', header: 'Status', cell: (e) => <StatusPill status={e.status} />, className: 'w-28' },
-    { id: 'actions', header: 'Actions', hideHeader: true, cell: (e) => <EntryRowMenu entry={e} type={e.contentType ? typeById.get(e.contentType.id) : undefined} />, className: 'w-12 text-right' },
+    { id: 'title', header: t('columns.title'), cell: (e) => <span className="flex items-center gap-3"><TypeBadge entry={e} cover={coverFor(e)} /><TitleLink entry={e} /></span> },
+    { id: 'type', header: t('columns.model'), cell: (e) => <TypeLabel entry={e} />, className: 'w-40' },
+    { id: 'edited', header: t('columns.edited'), cell: (e) => <Edited date={e.updatedAt} />, className: 'w-32 whitespace-nowrap' },
+    { id: 'status', header: t('columns.status'), cell: (e) => <StatusPill status={e.status} />, className: 'w-28' },
+    { id: 'actions', header: t('columns.actions'), hideHeader: true, cell: (e) => <EntryRowMenu entry={e} type={e.contentType ? typeById.get(e.contentType.id) : undefined} />, className: 'w-12 text-right' },
   ]
 
   let body: React.ReactNode
@@ -70,29 +72,29 @@ export function ContentListPage() {
   } else if (list.isPending || (rows?.length === 0 && (list.isPlaceholderData || (pagination && pagination.total > 0 && params.page > pagination.totalPages)))) {
     body = <ListSkeleton />
   } else if (list.isError) {
-    body = <ErrorState message="Could not load content." onRetry={() => void list.refetch()} />
+    body = <ErrorState message={t('list.loadError')} onRetry={() => void list.refetch()} />
   } else if (list.data.data.length === 0 && filtersActive) {
     body = (
       <EmptyState
         icon={SearchX}
-        title="No entries match these filters"
-        action={<Button variant="outline" onClick={() => update({ type: undefined, status: undefined, q: undefined })}>Clear filters</Button>}
+        title={t('list.noMatch')}
+        action={<Button variant="outline" onClick={() => update({ type: undefined, status: undefined, q: undefined })}>{t('list.clearFilters')}</Button>}
       />
     )
   } else if (list.data.data.length === 0) {
     body = (
       <EmptyState
         icon={FileText}
-        title="No entries yet"
-        description="Create your first entry to see it here."
-        action={<Button asChild><Link to="/content/new">New entry</Link></Button>}
+        title={t('list.emptyTitle')}
+        description={t('list.emptyText')}
+        action={<Button asChild><Link to="/content/new">{t('list.newEntry')}</Link></Button>}
       />
     )
   } else {
     body = (
       <div className={cn(list.isPlaceholderData && 'opacity-60 transition-opacity')}>
         <DataList
-          caption="Entries"
+          caption={t('list.tableLabel')}
           rows={list.data.data}
           columns={columns}
           rowKey={(e) => e.id}
@@ -102,7 +104,7 @@ export function ContentListPage() {
               <div className="min-w-0 flex-1">
                 <TitleLink entry={e} />
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {e.contentType?.name ?? 'Deleted model'} · <Edited date={e.updatedAt} />
+                  {e.contentType?.name ?? t('list.deletedModel')} · <Edited date={e.updatedAt} />
                 </p>
               </div>
               <StatusPill status={e.status} />
@@ -117,7 +119,7 @@ export function ContentListPage() {
 
   return (
     <>
-      <PageHeader title="Content" description="Everything you publish, across all content models." actions={<NewEntryButton types={types} />} />
+      <PageHeader title={t('list.title')} description={t('list.description')} actions={<NewEntryButton types={types} />} />
       {types.length > 0 && <ContentFilters types={types} counts={stats.data?.entries.byType} params={params} update={update} />}
       {body}
     </>
@@ -125,20 +127,22 @@ export function ContentListPage() {
 }
 
 function TitleLink({ entry }: { entry: EntryListItem }) {
+  const { t } = useTranslation('content')
   const untitled = entry.title === UNTITLED
   return (
     <Link
       to={`/content/${entry.id}`}
       className={cn('font-serif text-base font-semibold hover:underline', untitled && 'italic text-muted-foreground')}
     >
-      {entry.title}
+      {untitled ? t('list.untitled') : entry.title}
     </Link>
   )
 }
 
 function TypeLabel({ entry }: { entry: EntryListItem }) {
+  const { t } = useTranslation('content')
   return (
-    <span className="text-muted-foreground">{entry.contentType?.name ?? 'Deleted model'}</span>
+    <span className="text-muted-foreground">{entry.contentType?.name ?? t('list.deletedModel')}</span>
   )
 }
 
@@ -162,8 +166,9 @@ function Edited({ date }: { date: string }) {
 }
 
 function ListSkeleton() {
+  const { t } = useTranslation('content')
   return (
-    <div role="status" aria-busy="true" aria-label="Loading entries" className="space-y-2">
+    <div role="status" aria-busy="true" aria-label={t('list.loading')} className="space-y-2">
       {Array.from({ length: 6 }, (_, i) => (
         <Skeleton key={i} className="h-14 w-full rounded-lg" />
       ))}

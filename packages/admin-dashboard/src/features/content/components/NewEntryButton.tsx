@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronDown, Plus } from 'lucide-react'
@@ -9,27 +10,28 @@ import { TypeChooser } from './TypeChooser'
 
 export function NewEntryButton({ types }: { types: ContentType[] }) {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation('content')
   return (
     <div className="flex">
       <Button className="rounded-r-none" onClick={() => setOpen(true)}>
         <Plus aria-hidden />
-        New entry
+        {t('newEntry.button')}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="rounded-l-none border-l border-primary-foreground/30 px-2" aria-label="New entry of type">
+          <Button className="rounded-l-none border-l border-primary-foreground/30 px-2" aria-label={t('newEntry.ofType')}>
             <ChevronDown aria-hidden />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {types.map((t) => (
-            <DropdownMenuItem key={t.id} asChild>
-              <Link to={`/content/new?type=${t.id}`}>{t.name}</Link>
+          {types.map((type) => (
+            <DropdownMenuItem key={type.id} asChild>
+              <Link to={`/content/new?type=${type.id}`}>{type.name}</Link>
             </DropdownMenuItem>
           ))}
           {types.length === 0 && (
             <DropdownMenuItem asChild>
-              <Link to="/models">Create a content model</Link>
+              <Link to="/models">{t('newEntry.createModel')}</Link>
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -37,8 +39,8 @@ export function NewEntryButton({ types }: { types: ContentType[] }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl">New entry</DialogTitle>
-            <DialogDescription>Choose what you want to create.</DialogDescription>
+            <DialogTitle className="font-serif text-xl">{t('newEntry.dialogTitle')}</DialogTitle>
+            <DialogDescription>{t('newEntry.dialogText')}</DialogDescription>
           </DialogHeader>
           <TypeChooser types={types} onChoose={() => setOpen(false)} />
         </DialogContent>

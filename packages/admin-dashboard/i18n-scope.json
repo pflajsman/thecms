@@ -21,6 +21,12 @@
     "src/features/home/pages/HomePage.tsx",
     "src/features/home/components/SetupChecklist.tsx",
     "src/features/home/components/ConnectSnippet.tsx",
-    "src/features/home/home-utils.ts"
+    "src/features/home/home-utils.ts",
+    "src/features/content/pages/ContentListPage.tsx",
+    "src/features/content/components/ContentFilters.tsx",
+    "src/features/content/components/EntryRowMenu.tsx",
+    "src/features/content/components/NewEntryButton.tsx",
+    "src/features/content/components/TypeChooser.tsx",
+    "src/features/content/useEntryActions.ts"
   ]
 }

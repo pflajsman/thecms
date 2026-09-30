@@ -1,1 +1,71 @@
-{}
+{
+  "list": {
+    "title": "Obsah",
+    "description": "Vše, co publikujete, napříč modely obsahu.",
+    "tableLabel": "Položky",
+    "loading": "Načítání položek",
+    "loadError": "Obsah se nepodařilo načíst.",
+    "noMatch": "Filtrům neodpovídá žádná položka",
+    "clearFilters": "Zrušit filtry",
+    "emptyTitle": "Zatím žádné položky",
+    "emptyText": "Vytvořte první položku a zobrazí se tady.",
+    "newEntry": "Nová položka",
+    "deletedModel": "Smazaný model",
+    "untitled": "Bez názvu"
+  },
+  "columns": {
+    "title": "Název",
+    "model": "Model",
+    "edited": "Upraveno",
+    "status": "Stav",
+    "actions": "Akce"
+  },
+  "filters": {
+    "search": "Hledat položky",
+    "searchPlaceholder": "Hledat podle názvu…",
+    "status": "Stav",
+    "anyStatus": "Jakýkoli stav",
+    "sort": "Řazení",
+    "sortUpdated": "Naposledy upravené",
+    "sortCreated": "Datum vytvoření",
+    "sortTitle": "Název A až Z",
+    "model": "Model obsahu",
+    "allTypes": "Všechny typy"
+  },
+  "rowMenu": {
+    "actionsFor": "Akce pro {{title}}",
+    "open": "Otevřít",
+    "publish": "Publikovat",
+    "unpublish": "Zrušit publikování",
+    "restore": "Vrátit do konceptu",
+    "archive": "Archivovat",
+    "duplicate": "Duplikovat",
+    "delete": "Smazat",
+    "deleteTitle": "Smazat „{{title}}“?",
+    "deleteText": "Položka bude trvale odstraněna. Weby, které ji zobrazují, ji přestanou dostávat."
+  },
+  "newEntry": {
+    "button": "Nová položka",
+    "ofType": "Nová položka podle modelu",
+    "createModel": "Vytvořit model obsahu",
+    "dialogTitle": "Nová položka",
+    "dialogText": "Vyberte, co chcete vytvořit."
+  },
+  "typeChooser": {
+    "firstTitle": "Nejdřív vytvořte model obsahu",
+    "firstText": "Modely obsahu určují, jaká pole mají vaše položky.",
+    "createModel": "Vytvořit model obsahu",
+    "fieldCount_one": "{{count}} pole",
+    "fieldCount_few": "{{count}} pole",
+    "fieldCount_other": "{{count}} polí"
+  },
+  "toast": {
+    "published": "Publikováno „{{title}}“",
+    "unpublished": "Publikování „{{title}}“ zrušeno",
+    "archived": "Archivováno „{{title}}“",
+    "restored": "„{{title}}“ vráceno do konceptu",
+    "duplicated": "Vytvořena kopie „{{title}}“",
+    "deleted": "Smazáno „{{title}}“",
+    "undone": "Vráceno zpět"
+  }
+}

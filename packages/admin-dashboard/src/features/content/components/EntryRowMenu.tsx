@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MoreHorizontal } from 'lucide-react'
@@ -15,40 +16,41 @@ import { useEntryActions } from '../useEntryActions'
 
 export function EntryRowMenu({ entry, type }: { entry: EntryListItem; type?: ContentType }) {
   const actions = useEntryActions()
+  const { t } = useTranslation('content')
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label={`Actions for ${entry.title}`}>
+          <Button variant="ghost" size="icon" aria-label={t('rowMenu.actionsFor', { title: entry.title })}>
             <MoreHorizontal aria-hidden />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
-            <Link to={`/content/${entry.id}`}>Open</Link>
+            <Link to={`/content/${entry.id}`}>{t('rowMenu.open')}</Link>
           </DropdownMenuItem>
-          {entry.status === 'DRAFT' && <DropdownMenuItem onSelect={() => actions.publish(entry)}>Publish</DropdownMenuItem>}
-          {entry.status === 'PUBLISHED' && <DropdownMenuItem onSelect={() => actions.unpublish(entry)}>Unpublish</DropdownMenuItem>}
+          {entry.status === 'DRAFT' && <DropdownMenuItem onSelect={() => actions.publish(entry)}>{t('rowMenu.publish')}</DropdownMenuItem>}
+          {entry.status === 'PUBLISHED' && <DropdownMenuItem onSelect={() => actions.unpublish(entry)}>{t('rowMenu.unpublish')}</DropdownMenuItem>}
           {entry.status === 'ARCHIVED' ? (
-            <DropdownMenuItem onSelect={() => actions.restore(entry)}>Restore to draft</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => actions.restore(entry)}>{t('rowMenu.restore')}</DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onSelect={() => actions.archive(entry)}>Archive</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => actions.archive(entry)}>{t('rowMenu.archive')}</DropdownMenuItem>
           )}
-          {entry.contentType && <DropdownMenuItem onSelect={() => actions.duplicate(entry, type)}>Duplicate</DropdownMenuItem>}
+          {entry.contentType && <DropdownMenuItem onSelect={() => actions.duplicate(entry, type)}>{t('rowMenu.duplicate')}</DropdownMenuItem>}
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onSelect={() => setConfirmDelete(true)}>
-            Delete
+            {t('rowMenu.delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={`Delete “${entry.title}”?`}
-        description="This permanently removes the entry. Sites that show it will stop receiving it."
-        confirmLabel="Delete"
+        title={t('rowMenu.deleteTitle', { title: entry.title })}
+        description={t('rowMenu.deleteText')}
+        confirmLabel={t('rowMenu.delete')}
         destructive
         onConfirm={() => {
           setConfirmDelete(false)
