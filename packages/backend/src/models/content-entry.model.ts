@@ -38,9 +38,9 @@ const ContentEntrySchema = new Schema<IContentEntry>(
       index: true,
     },
     // Content language of this version (see models/language.model.ts).
-    language: { type: String, index: true, trim: true, lowercase: true },
+    language: { type: String, required: true, index: true, trim: true, lowercase: true },
     // Groups the language versions of one entry. Existing entries use their own _id.
-    itemId: { type: Schema.Types.ObjectId, index: true },
+    itemId: { type: Schema.Types.ObjectId, required: true, index: true },
     data: {
       type: Schema.Types.Mixed,
       required: [true, 'Content data is required'],

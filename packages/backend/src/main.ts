@@ -3,6 +3,7 @@ import { app } from './app';
 import { connectDatabase } from './config/database';
 import { storageService } from './config/storage';
 import { EmailService } from './services/email.service';
+import { migrateLanguages } from './utils/migrate-languages';
 
 // Load environment variables
 dotenv.config();
@@ -17,6 +18,14 @@ async function startServer() {
     // Connect to database
     await connectDatabase();
     console.log('✅ Database connected successfully');
+
+    // Content languages: create the default language and assign existing entries (idempotent).
+    const migration = await migrateLanguages();
+    if (migration.createdDefault || migration.migratedEntries > 0) {
+      console.log(
+        `✅ Content languages migrated (default created: ${migration.createdDefault}, entries: ${migration.migratedEntries})`
+      );
+    }
 
     // Initialize blob storage
     await storageService.initialize();

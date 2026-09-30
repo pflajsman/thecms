@@ -6,6 +6,8 @@ import { WebhookService } from '../../services/webhook.service';
 import { WebhookEvent } from '../../models/webhook.model';
 import { computeEntryTitle } from '../../utils/entryTitle';
 import { escapeRegex } from '../../utils/regex';
+import { AppError } from '../../middleware/error.middleware';
+import { LanguagesService } from '../languages/languages.service';
 
 /**
  * Query options for listing content entries
@@ -66,6 +68,10 @@ export interface CreateEntryData {
   data: Record<string, any>;
   status?: ContentStatus;
   createdBy?: string;
+  /** Content language code; defaults to the default language. */
+  language?: string;
+  /** Item to add this version to; a new item when absent. */
+  itemId?: string;
 }
 
 /**
@@ -110,8 +116,20 @@ export class ContentEntriesService {
       );
     }
 
+    const language = entryData.language ?? (await LanguagesService.defaultCode());
+    await LanguagesService.assertExists(language);
+    const _id = new mongoose.Types.ObjectId();
+    const itemId = entryData.itemId ? new mongoose.Types.ObjectId(entryData.itemId) : _id;
+    // No unique index on { itemId, language }: Cosmos DB cannot add one to a non-empty collection.
+    if (entryData.itemId && (await ContentEntryModel.exists({ itemId, language }))) {
+      throw new AppError('This language already exists for this entry', 409);
+    }
+
     // Create the entry
     const entry = new ContentEntryModel({
+      _id,
+      itemId,
+      language,
       contentTypeId: entryData.contentTypeId,
       data: entryData.data,
       title: computeEntryTitle(entryData.data, contentType.fields, contentType.titleField),

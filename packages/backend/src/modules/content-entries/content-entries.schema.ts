@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ContentStatus } from '../../models/content-entry.model';
+import { LANGUAGE_CODE } from '../../models/language.model';
 
 /**
  * Schema for creating a content entry
@@ -14,6 +15,13 @@ export const createContentEntrySchema = z.object({
       .optional()
       .default(ContentStatus.DRAFT)
       .describe('Entry status: DRAFT, PUBLISHED, or ARCHIVED'),
+    language: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(LANGUAGE_CODE)
+      .optional()
+      .describe('Content language code; defaults to the default language'),
   }),
 });
 
@@ -142,6 +150,13 @@ export const createEntryForTypeSchema = z.object({
       .optional()
       .default(ContentStatus.DRAFT)
       .describe('Entry status: DRAFT, PUBLISHED, or ARCHIVED'),
+    language: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(LANGUAGE_CODE)
+      .optional()
+      .describe('Content language code; defaults to the default language'),
   }),
 });
 

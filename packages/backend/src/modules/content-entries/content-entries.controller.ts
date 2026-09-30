@@ -40,6 +40,7 @@ export class ContentEntriesController {
         contentTypeId: validated.params.typeId,
         data: validated.body.data,
         status: validated.body.status,
+        language: validated.body.language,
         createdBy: userId,
       });
 

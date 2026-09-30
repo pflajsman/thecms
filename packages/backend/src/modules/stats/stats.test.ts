@@ -32,11 +32,15 @@ it('counts entries by status, types and unread submissions', async () => {
     slug: 'post',
     fields: [{ name: 'title', label: 'Title', type: FieldType.TEXT, required: false }],
   });
+  const entry = (status: ContentStatus) => {
+    const _id = new mongoose.Types.ObjectId();
+    return { _id, itemId: _id, language: 'en', contentTypeId: type._id, data: {}, status };
+  };
   await ContentEntryModel.create([
-    { contentTypeId: type._id, data: {}, status: ContentStatus.DRAFT },
-    { contentTypeId: type._id, data: {}, status: ContentStatus.DRAFT },
-    { contentTypeId: type._id, data: {}, status: ContentStatus.PUBLISHED },
-    { contentTypeId: type._id, data: {}, status: ContentStatus.ARCHIVED },
+    entry(ContentStatus.DRAFT),
+    entry(ContentStatus.DRAFT),
+    entry(ContentStatus.PUBLISHED),
+    entry(ContentStatus.ARCHIVED),
   ]);
   const formId = new mongoose.Types.ObjectId();
   await FormSubmissionModel.collection.insertMany([
