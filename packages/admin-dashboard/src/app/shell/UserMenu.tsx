@@ -67,7 +67,7 @@ export function UserMenu({ variant, setupModules }: UserMenuProps) {
               <DropdownMenuItem key={m.id} asChild>
                 <Link to={m.path}>
                   <m.icon aria-hidden />
-                  {m.label}
+                  {t(m.labelKey)}
                 </Link>
               </DropdownMenuItem>
             ))}

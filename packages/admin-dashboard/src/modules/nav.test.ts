@@ -3,7 +3,7 @@ import { collectRoutes, findActiveModule, groupModules, isModuleActive, mobileTa
 import type { AppModule } from './types'
 
 const mod = (over: Partial<AppModule>): AppModule => ({
-  id: 'x', label: 'X', icon: House, group: 'workspace', path: '/x', routes: [], ...over,
+  id: 'x', labelKey: 'nav.home', icon: House, group: 'workspace', path: '/x', routes: [], ...over,
 })
 
 const home = mod({ id: 'home', path: '/', mobileTab: true, routes: [{ index: true }] })

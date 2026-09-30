@@ -1,6 +1,22 @@
 {
   "files": [
     "src/app/shell/SignInScreen.tsx",
-    "src/i18n/LanguageSwitcher.tsx"
+    "src/i18n/LanguageSwitcher.tsx",
+    "src/modules/registry.tsx",
+    "src/app/shell/Sidebar.tsx",
+    "src/app/shell/TopBar.tsx",
+    "src/app/shell/MobileTabs.tsx",
+    "src/app/shell/UserMenu.tsx",
+    "src/app/shell/CommandPalette.tsx",
+    "src/app/shell/ShellSkeleton.tsx",
+    "src/app/shell/AppShell.tsx",
+    "src/app/RouteError.tsx",
+    "src/components/common/ConfirmDialog.tsx",
+    "src/components/common/EmptyState.tsx",
+    "src/components/common/ErrorState.tsx",
+    "src/components/common/Pager.tsx",
+    "src/components/common/StatusPill.tsx",
+    "src/components/common/DataList.tsx",
+    "src/components/common/PageHeader.tsx"
   ]
 }

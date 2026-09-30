@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import type { AppModule, CreateAction } from '@/modules/types'
@@ -19,10 +20,11 @@ export function MobileTabs({ modules, actions }: MobileTabsProps) {
   const { pathname } = useLocation()
   const tabs = mobileTabModules(modules)
   const middle = Math.ceil(tabs.length / 2)
+  const { t } = useTranslation('shell')
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t('mobile.primary')}
       className="fixed inset-x-0 bottom-0 z-40 flex items-end justify-around border-t border-sidebar-border bg-sidebar pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       {tabs.slice(0, middle).map((m) => (
@@ -37,6 +39,7 @@ export function MobileTabs({ modules, actions }: MobileTabsProps) {
 }
 
 function Tab({ module, active }: { module: AppModule; active: boolean }) {
+  const { t } = useTranslation('shell')
   const Icon = module.icon
   return (
     <Link
@@ -48,7 +51,7 @@ function Tab({ module, active }: { module: AppModule; active: boolean }) {
       )}
     >
       <Icon aria-hidden className="size-5" />
-      {module.label}
+      {t(module.labelKey)}
       {module.useBadge && <TabDot useCount={module.useBadge} />}
     </Link>
   )
@@ -66,11 +69,12 @@ function TabDot({ useCount }: { useCount: () => number | undefined }) {
 
 function CreateMenu({ actions }: { actions: CreateAction[] }) {
   const navigate = useNavigate()
+  const { t } = useTranslation('shell')
   return (
     <div className="flex flex-1 justify-center">
       <DropdownMenu>
         <DropdownMenuTrigger
-          aria-label="Create"
+          aria-label={t('mobile.create')}
           className="-mt-5 mb-2 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Plus aria-hidden className="size-6" />
@@ -79,7 +83,7 @@ function CreateMenu({ actions }: { actions: CreateAction[] }) {
           {actions.map((a) => (
             <DropdownMenuItem key={a.id} onSelect={() => navigate(a.to)}>
               <a.icon aria-hidden />
-              {a.label}
+              {t(a.labelKey)}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -24,6 +25,7 @@ export function CommandPaletteProvider({ modules, actions, children }: ProviderP
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
+  const { t } = useTranslation('shell')
   const debouncedQuery = useDebouncedValue(query.trim(), 250)
   const entrySearch = useEntryList(
     { search: debouncedQuery, limit: 8, sortBy: 'updatedAt' },
@@ -53,12 +55,12 @@ export function CommandPaletteProvider({ modules, actions, children }: ProviderP
   return (
     <CommandPaletteContext.Provider value={value}>
       {children}
-      <CommandDialog open={open} onOpenChange={setOpen} title="Command palette" description="Search or jump to a page or action">
-        <CommandInput placeholder="Search or jump to…" value={query} onValueChange={setQuery} />
+      <CommandDialog open={open} onOpenChange={setOpen} title={t('commandPalette.title')} description={t('commandPalette.description')}>
+        <CommandInput placeholder={t('commandPalette.placeholder')} value={query} onValueChange={setQuery} />
         <CommandList>
-          <CommandEmpty>No results.</CommandEmpty>
+          <CommandEmpty>{t('commandPalette.empty')}</CommandEmpty>
           {entries.length > 0 && (
-            <CommandGroup heading="Entries">
+            <CommandGroup heading={t('commandPalette.entries')}>
               {entries.map((e) => (
                 <CommandItem key={e.id} value={`entry-${e.id}`} keywords={[e.title, debouncedQuery]} onSelect={() => go(`/content/${e.id}`)}>
                   <FileText aria-hidden />
@@ -68,19 +70,19 @@ export function CommandPaletteProvider({ modules, actions, children }: ProviderP
               ))}
             </CommandGroup>
           )}
-          <CommandGroup heading="Go to">
+          <CommandGroup heading={t('commandPalette.goTo')}>
             {modules.map((m) => (
-              <CommandItem key={m.id} value={m.label} onSelect={() => go(m.path)}>
+              <CommandItem key={m.id} value={t(m.labelKey)} onSelect={() => go(m.path)}>
                 <m.icon aria-hidden />
-                {m.label}
+                {t(m.labelKey)}
               </CommandItem>
             ))}
           </CommandGroup>
-          <CommandGroup heading="Create">
+          <CommandGroup heading={t('commandPalette.create')}>
             {actions.map((a) => (
-              <CommandItem key={a.id} value={a.label} onSelect={() => go(a.to)}>
+              <CommandItem key={a.id} value={t(a.labelKey)} onSelect={() => go(a.to)}>
                 <a.icon aria-hidden />
-                {a.label}
+                {t(a.labelKey)}
               </CommandItem>
             ))}
           </CommandGroup>

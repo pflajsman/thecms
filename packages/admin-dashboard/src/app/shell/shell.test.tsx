@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Boxes, FileText, House, Image as ImageIcon, Inbox, Plus } from 'lucide-react'
-import { renderWithProviders } from '@/test/render'
+import { renderWithProviders, setTestLanguage } from '@/test/render'
 import type { AppModule, CreateAction } from '@/modules/types'
 import { Sidebar } from './Sidebar'
 import { MobileTabs } from './MobileTabs'
@@ -29,13 +29,13 @@ const auth = vi.hoisted(() => ({
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => auth.value }))
 
 const testModules: AppModule[] = [
-  { id: 'home', label: 'Home', icon: House, group: 'workspace', path: '/', mobileTab: true, routes: [] },
-  { id: 'content', label: 'Content', icon: FileText, group: 'workspace', path: '/content', matches: ['/entries'], mobileTab: true, routes: [] },
-  { id: 'media', label: 'Media', icon: ImageIcon, group: 'workspace', path: '/media', mobileTab: true, routes: [] },
-  { id: 'inbox', label: 'Inbox', icon: Inbox, group: 'workspace', path: '/inbox', mobileTab: true, useBadge: () => 3, routes: [] },
-  { id: 'models', label: 'Content models', icon: Boxes, group: 'setup', path: '/models', matches: ['/content-types'], routes: [] },
+  { id: 'home', labelKey: 'nav.home', icon: House, group: 'workspace', path: '/', mobileTab: true, routes: [] },
+  { id: 'content', labelKey: 'nav.content', icon: FileText, group: 'workspace', path: '/content', matches: ['/entries'], mobileTab: true, routes: [] },
+  { id: 'media', labelKey: 'nav.media', icon: ImageIcon, group: 'workspace', path: '/media', mobileTab: true, routes: [] },
+  { id: 'inbox', labelKey: 'nav.inbox', icon: Inbox, group: 'workspace', path: '/inbox', mobileTab: true, useBadge: () => 3, routes: [] },
+  { id: 'models', labelKey: 'nav.models', icon: Boxes, group: 'setup', path: '/models', matches: ['/content-types'], routes: [] },
 ]
-const testActions: CreateAction[] = [{ id: 'new-entry', label: 'New entry', to: '/content', icon: Plus }]
+const testActions: CreateAction[] = [{ id: 'new-entry', labelKey: 'create.newEntry', to: '/content', icon: Plus }]
 
 function LocationProbe() {
   return <div data-testid="location">{useLocation().pathname}</div>
@@ -151,5 +151,19 @@ describe('UserMenu language', () => {
     expect(await screen.findByText('Jazyk')).toBeInTheDocument()
     expect(screen.getByRole('menuitemradio', { name: 'Čeština' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('menuitem', { name: 'Odhlásit se' })).toBeInTheDocument()
+  })
+})
+
+describe('shell in Czech', () => {
+  it('shows navigation, groups and search in Czech', async () => {
+    await setTestLanguage('cs')
+    renderWithProviders(withPalette(<Sidebar modules={testModules} />))
+    const nav = screen.getByRole('navigation', { name: 'Hlavní navigace' })
+    for (const name of ['Přehled', 'Obsah', 'Média', 'Zprávy', 'Modely obsahu']) {
+      expect(within(nav).getByRole('link', { name: new RegExp(name) })).toBeInTheDocument()
+    }
+    expect(within(nav).getByText('Práce')).toBeInTheDocument()
+    expect(within(nav).getByText('Nastavení')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Hledat nebo přejít' })).toBeInTheDocument()
   })
 })

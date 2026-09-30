@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import type { AppModule } from '@/modules/types'
@@ -15,6 +16,7 @@ export function Sidebar({ modules }: SidebarProps) {
   const { pathname } = useLocation()
   const { setOpen } = useCommandPalette()
   const { workspace, setup } = groupModules(modules)
+  const { t } = useTranslation('shell')
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-16 shrink-0 flex-col bg-sidebar px-2 py-4 text-sidebar-foreground md:flex lg:w-60 lg:px-3">
@@ -25,16 +27,16 @@ export function Sidebar({ modules }: SidebarProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Search or jump to"
+        aria-label={t('search.open')}
         className="mb-3 flex items-center justify-center gap-2 rounded-full border border-sidebar-border bg-card px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent lg:justify-start"
       >
         <Search aria-hidden className="size-4 shrink-0" />
-        <span className="hidden flex-1 text-left lg:inline">Search or jump…</span>
+        <span className="hidden flex-1 text-left lg:inline">{t('search.short')}</span>
         <kbd className="hidden text-xs lg:inline">⌘K</kbd>
       </button>
-      <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-5 overflow-y-auto">
-        <NavGroup label="Workspace" modules={workspace} pathname={pathname} />
-        <NavGroup label="Setup" modules={setup} pathname={pathname} />
+      <nav aria-label={t('sidebar.mainNav')} className="flex flex-1 flex-col gap-5 overflow-y-auto">
+        <NavGroup label={t('groups.workspace')} modules={workspace} pathname={pathname} />
+        <NavGroup label={t('groups.setup')} modules={setup} pathname={pathname} />
       </nav>
       <UserMenu variant="sidebar" />
     </aside>
@@ -58,19 +60,21 @@ function NavGroup({ label, modules, pathname }: { label: string; modules: AppMod
 }
 
 function NavItem({ module, active }: { module: AppModule; active: boolean }) {
+  const { t } = useTranslation('shell')
   const Icon = module.icon
+  const label = t(module.labelKey)
   return (
     <Link
       to={module.path}
       aria-current={active ? 'page' : undefined}
-      title={module.label}
+      title={label}
       className={cn(
         'relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors',
         active ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground',
       )}
     >
       <Icon aria-hidden className="size-4 shrink-0" />
-      <span className="hidden flex-1 lg:inline">{module.label}</span>
+      <span className="hidden flex-1 lg:inline">{label}</span>
       {module.useBadge && <NavBadge useCount={module.useBadge} />}
     </Link>
   )

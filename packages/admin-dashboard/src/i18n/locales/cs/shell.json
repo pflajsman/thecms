@@ -14,5 +14,54 @@
     "title": "Vítejte v TheCMS",
     "subtitle": "Přihlaste se a spravujte svůj obsah.",
     "button": "Přihlásit se"
-  }
+  },
+  "nav": {
+    "home": "Přehled",
+    "content": "Obsah",
+    "media": "Média",
+    "inbox": "Zprávy",
+    "models": "Modely obsahu",
+    "forms": "Formuláře",
+    "sites": "Weby a API klíče",
+    "webhooks": "Webhooky"
+  },
+  "groups": {
+    "workspace": "Práce",
+    "setup": "Nastavení"
+  },
+  "create": {
+    "newEntry": "Nová položka",
+    "uploadMedia": "Nahrát média"
+  },
+  "sidebar": {
+    "mainNav": "Hlavní navigace"
+  },
+  "search": {
+    "open": "Hledat nebo přejít",
+    "short": "Hledat nebo přejít…",
+    "button": "Hledat"
+  },
+  "commandPalette": {
+    "title": "Příkazy",
+    "description": "Hledejte stránku nebo akci",
+    "placeholder": "Hledat nebo přejít na…",
+    "empty": "Nic nenalezeno.",
+    "entries": "Položky",
+    "goTo": "Přejít na",
+    "create": "Vytvořit"
+  },
+  "mobile": {
+    "primary": "Hlavní navigace",
+    "create": "Vytvořit"
+  },
+  "routeError": {
+    "somethingWrong": "Něco se pokazilo",
+    "notFound": "Stránka nenalezena",
+    "notFoundText": "Stránka, kterou hledáte, neexistuje.",
+    "errorText": "Na stránce došlo k neočekávané chybě. Uložený obsah je v bezpečí.",
+    "goHome": "Přejít na Přehled",
+    "reload": "Načíst znovu"
+  },
+  "skipToContent": "Přeskočit na obsah",
+  "loading": "Načítání TheCMS"
 }

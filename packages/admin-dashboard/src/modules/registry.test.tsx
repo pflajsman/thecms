@@ -1,5 +1,6 @@
 import { modules, createActions } from './registry'
 import { groupModules, mobileTabModules } from './nav'
+import { i18n } from '@/i18n'
 
 describe('module registry', () => {
   it('has unique ids and paths', () => {
@@ -9,8 +10,8 @@ describe('module registry', () => {
 
   it('matches the approved information architecture', () => {
     const { workspace, setup } = groupModules(modules)
-    expect(workspace.map((m) => m.label)).toEqual(['Home', 'Content', 'Media', 'Inbox'])
-    expect(setup.map((m) => m.label)).toEqual(['Content models', 'Forms', 'Sites & API keys', 'Webhooks'])
+    expect(workspace.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Home', 'Content', 'Media', 'Inbox'])
+    expect(setup.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Content models', 'Forms', 'Sites & API keys', 'Webhooks'])
   })
 
   it('shows exactly Home, Content, Media and Inbox as mobile tabs', () => {
@@ -18,6 +19,6 @@ describe('module registry', () => {
   })
 
   it('offers create actions', () => {
-    expect(createActions.map((a) => a.label)).toEqual(['New entry', 'Upload media'])
+    expect(createActions.map((a) => i18n.t(a.labelKey, { ns: 'shell' }))).toEqual(['New entry', 'Upload media'])
   })
 })

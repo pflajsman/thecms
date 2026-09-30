@@ -14,5 +14,54 @@
     "title": "Welcome to TheCMS",
     "subtitle": "Sign in to manage your content.",
     "button": "Sign in"
-  }
+  },
+  "nav": {
+    "home": "Home",
+    "content": "Content",
+    "media": "Media",
+    "inbox": "Inbox",
+    "models": "Content models",
+    "forms": "Forms",
+    "sites": "Sites & API keys",
+    "webhooks": "Webhooks"
+  },
+  "groups": {
+    "workspace": "Workspace",
+    "setup": "Setup"
+  },
+  "create": {
+    "newEntry": "New entry",
+    "uploadMedia": "Upload media"
+  },
+  "sidebar": {
+    "mainNav": "Main navigation"
+  },
+  "search": {
+    "open": "Search or jump to",
+    "short": "Search or jump…",
+    "button": "Search"
+  },
+  "commandPalette": {
+    "title": "Command palette",
+    "description": "Search or jump to a page or action",
+    "placeholder": "Search or jump to…",
+    "empty": "No results.",
+    "entries": "Entries",
+    "goTo": "Go to",
+    "create": "Create"
+  },
+  "mobile": {
+    "primary": "Primary",
+    "create": "Create"
+  },
+  "routeError": {
+    "somethingWrong": "Something went wrong",
+    "notFound": "Page not found",
+    "notFoundText": "The page you asked for does not exist.",
+    "errorText": "This page hit an unexpected error. Your saved content is safe.",
+    "goHome": "Go to Home",
+    "reload": "Reload page"
+  },
+  "skipToContent": "Skip to content",
+  "loading": "Loading TheCMS"
 }

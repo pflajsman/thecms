@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import { Outlet } from 'react-router-dom'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import { RouteError } from './RouteError'
 
 function Boom(): never {
@@ -33,4 +33,12 @@ it('explains a missing page', async () => {
   vi.spyOn(console, 'error').mockImplementation(() => {})
   renderRoutes([{ path: '/', element: <p>home</p>, errorElement: <RouteError fullPage /> }], { route: '/nowhere' })
   expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+})
+
+it('explains the error in Czech', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  await setTestLanguage('cs')
+  renderRoutes([{ path: '/', element: <p>home</p>, errorElement: <RouteError fullPage /> }], { route: '/nowhere' })
+  expect(await screen.findByRole('heading', { name: 'Stránka nenalezena' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Přejít na Přehled' })).toHaveAttribute('href', '/')
 })

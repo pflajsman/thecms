@@ -22,5 +22,14 @@
     "hoursAgo": "před {{count}} h",
     "yesterday": "včera",
     "daysAgo": "před {{count}} dny"
+  },
+  "pager": {
+    "label": "Stránkování",
+    "range": "{{from}}–{{to}} z {{total}}",
+    "previous": "Předchozí",
+    "next": "Další"
+  },
+  "confirm": {
+    "typeToConfirm": "Pro potvrzení napište <name>{{name}}</name>"
   }
 }

@@ -47,7 +47,7 @@ export default defineConfig([
               'data-.+', 'aria-(hidden|pressed|invalid|busy|current|expanded|live|haspopup|controls|describedby|labelledby|multiline|modal|selected|checked|disabled|level|orientation|atomic)',
             ],
           },
-          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS'] },
+          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS', '⌘[A-Z]'] },
         },
       ],
     },

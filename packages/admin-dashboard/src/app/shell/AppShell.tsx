@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { createActions, modules } from '@/modules/registry'
@@ -10,6 +11,7 @@ import { ShellSkeleton } from './ShellSkeleton'
 
 export function AppShell() {
   const { isLoading, isAuthenticated } = useAuth()
+  const { t } = useTranslation('shell')
 
   if (isLoading) return <ShellSkeleton />
   if (!isAuthenticated) return <SignInScreen />
@@ -17,7 +19,7 @@ export function AppShell() {
   return (
     <CommandPaletteProvider modules={modules} actions={createActions}>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">
-        Skip to content
+        {t('skipToContent')}
       </a>
       <div className="flex min-h-dvh bg-background text-foreground">
         <Sidebar modules={modules} />

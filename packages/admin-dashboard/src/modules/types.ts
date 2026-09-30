@@ -1,11 +1,15 @@
 import type { LucideIcon } from 'lucide-react'
 import type { RouteObject } from 'react-router-dom'
+import type shellEn from '@/i18n/locales/en/shell.json'
+
+export type NavLabelKey = `nav.${keyof typeof shellEn.nav & string}`
+export type CreateLabelKey = `create.${keyof typeof shellEn.create & string}`
 
 export type ModuleGroup = 'workspace' | 'setup'
 
 export interface AppModule {
   id: string
-  label: string
+  labelKey: NavLabelKey
   icon: LucideIcon
   group: ModuleGroup
   /** Canonical path shown in navigation. */
@@ -21,7 +25,7 @@ export interface AppModule {
 
 export interface CreateAction {
   id: string
-  label: string
+  labelKey: CreateLabelKey
   to: string
   icon: LucideIcon
 }

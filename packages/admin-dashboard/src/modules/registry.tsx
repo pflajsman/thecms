@@ -32,7 +32,7 @@ import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
 export const modules: AppModule[] = [
   {
     id: 'home',
-    label: 'Home',
+    labelKey: 'nav.home',
     icon: House,
     group: 'workspace',
     path: '/',
@@ -41,7 +41,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'content',
-    label: 'Content',
+    labelKey: 'nav.content',
     icon: FileText,
     group: 'workspace',
     path: '/content',
@@ -57,7 +57,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'media',
-    label: 'Media',
+    labelKey: 'nav.media',
     icon: ImageIcon,
     group: 'workspace',
     path: '/media',
@@ -66,7 +66,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'inbox',
-    label: 'Inbox',
+    labelKey: 'nav.inbox',
     icon: Inbox,
     group: 'workspace',
     path: '/inbox',
@@ -79,7 +79,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'models',
-    label: 'Content models',
+    labelKey: 'nav.models',
     icon: Boxes,
     group: 'setup',
     path: '/models',
@@ -94,7 +94,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'forms',
-    label: 'Forms',
+    labelKey: 'nav.forms',
     icon: ClipboardList,
     group: 'setup',
     path: '/forms',
@@ -110,7 +110,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'sites',
-    label: 'Sites & API keys',
+    labelKey: 'nav.sites',
     icon: KeyRound,
     group: 'setup',
     path: '/sites',
@@ -122,7 +122,7 @@ export const modules: AppModule[] = [
   },
   {
     id: 'webhooks',
-    label: 'Webhooks',
+    labelKey: 'nav.webhooks',
     icon: Webhook,
     group: 'setup',
     path: '/webhooks',
@@ -134,6 +134,6 @@ export const modules: AppModule[] = [
 ]
 
 export const createActions: CreateAction[] = [
-  { id: 'new-entry', label: 'New entry', to: '/content/new', icon: Plus },
-  { id: 'upload-media', label: 'Upload media', to: '/media', icon: Upload },
+  { id: 'new-entry', labelKey: 'create.newEntry', to: '/content/new', icon: Plus },
+  { id: 'upload-media', labelKey: 'create.uploadMedia', to: '/media', icon: Upload },
 ]

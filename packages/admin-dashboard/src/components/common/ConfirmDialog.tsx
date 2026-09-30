@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next'
 import { useState, type ReactNode } from 'react'
 import {
   AlertDialog,
@@ -39,12 +40,13 @@ export function ConfirmDialog({ open, onOpenChange, ...rest }: ConfirmDialogProp
 function ConfirmBody({
   title,
   description,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   destructive = false,
   confirmText,
   pending = false,
   onConfirm,
 }: Omit<ConfirmDialogProps, 'open' | 'onOpenChange'>) {
+  const { t } = useTranslation()
   const [typed, setTyped] = useState('')
   const locked = confirmText !== undefined && typed !== confirmText
 
@@ -57,15 +59,15 @@ function ConfirmBody({
       {confirmText !== undefined && (
         <div className="space-y-2">
           <Label htmlFor="confirm-text">
-            Type <span className="font-mono font-semibold">{confirmText}</span> to confirm
+            <Trans i18nKey="confirm.typeToConfirm" values={{ name: confirmText }} components={{ name: <span className="font-mono font-semibold" /> }} />
           </Label>
           <Input id="confirm-text" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
         </div>
       )}
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
         <Button variant={destructive ? 'destructive' : 'default'} disabled={locked || pending} onClick={onConfirm}>
-          {confirmLabel}
+          {confirmLabel ?? t('actions.confirm')}
         </Button>
       </AlertDialogFooter>
     </>

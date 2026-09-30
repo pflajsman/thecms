@@ -5,7 +5,7 @@
     "save": "Save",
     "delete": "Delete",
     "close": "Close",
-    "retry": "Try again",
+    "retry": "Retry",
     "copy": "Copy",
     "undo": "Undo"
   },
@@ -22,5 +22,14 @@
     "hoursAgo": "{{count}}h ago",
     "yesterday": "yesterday",
     "daysAgo": "{{count}} days ago"
+  },
+  "pager": {
+    "label": "Pagination",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "confirm": {
+    "typeToConfirm": "Type <name>{{name}}</name> to confirm"
   }
 }

@@ -5,6 +5,7 @@ import { StatusPill } from './StatusPill'
 import { EmptyState } from './EmptyState'
 import { PageHeader } from './PageHeader'
 import { ConfirmDialog } from './ConfirmDialog'
+import { setTestLanguage } from '@/test/render'
 
 describe('StatusPill', () => {
   it.each([
@@ -52,4 +53,13 @@ describe('ConfirmDialog', () => {
     await userEvent.click(confirm)
     expect(onConfirm).toHaveBeenCalledOnce()
   })
+})
+
+it('shows statuses and dialog buttons in Czech', async () => {
+  await setTestLanguage('cs')
+  render(<StatusPill status="DRAFT" />)
+  expect(screen.getByText('Koncept')).toBeInTheDocument()
+  render(<ConfirmDialog open onOpenChange={() => {}} title="x" description="y" onConfirm={() => {}} />)
+  expect(screen.getByRole('button', { name: 'Zrušit' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Potvrdit' })).toBeInTheDocument()
 })

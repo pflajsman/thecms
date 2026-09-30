@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function ShellSkeleton() {
+  const { t } = useTranslation('shell')
   return (
-    <div role="status" aria-busy="true" aria-label="Loading TheCMS" className="flex min-h-dvh bg-background">
+    <div role="status" aria-busy="true" aria-label={t('loading')} className="flex min-h-dvh bg-background">
       <div className="hidden w-60 flex-col gap-3 bg-sidebar p-4 md:flex">
         <Skeleton className="h-8 w-32" />
         <Skeleton className="h-8 w-full rounded-full" />
