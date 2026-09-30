@@ -74,7 +74,11 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
       return
     }
     const payload: WebhookPayload = { ...draft, name: draft.name.trim(), url: draft.url.trim(), description: draft.description?.trim() }
-    if (!payload.siteId) delete payload.siteId
+    // On edit, send null for "All sites" so a previously chosen site is cleared; on create, just omit it.
+    if (!payload.siteId) {
+      if (webhook) payload.siteId = null
+      else delete payload.siteId
+    }
     try {
       if (webhook) {
         await writes.update(webhook.id, payload)

@@ -50,7 +50,8 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const errors = validateSite(draft)
   const visible = showErrors ? errors : {}
-  const dirty = stableStringify(draft) !== baseline
+  const pendingOrigin = origin.trim() !== ''
+  const dirty = stableStringify(draft) !== baseline || pendingOrigin
   const blocker = useUnsavedGuard(dirty)
 
   const addOrigin = () => {
@@ -69,14 +70,28 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
 
   const save = async () => {
     setShowErrors(true)
+    // An origin typed but not added yet would otherwise be dropped, leaving the key open to every origin.
+    let allowedOrigins = draft.allowedOrigins
+    if (pendingOrigin) {
+      const message = originError(origin, allowedOrigins)
+      setOriginMessage(message)
+      if (message) {
+        toast.error('Fix the highlighted fields before saving')
+        return
+      }
+      allowedOrigins = [...allowedOrigins, normalizeOrigin(origin)]
+    }
     if (Object.keys(errors).length) {
       toast.error('Fix the highlighted fields before saving')
       return
     }
-    const payload = { ...draft, name: draft.name.trim(), domain: draft.domain.trim().toLowerCase(), description: draft.description?.trim() }
+    const next = { ...draft, allowedOrigins }
+    const payload = { ...next, name: draft.name.trim(), domain: draft.domain.trim().toLowerCase(), description: draft.description?.trim() }
     try {
       const saved = site ? await writes.update(site.id, payload) : await writes.create(payload)
-      setBaseline(stableStringify(draft))
+      setDraft(next)
+      setOrigin('')
+      setBaseline(stableStringify(next))
       toast.success(site ? 'Site saved' : 'Site created')
       if (!site) navigate(`/sites/${saved.id}`, { replace: true, state: { skipGuard: true } })
     } catch (error) {
@@ -175,10 +190,13 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
               </ul>
             )}
           </div>
-          <div className="flex items-center justify-between gap-2">
-            <Label htmlFor="site-active">Active</Label>
-            <Switch id="site-active" checked={draft.isActive !== false} onCheckedChange={(checked) => setDraft({ ...draft, isActive: checked })} />
-          </div>
+          {/* New sites are always created active (the create endpoint has no isActive). */}
+          {site && (
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="site-active">Active</Label>
+              <Switch id="site-active" checked={draft.isActive !== false} onCheckedChange={(checked) => setDraft({ ...draft, isActive: checked })} />
+            </div>
+          )}
         </section>
         {site && <ConnectSnippets apiKey={site.apiKey} slug={types.data?.[0]?.slug} />}
       </div>

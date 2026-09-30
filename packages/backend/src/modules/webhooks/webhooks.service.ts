@@ -97,9 +97,15 @@ export class WebhooksService {
       throw new Error('Invalid webhook ID');
     }
 
+    const { siteId, ...rest } = data;
+    const update =
+      siteId === null
+        ? { $set: rest, $unset: { siteId: 1 } }
+        : { $set: siteId === undefined ? rest : { ...rest, siteId } };
+
     const webhook = await WebhookModel.findByIdAndUpdate(
       id,
-      { $set: data },
+      update,
       { new: true, runValidators: true }
     )
       .populate('siteId', 'name domain')

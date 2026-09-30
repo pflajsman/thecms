@@ -27,7 +27,8 @@ export const updateWebhookSchema = z.object({
     description: z.string().max(500).optional(),
     events: z.array(z.nativeEnum(WebhookEvent)).min(1).optional(),
     isActive: z.boolean().optional(),
-    siteId: z.string().optional(),
+    // null clears the site, so the webhook fires for every site.
+    siteId: z.string().nullable().optional(),
     maxRetries: z.number().int().min(0).max(10).optional(),
     retryDelay: z.number().int().min(1000).max(300000).optional(),
   }),

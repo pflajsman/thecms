@@ -37,8 +37,17 @@ export interface WebhookPayload {
   url: string
   description?: string
   events: string[]
-  siteId?: string
+  /** On update, null clears the site so the webhook fires for every site. */
+  siteId?: string | null
   isActive?: boolean
+}
+
+// GET and PUT responses populate siteId with the site document.
+type RawWebhook = Omit<Webhook, 'siteId'> & { siteId?: string | { id: string } | null }
+
+function normalize<T extends RawWebhook>(raw: T): Omit<T, 'siteId'> & { siteId?: string } {
+  const { siteId, ...rest } = raw
+  return { ...rest, siteId: typeof siteId === 'object' && siteId !== null ? siteId.id : (siteId ?? undefined) }
 }
 
 export interface TestResult {
@@ -49,19 +58,19 @@ export interface TestResult {
 }
 
 export async function listWebhooks(): Promise<Webhook[]> {
-  return (await apiClient.get<PaginatedResponse<Webhook>>('/webhooks', { params: { page: 1, limit: 100 } })).data.data
+  return (await apiClient.get<PaginatedResponse<RawWebhook>>('/webhooks', { params: { page: 1, limit: 100 } })).data.data.map(normalize)
 }
 
 export async function getWebhook(id: string): Promise<Webhook> {
-  return (await apiClient.get<ApiResponse<Webhook>>(`/webhooks/${id}`)).data.data
+  return normalize((await apiClient.get<ApiResponse<RawWebhook>>(`/webhooks/${id}`)).data.data)
 }
 
 export async function createWebhook(body: WebhookPayload): Promise<Webhook & { secret: string }> {
-  return (await apiClient.post<ApiResponse<Webhook & { secret: string }>>('/webhooks', body)).data.data
+  return normalize((await apiClient.post<ApiResponse<RawWebhook & { secret: string }>>('/webhooks', body)).data.data)
 }
 
 export async function updateWebhook(id: string, body: WebhookPayload): Promise<Webhook> {
-  return (await apiClient.put<ApiResponse<Webhook>>(`/webhooks/${id}`, body)).data.data
+  return normalize((await apiClient.put<ApiResponse<RawWebhook>>(`/webhooks/${id}`, body)).data.data)
 }
 
 export async function deleteWebhook(id: string): Promise<void> {

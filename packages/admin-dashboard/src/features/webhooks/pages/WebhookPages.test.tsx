@@ -77,3 +77,37 @@ it('rotates the secret after confirming and shows the new one', async () => {
   expect(await screen.findByRole('dialog', { name: 'Signing secret' })).toHaveTextContent('whsec_rotated')
   expect(apiClient.post).toHaveBeenCalledWith('/webhooks/w1/rotate-secret')
 })
+
+describe('webhook scoped to a site', () => {
+  const blog = { id: 's1', name: 'Blog', domain: 'blog.test', apiKey: 'cms_key', isActive: true, requestCount: 0, createdAt: '', updatedAt: '' }
+  // The backend populates siteId on GET.
+  const scoped = { ...hook, id: 'w2', siteId: { id: 's1', name: 'Blog', domain: 'blog.test' } }
+
+  beforeEach(() => {
+    vi.mocked(sitesService.list).mockResolvedValue({ success: true, data: [blog], pagination: { page: 1, limit: 100, total: 1, totalPages: 1 } })
+    vi.mocked(apiClient.get).mockImplementation(async (url: string) => {
+      if (url === '/webhooks/w2') return { data: { success: true, data: scoped } }
+      return { data: { success: true, data: [] } }
+    })
+    vi.mocked(apiClient.put).mockImplementation(async (_url: string, body: unknown) => ({ data: { success: true, data: { ...scoped, ...(body as object) } } }))
+  })
+
+  it('shows the site and saves edits with its id', async () => {
+    renderRoutes(routes, { route: '/webhooks/w2' })
+    const site = await screen.findByRole('combobox', { name: 'Site' })
+    await waitFor(() => expect(site).toHaveTextContent('Blog'))
+    await userEvent.type(screen.getByLabelText('Name'), ' v2')
+    await userEvent.click(screen.getByRole('button', { name: 'Save webhook' }))
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/webhooks/w2', expect.objectContaining({ name: 'Deploy v2', siteId: 's1' })))
+  })
+
+  it('clears the site when All sites is chosen', async () => {
+    renderRoutes(routes, { route: '/webhooks/w2' })
+    const site = await screen.findByRole('combobox', { name: 'Site' })
+    await waitFor(() => expect(site).toHaveTextContent('Blog'))
+    await userEvent.click(site)
+    await userEvent.click(await screen.findByRole('option', { name: 'All sites' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Save webhook' }))
+    await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/webhooks/w2', expect.objectContaining({ siteId: null })))
+  })
+})
