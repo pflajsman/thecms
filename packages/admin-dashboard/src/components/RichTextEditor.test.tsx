@@ -73,3 +73,13 @@ it('labels the toolbar in Czech and refuses a javascript: link with a Czech hint
   await userEvent.click(screen.getByRole('button', { name: 'Použít odkaz' }))
   expect(screen.getByText('Zadejte webovou adresu (https://…), e-mail (mailto:…) nebo cestu ke stránce (/o-nas)')).toBeInTheDocument()
 })
+
+it('re-translates a link error that is already shown', async () => {
+  renderWithProviders(<RichTextEditor value="<p>Hi</p>" onChange={() => {}} />)
+  await userEvent.click(await screen.findByRole('button', { name: 'Link' }))
+  await userEvent.type(await screen.findByLabelText('Link URL'), 'javascript:alert(1)')
+  await userEvent.click(screen.getByRole('button', { name: 'Apply link' }))
+  expect(screen.getByText(/Use a web address/)).toBeInTheDocument()
+  await setTestLanguage('cs')
+  expect(screen.getByText(/Zadejte webovou adresu/)).toBeInTheDocument()
+})

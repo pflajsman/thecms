@@ -69,7 +69,7 @@ function Divider() {
 export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickImage: () => void }) {
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkValue, setLinkValue] = useState('')
-  const [linkError, setLinkError] = useState<string | null>(null)
+  const [linkError, setLinkError] = useState(false)
   const [urlImageOpen, setUrlImageOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [imageError, setImageError] = useState(false)
@@ -84,7 +84,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
   const applyLink = () => {
     const href = safeHref(linkValue)
     if (!href) {
-      setLinkError(t('toolbar.linkHint'))
+      setLinkError(true)
       return
     }
     chain().extendMarkRange('link').setLink({ href }).run()
@@ -199,7 +199,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
           setLinkOpen(open)
           if (open) {
             setLinkValue((editor.getAttributes('link').href as string | undefined) ?? '')
-            setLinkError(null)
+            setLinkError(false)
           }
         }}
       >
@@ -229,7 +229,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
             />
             {linkError && (
               <p id="rte-link-error" className="text-xs text-destructive">
-                {linkError}
+                {t('toolbar.linkHint')}
               </p>
             )}
             <div className="flex justify-end gap-2">

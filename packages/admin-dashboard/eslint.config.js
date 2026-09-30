@@ -7,8 +7,8 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import i18next from 'eslint-plugin-i18next'
 import { readFileSync } from 'node:fs'
 
-const i18nScope = JSON.parse(readFileSync(new URL('./i18n-scope.json', import.meta.url), 'utf8')).files
-const i18nScopeTs = i18nScope.filter((f) => f.endsWith('.ts'))
+// Plain .ts modules that build user-facing text; every .tsx component is covered by the glob below.
+const i18nCopyModules = JSON.parse(readFileSync(new URL('./i18n-scope.json', import.meta.url), 'utf8')).copyModules
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -31,8 +31,9 @@ export default defineConfig([
     rules: { 'react-refresh/only-export-components': 'off' },
   },
   {
-    // Converted files may not show literal text: JSX text and user-facing attributes must come from the catalogs.
-    files: i18nScope.length ? i18nScope : ['__no-files-yet__'],
+    // No component may show literal text: JSX text and user-facing attributes must come from the catalogs.
+    files: ['src/**/*.tsx'],
+    ignores: ['src/**/*.test.tsx', 'src/components/ui/**', 'src/test/**'],
     plugins: { i18next },
     rules: {
       'i18next/no-literal-string': [
@@ -44,7 +45,7 @@ export default defineConfig([
               'className', 'style', 'type', 'key', 'id', 'width', 'height', 'variant', 'size', 'align', 'side',
               'sideOffset', 'role', 'to', 'href', 'htmlFor', 'name', 'value', 'autoComplete', 'inputMode', 'rel',
               'target', 'accept', 'orientation', 'src', 'method', 'lang', 'dir', 'viewBox', 'fill', 'stroke', 'd',
-              'xmlns', 'strokeWidth', 'tabIndex', 'pattern', 'min', 'max', 'step', 'scope', 'dateTime', 'mode', 'as', 'saveTone',
+              'xmlns', 'strokeWidth', 'tabIndex', 'pattern', 'min', 'max', 'step', 'scope', 'dateTime', 'mode', 'as', 'saveTone', 'position',
               'data-.+', 'aria-(hidden|pressed|invalid|busy|current|expanded|live|haspopup|controls|describedby|labelledby|multiline|modal|selected|checked|disabled|level|orientation|atomic)',
             ],
           },
@@ -58,7 +59,7 @@ export default defineConfig([
   },
   {
     // Plain .ts files in scope have no JSX, so check every string literal there.
-    files: i18nScopeTs.length ? i18nScopeTs : ['__no-files-yet__'],
+    files: i18nCopyModules,
     plugins: { i18next },
     rules: {
       'i18next/no-literal-string': [

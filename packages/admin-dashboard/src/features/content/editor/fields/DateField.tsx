@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { CalendarIcon, X } from 'lucide-react'
-import { cs } from 'date-fns/locale'
+import { cs as dayPickerCs } from 'react-day-picker/locale'
 import { formatDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -31,7 +31,7 @@ export function DateField(props: FieldControlProps) {
               selected={date}
               onSelect={(d) => { onChange(d ? d.toISOString() : undefined); setOpen(false) }}
               autoFocus
-              locale={i18n.language === 'cs' ? cs : undefined}
+              locale={i18n.language === 'cs' ? dayPickerCs : undefined}
             />
           </PopoverContent>
         </Popover>

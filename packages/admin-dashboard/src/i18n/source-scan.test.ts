@@ -1,8 +1,12 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-// Paths are relative to the package root; Vitest runs from there.
-const scope: { files: string[] } = JSON.parse(readFileSync(resolve(process.cwd(), 'i18n-scope.json'), 'utf8'))
+// Every source file except tests, the ui primitives and test helpers. Vitest runs from the package root.
+const SRC = resolve(process.cwd(), 'src')
+const sourceFiles = (readdirSync(SRC, { recursive: true }) as string[])
+  .map((f) => f.split('\\').join('/'))
+  .filter((f) => /\.(ts|tsx)$/.test(f) && !/\.test\.(ts|tsx)$/.test(f) && !f.startsWith('components/ui/') && !f.startsWith('test/'))
+  .map((f) => `src/${f}`)
 
 // The lint rule covers JSX text and attributes; toasts are plain calls, so check them here.
 // Whitespace (including newlines) may sit between the call and its first argument.
@@ -22,7 +26,6 @@ it('finds literal toast text, also when the text starts on the next line', () =>
   expect(findRawToasts("toast.success(t('toast.saved'))")).toEqual([])
 })
 
-it.each(scope.files.length ? scope.files : ['(none yet)'])('%s passes no literal text to toast', (file) => {
-  if (file === '(none yet)') return
+it.each(sourceFiles)('%s passes no literal text to toast', (file) => {
   expect(findRawToasts(readFileSync(resolve(process.cwd(), file), 'utf8'))).toEqual([])
 })

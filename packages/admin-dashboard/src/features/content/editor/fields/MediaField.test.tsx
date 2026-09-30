@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { renderWithProviders } from '@/test/render'
+import { renderWithProviders, setTestLanguage } from '@/test/render'
 import type { Field } from '@/types'
 import * as api from '@/features/media/media-api'
 import { makeMedia, mediaPage } from '@/features/media/test-fixtures'
@@ -75,6 +75,8 @@ describe('MediaField', () => {
     const zone = await screen.findByRole('group', { name: 'Gallery' })
     fireEvent.drop(zone, { dataTransfer: { types: ['Files'], files: [new File(['x'], 'route.gpx', { type: 'application/gpx+xml' })] } })
     expect(await screen.findByText('route.gpx is not allowed in Gallery.')).toBeInTheDocument()
+    await setTestLanguage('cs')
+    expect(await screen.findByText('Soubor route.gpx není v poli Gallery povolen.')).toBeInTheDocument()
     expect(api.uploadMedia).not.toHaveBeenCalled()
   })
 

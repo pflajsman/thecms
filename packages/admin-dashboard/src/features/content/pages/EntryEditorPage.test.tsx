@@ -177,3 +177,12 @@ describe('in Czech', () => {
     expect(screen.queryByText('Title is required')).not.toBeInTheDocument()
   })
 })
+
+it('labels the date picker navigation in Czech', async () => {
+  await setTestLanguage('cs')
+  const dated = { ...tripType, fields: [...tripType.fields, { name: 'day', label: 'Day', type: 'DATE' as const, required: false }] }
+  vi.mocked(api.getContentType).mockResolvedValue(dated)
+  renderRoutes(routes, { route: `/content/new?type=${tripType.id}` })
+  await userEvent.click((await screen.findByText('Vyberte datum')).closest('button')!)
+  expect(await screen.findByRole('button', { name: /Přejít na další měsíc/ })).toBeInTheDocument()
+})

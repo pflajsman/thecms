@@ -28,7 +28,8 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   })
   const writes = useMediaWrites()
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [dropError, setDropError] = useState<string | null>(null)
+  // File names only; the message is built at render so it follows a language switch.
+  const [rejectedNames, setRejectedNames] = useState<string[]>([])
   const [dragOver, setDragOver] = useState(false)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
 
@@ -54,9 +55,8 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
     .map((u) => (u.error!.startsWith(u.name) ? u.error! : `${u.name}: ${u.error}`))
 
   const upload = (files: File[]) => {
-    const label = field.label || field.name
     const rejected = files.filter((f) => !matchesAccept({ mimeType: f.type, originalName: f.name }, accept))
-    setDropError(rejected.length ? rejected.map((f) => t('fields.notAllowed', { name: f.name, label })).join(' ') : null)
+    setRejectedNames(rejected.map((f) => f.name))
     const ok = files.filter((f) => !rejected.includes(f))
     uploads.add(multiple ? ok : ok.slice(0, 1))
   }
@@ -75,7 +75,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   }
 
   return (
-    <FieldShell field={field} id={id} error={error ?? ([dropError, ...uploadErrors].filter(Boolean).join(' ') || undefined)}>
+    <FieldShell field={field} id={id} error={error ?? ([...rejectedNames.map((name) => t('fields.notAllowed', { name, label: field.label || field.name })), ...uploadErrors].join(' ') || undefined)}>
       <div
         role="group"
         aria-label={field.label || field.name}
