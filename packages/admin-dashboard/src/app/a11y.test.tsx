@@ -94,6 +94,25 @@ describe('in Czech', () => {
     expect(document.documentElement.lang).toBe('cs')
   })
 
+  const csCases: [string, string, ReactElement, string][] = [
+    ['/media', '/media', <MediaLibraryPage />, 'Média'],
+    ['/inbox', '/inbox', <InboxPage />, 'Zprávy'],
+    ['/models', '/models', <ModelsListPage />, 'Modely obsahu'],
+    ['/forms/:id', '/forms/f1', <FormBuilderPage />, 'Contact'],
+    ['/sites', '/sites', <SitesListPage />, 'Weby a API klíče'],
+    ['/sites/:id', '/sites/s1', <SiteFormPage />, 'Blog'],
+    ['/webhooks', '/webhooks', <WebhooksListPage />, 'Webhooky'],
+    ['/webhooks/:id', '/webhooks/w1', <WebhookFormPage />, 'Deploy'],
+  ]
+
+  it.each(csCases)('%s has no axe violations in Czech', async (path, url, element, heading) => {
+    await setTestLanguage('cs')
+    const { container } = renderRoutes([{ path, element }], { route: url })
+    await screen.findByRole('heading', { level: 1, name: heading })
+    await waitFor(() => expect(container.querySelector('[aria-busy="true"], [data-slot="skeleton"]')).toBeNull())
+    await expectNoA11yViolations(container)
+  })
+
   it('sign-in screen has no axe violations in Czech', async () => {
     await setTestLanguage('cs')
     const { container } = renderRoutes([{ path: '/', element: <SignInScreen /> }])
