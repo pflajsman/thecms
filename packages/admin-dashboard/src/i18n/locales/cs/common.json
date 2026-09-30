@@ -35,5 +35,14 @@
   "errors": {
     "network": "Nepodařilo se spojit se serverem. Zkontrolujte připojení a zkuste to znovu.",
     "generic": "Něco se pokazilo. Zkuste to prosím znovu."
+  },
+  "dnd": {
+    "instructions": "Pro zvednutí položky stiskněte mezerník. Během přetahování ji posouvejte šipkami. Dalším stisknutím mezerníku ji položíte na nové místo, klávesou Escape přetahování zrušíte.",
+    "picked": "Zvednuto: {{name}}.",
+    "over": "{{name}} je nad pozicí {{target}}.",
+    "notOver": "{{name}} už není nad žádnou pozicí.",
+    "dropped": "{{name}} položeno na pozici {{target}}.",
+    "droppedNowhere": "{{name}} položeno.",
+    "cancelled": "Přetahování zrušeno. {{name}} vráceno zpět."
   }
 }

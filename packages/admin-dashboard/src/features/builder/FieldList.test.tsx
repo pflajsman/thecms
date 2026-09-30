@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FieldList, type FieldListItem } from './FieldList'
+import { i18n } from '@/i18n'
 
 const items: FieldListItem[] = [
   { id: 'a', label: 'Title', apiKey: 'title', typeLabel: 'Text', isTitle: true },
@@ -20,4 +21,11 @@ it('selects and reorders fields', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Move Body down' }))
   expect(onReorder).toHaveBeenCalledWith(['a', 'c', 'b'])
   expect(screen.queryByRole('button', { name: 'Move Title up' })).not.toBeInTheDocument()
+})
+
+it('gives drag-and-drop screen reader instructions in Czech', async () => {
+  await i18n.changeLanguage('cs')
+  render(<FieldList label="Pole" items={items} selectedId="b" onSelect={() => {}} onReorder={() => {}} />)
+  expect(screen.getByText(/stiskněte mezerník/)).toBeInTheDocument()
+  expect(screen.queryByText(/press the space bar/)).not.toBeInTheDocument()
 })

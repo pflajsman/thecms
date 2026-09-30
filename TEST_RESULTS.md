@@ -383,3 +383,17 @@ Environment: local mongod and Azurite, backend and admin dev servers from the lo
 | 360px in Czech (iframe): Home, Content list, entry editor, new entry; no horizontal scroll, no clipped labels | Pass (after the same fix: filter selects now wrap) |
 | Dark theme in Czech (Home, Content list, editor) | Pass |
 | Console: React key warning in `EntryEditor` (`renderField` inside a map) | Noted, predates this plan |
+
+## Localization Plan 2 verification (2026-09-30)
+
+Environment: local mongod and Azurite, backend and admin dev servers from the Plan 2 worktree.
+
+| Check | Result |
+|---|---|
+| Admin tests (573), `pnpm lint` over every component (0 errors, 0 warnings), build | Pass |
+| Czech scan of Media (library, detail sheet), Inbox (list, message), Models (list, builder, template chooser, new model), Forms (list, builder, new form), Sites (list, form, new), Webhooks (list, new): no English except user content (model, field and form names, message text), API keys, code samples and words that are the same in Czech (Text, Video) | Pass (after fix in this plan: drag-and-drop screen-reader instructions came from dnd-kit in English) |
+| Axe in Czech on every screen (unit tests) | Pass |
+| 360px in Czech (iframe): media, inbox, models list and builder, forms list and builder, sites list and form, webhooks list and form; no horizontal scroll, no clipped labels | Pass |
+| Model builder palette in Czech (Text, Formátovaný text, Číslo, Datum, Ano, nebo ne, Média, Odkaz na položku) wraps cleanly | Pass |
+| Switch back to English: every screen shows English, `<html lang="en">`; the only Czech left is entry titles (user content) | Pass |
+| Template in Czech creates Czech labels with English keys | Covered by unit tests (no model created in the local data) |

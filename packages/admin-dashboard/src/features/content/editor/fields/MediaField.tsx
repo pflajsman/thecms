@@ -1,5 +1,6 @@
+import { useDndAccessibility } from '@/lib/hooks/useDndAccessibility'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useRef, useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type DragEvent, useCallback } from 'react'
 import { ArrowLeft, ArrowRight, GripVertical, ImagePlus, Upload, X } from 'lucide-react'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
@@ -21,6 +22,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   const accept = field.validation?.allowedMimeTypes
   const ids = multiple ? (Array.isArray(value) ? (value as string[]) : []) : typeof value === 'string' && value ? [value] : []
   const { byId, isLoading, isError, refetch } = useMediaByIds(ids)
+  const accessibility = useDndAccessibility(useCallback((mid) => byId.get(String(mid))?.originalName ?? t('fields.missingFile'), [byId, t]))
   // Uploads finish asynchronously; append to the latest value, not the one from their render.
   const idsRef = useRef(ids)
   useEffect(() => {
@@ -91,7 +93,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
           </p>
         )}
         {ids.length > 0 && !isError && (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} accessibility={accessibility}>
             <SortableContext items={ids} strategy={rectSortingStrategy}>
               <ul aria-label={t('fields.filesLabel', { label: field.label || field.name })} className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {ids.map((mediaId, index) => (

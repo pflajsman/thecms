@@ -12,6 +12,7 @@
     "src/features/builder/api-key.ts",
     "src/features/forms/form-draft.ts",
     "src/features/sites/sites-utils.ts",
-    "src/features/webhooks/webhook-events.ts"
+    "src/features/webhooks/webhook-events.ts",
+    "src/lib/hooks/useDndAccessibility.ts"
   ]
 }

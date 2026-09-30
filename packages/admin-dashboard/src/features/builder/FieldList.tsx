@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+import { useDndAccessibility } from '@/lib/hooks/useDndAccessibility'
 import { useTranslation } from 'react-i18next'
 import { ArrowDown, ArrowUp, GripVertical, Star } from 'lucide-react'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
@@ -26,12 +28,13 @@ interface FieldListProps {
 export function FieldList({ label, items, selectedId, onSelect, onReorder }: FieldListProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
   const ids = items.map((i) => i.id)
+  const accessibility = useDndAccessibility(useCallback((id) => { const item = items.find((i) => i.id === id); return item ? item.label || item.apiKey : String(id) }, [items]))
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return
     onReorder(moveItem(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id))))
   }
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} accessibility={accessibility}>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <ul aria-label={label} className="flex flex-col gap-1.5">
           {items.map((item, index) => (

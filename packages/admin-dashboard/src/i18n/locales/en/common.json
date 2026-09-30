@@ -35,5 +35,14 @@
   "errors": {
     "network": "Could not reach the server. Check your connection and try again.",
     "generic": "Something went wrong. Please try again."
+  },
+  "dnd": {
+    "instructions": "To pick up an item, press the space bar. While dragging, use the arrow keys to move it. Press space again to drop it in its new position, or press Escape to cancel.",
+    "picked": "Picked up {{name}}.",
+    "over": "{{name}} is over {{target}}.",
+    "notOver": "{{name}} is no longer over a position.",
+    "dropped": "{{name}} dropped on {{target}}.",
+    "droppedNowhere": "{{name}} dropped.",
+    "cancelled": "Dragging cancelled. {{name}} was returned."
   }
 }
