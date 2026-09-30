@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { screen, waitFor } from '@testing-library/react'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import { setViewport } from '@/test/viewport'
 import { expectNoA11yViolations } from '@/test/a11y'
 import apiClient from '@/lib/api'
@@ -82,4 +82,23 @@ it.each(cases)('%s has no axe violations', async (path, url, element, heading) =
 it('sign-in screen has no axe violations', async () => {
   const { container } = renderRoutes([{ path: '/', element: <SignInScreen /> }])
   await expectNoA11yViolations(container)
+})
+
+describe('in Czech', () => {
+  it('/content has no axe violations and the page language is Czech', async () => {
+    await setTestLanguage('cs')
+    const { container } = renderRoutes([{ path: '/content', element: <ContentListPage /> }], { route: '/content' })
+    await screen.findByRole('heading', { level: 1, name: 'Obsah' })
+    await waitFor(() => expect(container.querySelector('[aria-busy="true"], [data-slot="skeleton"]')).toBeNull())
+    await expectNoA11yViolations(container)
+    expect(document.documentElement.lang).toBe('cs')
+  })
+
+  it('sign-in screen has no axe violations in Czech', async () => {
+    await setTestLanguage('cs')
+    const { container } = renderRoutes([{ path: '/', element: <SignInScreen /> }])
+    await screen.findByRole('heading', { name: 'Vítejte v TheCMS' })
+    await expectNoA11yViolations(container)
+    expect(document.documentElement.lang).toBe('cs')
+  })
 })
