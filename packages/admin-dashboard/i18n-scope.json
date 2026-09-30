@@ -65,6 +65,12 @@
     "src/features/models/pages/ModelBuilderPage.tsx",
     "src/features/models/components/ModelFieldInspector.tsx",
     "src/features/builder/FieldList.tsx",
-    "src/features/builder/InspectorPanel.tsx"
+    "src/features/builder/InspectorPanel.tsx",
+    "src/features/forms/form-draft.ts",
+    "src/features/forms/pages/FormsListPage.tsx",
+    "src/features/forms/pages/FormBuilderPage.tsx",
+    "src/features/forms/components/FormFieldInspector.tsx",
+    "src/features/forms/components/FormPreview.tsx",
+    "src/features/forms/components/EmbedPanel.tsx"
   ]
 }

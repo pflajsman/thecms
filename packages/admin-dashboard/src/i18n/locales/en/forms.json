@@ -1,1 +1,89 @@
-{}
+{
+  "types": {
+    "TEXT": "Short text",
+    "EMAIL": "Email",
+    "TEXTAREA": "Long text",
+    "SELECT": "Choice",
+    "NUMBER": "Number",
+    "CHECKBOX": "Checkbox",
+    "DATE": "Date"
+  },
+  "defaults": {
+    "name": "Name",
+    "email": "Email",
+    "message": "Message"
+  },
+  "list": {
+    "title": "Forms",
+    "description": "Forms your sites can show. Answers arrive in the Inbox.",
+    "new": "New form",
+    "emptyTitle": "No forms yet",
+    "emptyText": "Create a contact or booking form your site can show.",
+    "accepting": "Accepting submissions",
+    "paused": "Paused",
+    "viewMessages": "View messages",
+    "loadError": "Could not load forms."
+  },
+  "count": {
+    "submissions_one": "{{count}} submission",
+    "submissions_other": "{{count}} submissions"
+  },
+  "builder": {
+    "fixFields": "Fix the highlighted fields before saving",
+    "saved": "Form saved",
+    "created": "Form created",
+    "deleted": "Deleted {{name}}",
+    "newTitle": "New form",
+    "deleteForm": "Delete form",
+    "saving": "Saving…",
+    "save": "Save form",
+    "name": "Name",
+    "slug": "Slug",
+    "sendTo": "Send submissions to",
+    "site": "Site",
+    "anySite": "Any site",
+    "accept": "Accept new submissions",
+    "fields": "Fields",
+    "fieldsLabel": "Form fields",
+    "addField": "Add {{type}} field",
+    "fieldOfType": "{{type}} field",
+    "fieldSettings": "Field settings",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteWithSubmissions_one": "This also deletes its {{count}} submission.",
+    "deleteWithSubmissions_other": "This also deletes its {{count}} submissions.",
+    "cannotUndo": "This cannot be undone.",
+    "loadError": "Could not load this form."
+  },
+  "inspector": {
+    "label": "Label",
+    "apiKey": "API key",
+    "keyHint": "Your site sends the value under this key.",
+    "placeholder": "Placeholder",
+    "required": "Required",
+    "options": "Options (one per line)",
+    "minLength": "Min length",
+    "maxLength": "Max length",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "remove": "Remove field"
+  },
+  "preview": {
+    "title": "Preview",
+    "untitled": "Untitled form",
+    "choose": "Choose…",
+    "send": "Send"
+  },
+  "embed": {
+    "title": "Embed",
+    "intro": "Your site can load this form from <code>{{url}}</code> and send answers like this:",
+    "copied": "Snippet copied",
+    "exampleLabel": "Submit example",
+    "noKey": "Connect a site to get an API key."
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "email": "Enter a valid email address",
+    "noOptions": "Add at least one option",
+    "minLength": "Min length must be a whole number of 0 or more"
+  }
+}

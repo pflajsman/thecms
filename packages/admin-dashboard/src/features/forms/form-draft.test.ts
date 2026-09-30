@@ -1,5 +1,6 @@
 import type { ContactForm } from '@/types'
 import { addFormField, draftFromForm, newFormDraft, setFormFieldLabel, setFormName, toFormPayload, updateFormField, validateForm } from './form-draft'
+import { i18n } from '@/i18n'
 
 describe('form drafts', () => {
   it('starts with name, email and message fields', () => {
@@ -52,4 +53,11 @@ describe('form rule validation', () => {
     expect(validateForm(updateFormField(draft, cid, { validation: { minLength: -1 } }))[`rules:${cid}`]).toBe('Min length must be a whole number of 0 or more')
     expect(validateForm(updateFormField(draft, cid, { validation: { min: 5, max: 1 } }))[`rules:${cid}`]).toBe('Maximum must be at least the minimum')
   })
+})
+
+it('explains form errors in Czech', async () => {
+  await i18n.changeLanguage('cs')
+  const errors = validateForm({ ...newFormDraft(), name: '', recipientEmail: 'x' })
+  expect(errors.name).toBe('Název je povinný')
+  expect(errors.recipientEmail).toBe('Zadejte platnou e-mailovou adresu')
 })

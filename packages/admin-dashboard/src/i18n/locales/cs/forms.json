@@ -1,1 +1,91 @@
-{}
+{
+  "types": {
+    "TEXT": "Krátký text",
+    "EMAIL": "E-mail",
+    "TEXTAREA": "Dlouhý text",
+    "SELECT": "Výběr",
+    "NUMBER": "Číslo",
+    "CHECKBOX": "Zaškrtávací pole",
+    "DATE": "Datum"
+  },
+  "defaults": {
+    "name": "Jméno",
+    "email": "E-mail",
+    "message": "Zpráva"
+  },
+  "list": {
+    "title": "Formuláře",
+    "description": "Formuláře, které mohou weby zobrazit. Odpovědi přicházejí do Zpráv.",
+    "new": "Nový formulář",
+    "emptyTitle": "Zatím žádné formuláře",
+    "emptyText": "Vytvořte kontaktní nebo rezervační formulář pro svůj web.",
+    "accepting": "Přijímá odpovědi",
+    "paused": "Pozastaveno",
+    "viewMessages": "Zobrazit zprávy",
+    "loadError": "Formuláře se nepodařilo načíst."
+  },
+  "count": {
+    "submissions_one": "{{count}} odpověď",
+    "submissions_few": "{{count}} odpovědi",
+    "submissions_other": "{{count}} odpovědí"
+  },
+  "builder": {
+    "fixFields": "Před uložením opravte zvýrazněná pole",
+    "saved": "Formulář uložen",
+    "created": "Formulář vytvořen",
+    "deleted": "Formulář {{name}} smazán",
+    "newTitle": "Nový formulář",
+    "deleteForm": "Smazat formulář",
+    "saving": "Ukládání…",
+    "save": "Uložit formulář",
+    "name": "Název",
+    "slug": "Slug",
+    "sendTo": "Odesílat odpovědi na",
+    "site": "Web",
+    "anySite": "Jakýkoli web",
+    "accept": "Přijímat nové odpovědi",
+    "fields": "Pole",
+    "fieldsLabel": "Pole formuláře",
+    "addField": "Přidat pole {{type}}",
+    "fieldOfType": "Pole typu {{type}}",
+    "fieldSettings": "Nastavení pole",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteWithSubmissions_one": "Smaže se také jeho {{count}} odpověď.",
+    "deleteWithSubmissions_few": "Smažou se také jeho {{count}} odpovědi.",
+    "deleteWithSubmissions_other": "Smaže se také jeho {{count}} odpovědí.",
+    "cannotUndo": "Nelze to vrátit.",
+    "loadError": "Formulář se nepodařilo načíst."
+  },
+  "inspector": {
+    "label": "Popisek",
+    "apiKey": "Klíč API",
+    "keyHint": "Web odesílá hodnotu pod tímto klíčem.",
+    "placeholder": "Zástupný text",
+    "required": "Povinné",
+    "options": "Možnosti (každá na nový řádek)",
+    "minLength": "Minimální délka",
+    "maxLength": "Maximální délka",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "remove": "Odebrat pole"
+  },
+  "preview": {
+    "title": "Náhled",
+    "untitled": "Formulář bez názvu",
+    "choose": "Vyberte…",
+    "send": "Odeslat"
+  },
+  "embed": {
+    "title": "Vložení na web",
+    "intro": "Web může formulář načíst z <code>{{url}}</code> a odesílat odpovědi takto:",
+    "copied": "Ukázka zkopírována",
+    "exampleLabel": "Ukázka odeslání",
+    "noKey": "Připojte web a získáte API klíč."
+  },
+  "validation": {
+    "nameRequired": "Název je povinný",
+    "email": "Zadejte platnou e-mailovou adresu",
+    "noOptions": "Přidejte alespoň jednu možnost",
+    "minLength": "Minimální délka musí být celé číslo 0 nebo větší"
+  }
+}

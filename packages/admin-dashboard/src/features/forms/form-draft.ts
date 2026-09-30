@@ -1,15 +1,11 @@
+import { i18n } from '@/i18n'
 import type { ContactForm, FormFieldDefinition, FormFieldType } from '@/types'
 import { apiKeyError, toApiKey, toSlug, uniqueKey } from '@/features/builder/api-key'
 import type { FormPayload } from './forms-api'
 
-export const FORM_FIELD_LABELS: Record<FormFieldType, string> = {
-  TEXT: 'Short text',
-  EMAIL: 'Email',
-  TEXTAREA: 'Long text',
-  SELECT: 'Choice',
-  NUMBER: 'Number',
-  CHECKBOX: 'Checkbox',
-  DATE: 'Date',
+/** Name of a form field type in the current language. */
+export function formFieldTypeLabel(type: FormFieldType): string {
+  return i18n.t(`forms:types.${type}`)
 }
 
 export type DraftFormField = FormFieldDefinition & { cid: string; keyTouched: boolean; saved?: boolean }
@@ -38,9 +34,9 @@ export function newFormDraft(): FormDraft {
     recipientEmail: '',
     isActive: true,
     fields: [
-      { cid: nextCid(), keyTouched: true, name: 'name', label: 'Name', type: 'TEXT', required: true },
-      { cid: nextCid(), keyTouched: true, name: 'email', label: 'Email', type: 'EMAIL', required: true },
-      { cid: nextCid(), keyTouched: true, name: 'message', label: 'Message', type: 'TEXTAREA', required: true },
+      { cid: nextCid(), keyTouched: true, name: 'name', label: i18n.t('forms:defaults.name'), type: 'TEXT', required: true },
+      { cid: nextCid(), keyTouched: true, name: 'email', label: i18n.t('forms:defaults.email'), type: 'EMAIL', required: true },
+      { cid: nextCid(), keyTouched: true, name: 'message', label: i18n.t('forms:defaults.message'), type: 'TEXTAREA', required: true },
     ],
   }
 }
@@ -68,7 +64,7 @@ export function setFormSlug(d: FormDraft, slug: string): FormDraft {
 
 export function addFormField(d: FormDraft, type: FormFieldType): { draft: FormDraft; cid: string } {
   const cid = nextCid()
-  const label = FORM_FIELD_LABELS[type]
+  const label = formFieldTypeLabel(type)
   const field: DraftFormField = { cid, keyTouched: false, name: uniqueKey(toApiKey(label), d.fields.map((f) => f.name)), label, type, required: false, ...(type === 'SELECT' ? { options: [] } : {}) }
   return { draft: { ...d, fields: [...d.fields, field] }, cid }
 }
@@ -101,15 +97,15 @@ export function reorderFormFields(d: FormDraft, cids: string[]): FormDraft {
 
 export function validateForm(d: FormDraft): Record<string, string> {
   const errors: Record<string, string> = {}
-  if (!d.name.trim()) errors.name = 'Name is required'
-  if (!/^[a-z0-9-]{1,100}$/.test(d.slug)) errors.slug = 'Use lowercase letters, numbers and hyphens'
-  if (!EMAIL.test(d.recipientEmail.trim())) errors.recipientEmail = 'Enter a valid email address'
-  if (d.fields.length === 0) errors.fields = 'Add at least one field'
+  if (!d.name.trim()) errors.name = i18n.t('forms:validation.nameRequired')
+  if (!/^[a-z0-9-]{1,100}$/.test(d.slug)) errors.slug = i18n.t('models:validation.slug')
+  if (!EMAIL.test(d.recipientEmail.trim())) errors.recipientEmail = i18n.t('forms:validation.email')
+  if (d.fields.length === 0) errors.fields = i18n.t('models:validation.noFields')
   for (const f of d.fields) {
-    if (!f.label.trim()) errors[`label:${f.cid}`] = 'Label is required'
+    if (!f.label.trim()) errors[`label:${f.cid}`] = i18n.t('models:validation.labelRequired')
     const keyError = apiKeyError(f.name, d.fields.filter((o) => o.cid !== f.cid).map((o) => o.name))
     if (keyError) errors[`key:${f.cid}`] = keyError
-    if (f.type === 'SELECT' && !(f.options ?? []).some((o) => o.trim())) errors[`options:${f.cid}`] = 'Add at least one option'
+    if (f.type === 'SELECT' && !(f.options ?? []).some((o) => o.trim())) errors[`options:${f.cid}`] = i18n.t('forms:validation.noOptions')
     const ruleError = formRuleError(f)
     if (ruleError) errors[`rules:${f.cid}`] = ruleError
   }
@@ -121,10 +117,10 @@ const isInt = (n: unknown) => typeof n === 'number' && Number.isInteger(n)
 /** Mirrors the backend form field schema (minLength >= 0, maxLength >= 1). */
 function formRuleError(f: DraftFormField): string | null {
   const v = f.validation ?? {}
-  if (v.minLength !== undefined && !(isInt(v.minLength) && v.minLength >= 0)) return 'Min length must be a whole number of 0 or more'
-  if (v.maxLength !== undefined && !(isInt(v.maxLength) && v.maxLength >= 1)) return 'Max length must be a whole number of at least 1'
-  if (v.minLength !== undefined && v.maxLength !== undefined && v.maxLength < v.minLength) return 'Max length must be at least the min length'
-  if (v.min !== undefined && v.max !== undefined && v.max < v.min) return 'Maximum must be at least the minimum'
+  if (v.minLength !== undefined && !(isInt(v.minLength) && v.minLength >= 0)) return i18n.t('forms:validation.minLength')
+  if (v.maxLength !== undefined && !(isInt(v.maxLength) && v.maxLength >= 1)) return i18n.t('models:validation.maxLength')
+  if (v.minLength !== undefined && v.maxLength !== undefined && v.maxLength < v.minLength) return i18n.t('models:validation.maxBelowMin')
+  if (v.min !== undefined && v.max !== undefined && v.max < v.min) return i18n.t('models:validation.maxBelowMinNumber')
   return null
 }
 

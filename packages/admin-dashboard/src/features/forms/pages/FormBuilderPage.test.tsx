@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import { setViewport } from '@/test/viewport'
 import type { ContactForm } from '@/types'
 import apiClient from '@/lib/api'
@@ -78,4 +78,29 @@ it('marks required preview fields for assistive technology', async () => {
   const preview = await screen.findByRole('region', { name: 'Preview' })
   expect(within(preview).getByLabelText(/Email/)).toBeRequired()
   expect(within(preview).getByLabelText(/Message/)).toBeRequired()
+})
+
+describe('in Czech', () => {
+  it('starts a new form with Czech default labels and English keys', async () => {
+    await setTestLanguage('cs')
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { success: true, data: { ...form, id: 'f9' } } })
+    renderRoutes(routes, { route: '/forms/new' })
+    await userEvent.type(await screen.findByLabelText('Název'), 'Kontakt')
+    await userEvent.type(screen.getByLabelText('Odesílat odpovědi na'), 'me@x.test')
+    const preview = screen.getByRole('region', { name: 'Náhled' })
+    expect(within(preview).getByLabelText(/Jméno/)).toBeInTheDocument()
+    expect(within(preview).getByLabelText(/E-mail/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Uložit formulář' }))
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalled())
+    const body = vi.mocked(apiClient.post).mock.calls[0][1] as { fields: { name: string; label: string }[] }
+    expect(body.fields.map((f) => f.name)).toEqual(['name', 'email', 'message'])
+    expect(body.fields.map((f) => f.label)).toEqual(['Jméno', 'E-mail', 'Zpráva'])
+  })
+
+  it('shows the embed panel in Czech', async () => {
+    await setTestLanguage('cs')
+    renderRoutes(routes, { route: '/forms/f1' })
+    expect(await screen.findByRole('heading', { name: 'Vložení na web' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Ukázka odeslání')).toHaveTextContent('/forms/contact-us/submit')
+  })
 })

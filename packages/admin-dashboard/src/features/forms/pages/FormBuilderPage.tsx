@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -20,7 +21,7 @@ import { FieldList } from '@/features/builder/FieldList'
 import { InspectorPanel } from '@/features/builder/InspectorPanel'
 import { useForm, useFormWrites } from '../forms-api'
 import {
-  FORM_FIELD_LABELS,
+  formFieldTypeLabel,
   addFormField,
   draftFromForm,
   newFormDraft,
@@ -42,17 +43,19 @@ import { EmbedPanel } from '../components/EmbedPanel'
 const PALETTE: FormFieldType[] = ['TEXT', 'EMAIL', 'TEXTAREA', 'SELECT', 'NUMBER', 'CHECKBOX', 'DATE']
 
 export function FormBuilderPage() {
+  const { t } = useTranslation('forms')
   const { id = 'new' } = useParams()
   const isNew = id === 'new'
   const formQuery = useForm(isNew ? undefined : id)
   if (isNew) return <FormBuilder key="new" initial={newFormDraft()} />
-  if (formQuery.isError) return <ErrorState message="Could not load this form." onRetry={() => void formQuery.refetch()} />
+  if (formQuery.isError) return <ErrorState message={t('builder.loadError')} onRetry={() => void formQuery.refetch()} />
   if (!formQuery.data) return <Skeleton className="h-64 w-full" />
   return <FormBuilder key={formQuery.data.id} form={formQuery.data} initial={draftFromForm(formQuery.data)} />
 }
 
 function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft }) {
   const navigate = useNavigate()
+  const { t } = useTranslation('forms')
   const writes = useFormWrites()
   const sites = useSites()
   const [draft, setDraft] = useState(initial)
@@ -76,14 +79,14 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
     if (keys.length) {
       const fieldKey = keys.find((k) => k.includes(':'))
       if (fieldKey) setSelected(fieldKey.split(':')[1])
-      toast.error('Fix the highlighted fields before saving')
+      toast.error(t('builder.fixFields'))
       return
     }
     setSaving(true)
     try {
       const saved = form ? await writes.update(form.id, payload) : await writes.create(payload)
       setBaseline(stableStringify(payload))
-      toast.success(form ? 'Form saved' : 'Form created')
+      toast.success(form ? t('builder.saved') : t('builder.created'))
       if (!form) navigate(`/forms/${saved.id}`, { replace: true, state: { skipGuard: true } })
       else {
         // Re-draft from the server so saved fields keep their keys when labels change.
@@ -101,7 +104,7 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
     setConfirmDelete(false)
     try {
       await writes.remove(form!.id)
-      toast.success(`Deleted ${form!.name}`)
+      toast.success(t('builder.deleted', { name: form!.name }))
       navigate('/forms', { state: { skipGuard: true } })
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -111,67 +114,67 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
   return (
     <>
       <PageHeader
-        title={draft.name.trim() || 'New form'}
-        breadcrumb={<Link to="/forms">Forms</Link>}
+        title={draft.name.trim() || t('builder.newTitle')}
+        breadcrumb={<Link to="/forms">{t('list.title')}</Link>}
         actions={
           <>
-            {form && <Button variant="outline" onClick={() => setConfirmDelete(true)}>Delete form</Button>}
-            <Button onClick={() => void save()} disabled={saving || (!!form && !dirty)}>{saving ? 'Saving…' : 'Save form'}</Button>
+            {form && <Button variant="outline" onClick={() => setConfirmDelete(true)}>{t('builder.deleteForm')}</Button>}
+            <Button onClick={() => void save()} disabled={saving || (!!form && !dirty)}>{saving ? t('builder.saving') : t('builder.save')}</Button>
           </>
         }
       />
       <section className="mb-6 grid gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="form-name">Name</Label>
+          <Label htmlFor="form-name">{t('builder.name')}</Label>
           <Input id="form-name" value={draft.name} onChange={(e) => setDraft(setFormName(draft, e.target.value))} aria-invalid={visible.name ? true : undefined} />
           {visible.name && <p className="text-sm text-destructive">{visible.name}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="form-slug">Slug</Label>
+          <Label htmlFor="form-slug">{t('builder.slug')}</Label>
           <Input id="form-slug" className="font-mono" value={draft.slug} onChange={(e) => setDraft(setFormSlug(draft, e.target.value))} aria-invalid={visible.slug ? true : undefined} />
           {visible.slug && <p className="text-sm text-destructive">{visible.slug}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="form-recipient">Send submissions to</Label>
+          <Label htmlFor="form-recipient">{t('builder.sendTo')}</Label>
           <Input id="form-recipient" type="email" value={draft.recipientEmail} onChange={(e) => setDraft({ ...draft, recipientEmail: e.target.value })} aria-invalid={visible.recipientEmail ? true : undefined} />
           {visible.recipientEmail && <p className="text-sm text-destructive">{visible.recipientEmail}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="form-site">Site</Label>
+          <Label htmlFor="form-site">{t('builder.site')}</Label>
           <Select value={draft.siteId ?? 'none'} onValueChange={(v) => setDraft({ ...draft, siteId: v === 'none' ? undefined : v })}>
             <SelectTrigger id="form-site"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">Any site</SelectItem>
+              <SelectItem value="none">{t('builder.anySite')}</SelectItem>
               {(sites.data ?? []).map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="flex items-center justify-between gap-2 sm:col-span-2">
-          <Label htmlFor="form-active">Accept new submissions</Label>
+          <Label htmlFor="form-active">{t('builder.accept')}</Label>
           <Switch id="form-active" checked={draft.isActive} onCheckedChange={(checked) => setDraft({ ...draft, isActive: checked })} />
         </div>
       </section>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <section>
-          <h2 className="mb-2 font-serif text-lg font-semibold">Fields</h2>
+          <h2 className="mb-2 font-serif text-lg font-semibold">{t('builder.fields')}</h2>
           {visible.fields && <p className="mb-2 text-sm text-destructive">{visible.fields}</p>}
           <FieldList
-            label="Form fields"
-            items={draft.fields.map((f) => ({ id: f.cid, label: f.label, apiKey: f.name, typeLabel: FORM_FIELD_LABELS[f.type], hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`] || visible[`options:${f.cid}`] || visible[`rules:${f.cid}`]) }))}
+            label={t('builder.fieldsLabel')}
+            items={draft.fields.map((f) => ({ id: f.cid, label: f.label, apiKey: f.name, typeLabel: formFieldTypeLabel(f.type), hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`] || visible[`options:${f.cid}`] || visible[`rules:${f.cid}`]) }))}
             selectedId={selected}
             onSelect={setSelected}
             onReorder={(cids) => setDraft(reorderFormFields(draft, cids))}
           />
           <div className="mt-4 flex flex-wrap gap-2">
             {PALETTE.map((type) => (
-              <Button key={type} type="button" variant="outline" size="sm" aria-label={`Add ${FORM_FIELD_LABELS[type]} field`} onClick={() => { const { draft: next, cid } = addFormField(draft, type); setDraft(next); setSelected(cid) }}>
-                + {FORM_FIELD_LABELS[type]}
+              <Button key={type} type="button" variant="outline" size="sm" aria-label={t('builder.addField', { type: formFieldTypeLabel(type) })} onClick={() => { const { draft: next, cid } = addFormField(draft, type); setDraft(next); setSelected(cid) }}>
+                + {formFieldTypeLabel(type)}
               </Button>
             ))}
           </div>
           <div className="mt-6">
-            <InspectorPanel title="Field settings" open={!!selectedField} onClose={() => setSelected(undefined)}>
+            <InspectorPanel title={t('builder.fieldSettings')} open={!!selectedField} onClose={() => setSelected(undefined)}>
               {selectedField && (
                 <FormFieldInspector
                   key={selectedField.cid}
@@ -197,9 +200,9 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
         <ConfirmDialog
           open={confirmDelete}
           onOpenChange={setConfirmDelete}
-          title={`Delete ${form.name}?`}
-          description={form.submissionCount > 0 ? `This also deletes its ${form.submissionCount} ${form.submissionCount === 1 ? 'submission' : 'submissions'}.` : 'This cannot be undone.'}
-          confirmLabel="Delete"
+          title={t('builder.deleteTitle', { name: form.name })}
+          description={form.submissionCount > 0 ? t('builder.deleteWithSubmissions', { count: form.submissionCount }) : t('builder.cannotUndo')}
+          confirmLabel={t('actions.delete', { ns: 'common' })}
           destructive
           onConfirm={() => void remove()}
         />
