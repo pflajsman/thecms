@@ -46,6 +46,10 @@ const FieldDefinitionSchema = new Schema<FieldDefinition>(
       type: Boolean,
       default: false,
     },
+    // No default: absent means the field type decides (see utils/localized.ts).
+    localized: {
+      type: Boolean,
+    },
     defaultValue: {
       type: Schema.Types.Mixed,
     },

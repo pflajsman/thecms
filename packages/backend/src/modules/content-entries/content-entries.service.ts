@@ -8,6 +8,7 @@ import { computeEntryTitle } from '../../utils/entryTitle';
 import { escapeRegex } from '../../utils/regex';
 import { AppError } from '../../middleware/error.middleware';
 import { LanguagesService } from '../languages/languages.service';
+import { syncSharedFields } from './entry-versions.service';
 
 /**
  * Query options for listing content entries
@@ -329,6 +330,10 @@ export class ContentEntriesService {
     }
 
     await entry.save();
+
+    if (updateData.data) {
+      await syncSharedFields(entry, contentType.fields, contentType.titleField);
+    }
 
     // Trigger webhook for entry update
     WebhookService.triggerEvent(WebhookEvent.ENTRY_UPDATED, {

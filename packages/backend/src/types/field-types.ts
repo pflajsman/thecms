@@ -23,6 +23,8 @@ export interface FieldDefinition {
   unique?: boolean;
   defaultValue?: any;
   validation?: FieldValidation;
+  /** Translated per language version; defaults to true for TEXT and RICH_TEXT. */
+  localized?: boolean;
 }
 
 /**

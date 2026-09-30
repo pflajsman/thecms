@@ -54,6 +54,7 @@ const fieldDefinitionSchema = z.object({
     .transform((val) => val.trim())
     .optional(),
   required: z.boolean().default(false),
+  localized: z.boolean().optional(),
   unique: z.boolean().default(false).optional(),
   defaultValue: z.any().optional(),
   validation: fieldValidationSchema,

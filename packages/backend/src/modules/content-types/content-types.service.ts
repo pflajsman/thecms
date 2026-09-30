@@ -3,6 +3,8 @@ import { ContentEntryModel } from '../../models/content-entry.model';
 import { CreateContentTypeInput, UpdateContentTypeInput } from './content-types.schema';
 import { FieldType } from '../../types/field-types';
 import { recomputeTitlesForType } from '../content-entries/entry-titles.service';
+import { unifySharedField } from '../content-entries/entry-versions.service';
+import { isLocalized } from '../../utils/localized';
 
 /**
  * Content Types Service
@@ -93,12 +95,26 @@ export class ContentTypesService {
       }
     }
 
+    const previousFields = data.fields
+      ? (await ContentTypeModel.findById(id).select('fields').lean())?.fields ?? []
+      : [];
+
     // Update content type
     const contentType = await ContentTypeModel.findByIdAndUpdate(
       id,
       { $set: data },
       { new: true, runValidators: true }
     );
+
+    // Fields turned from translated to shared take one value across the item's versions.
+    if (contentType && data.fields) {
+      for (const field of data.fields) {
+        const before = previousFields.find((f) => f.name === field.name);
+        if (before && isLocalized(before) && !isLocalized(field)) {
+          await unifySharedField(id, field.name);
+        }
+      }
+    }
 
     if (contentType && (data.titleField !== undefined || data.fields !== undefined)) {
       await recomputeTitlesForType(contentType);
