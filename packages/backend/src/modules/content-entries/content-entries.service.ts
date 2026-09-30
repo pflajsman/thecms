@@ -216,7 +216,9 @@ export class ContentEntriesService {
     if (search) query.title = { $regex: escapeRegex(search), $options: 'i' };
 
     const direction = sortOrder === 'asc' ? 1 : -1;
-    const sort: Record<string, 1 | -1> = { [sortBy]: direction, _id: direction };
+    // One sort key only: Cosmos DB (production) needs an index that matches the sort exactly, and
+    // each sortable field has a single-field index on the model.
+    const sort: Record<string, 1 | -1> = { [sortBy]: direction };
 
     const [entries, total] = await Promise.all([
       ContentEntryModel.find(query).sort(sort).skip((page - 1) * limit).limit(limit).exec(),

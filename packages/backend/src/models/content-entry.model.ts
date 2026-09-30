@@ -86,6 +86,10 @@ ContentEntrySchema.index({ contentTypeId: 1, status: 1 });
 ContentEntrySchema.index({ contentTypeId: 1, createdAt: -1 });
 ContentEntrySchema.index({ contentTypeId: 1, publishedAt: -1 });
 ContentEntrySchema.index({ status: 1, publishedAt: -1 });
+// Single-field indexes for the admin Content list sorts (Cosmos DB only sorts on indexed fields;
+// title is indexed on the field itself).
+ContentEntrySchema.index({ updatedAt: -1 });
+ContentEntrySchema.index({ createdAt: -1 });
 
 // Text index for full-text search on data fields
 // Note: Wildcard text index is created manually in sync-indexes.ts script

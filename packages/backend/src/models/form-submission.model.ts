@@ -65,5 +65,7 @@ const FormSubmissionSchema = new Schema<IFormSubmission>(
 // Indexes
 FormSubmissionSchema.index({ formId: 1, status: 1 });
 FormSubmissionSchema.index({ formId: 1, createdAt: -1 });
+// The Inbox lists submissions across forms by date (Cosmos DB only sorts on indexed fields).
+FormSubmissionSchema.index({ createdAt: -1 });
 
 export const FormSubmissionModel = mongoose.model<IFormSubmission>('FormSubmission', FormSubmissionSchema);

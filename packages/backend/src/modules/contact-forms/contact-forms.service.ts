@@ -231,7 +231,7 @@ export class ContactFormsService {
     if (status) query.status = status;
 
     const [submissions, total] = await Promise.all([
-      FormSubmissionModel.find(query).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * limit).limit(limit).exec(),
+      FormSubmissionModel.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).exec(),
       FormSubmissionModel.countDocuments(query),
     ]);
 
