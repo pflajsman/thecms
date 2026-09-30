@@ -1,1 +1,96 @@
-{}
+{
+  "groups": {
+    "entries": "Entries",
+    "models": "Content models",
+    "media": "Media"
+  },
+  "events": {
+    "entry_created": "Entry created",
+    "entry_updated": "Entry updated",
+    "entry_deleted": "Entry deleted",
+    "entry_published": "Entry published",
+    "entry_unpublished": "Entry unpublished",
+    "entry_archived": "Entry archived",
+    "content_type_created": "Model created",
+    "content_type_updated": "Model updated",
+    "content_type_deleted": "Model deleted",
+    "media_uploaded": "Media uploaded",
+    "media_deleted": "Media deleted"
+  },
+  "list": {
+    "title": "Webhooks",
+    "description": "Notify other services when content changes.",
+    "new": "New webhook",
+    "loadError": "Could not load webhooks.",
+    "emptyTitle": "No webhooks yet",
+    "emptyText": "Webhooks call your endpoint when content changes, for example to rebuild your site.",
+    "eventCount_one": "{{count}} event",
+    "eventCount_other": "{{count}} events",
+    "active": "Active",
+    "paused": "Paused",
+    "lastFailed": "Last delivery failed",
+    "delivered": "Delivered {{when}}",
+    "noDeliveries": "No deliveries yet"
+  },
+  "test": {
+    "delivered": "Test delivered: {{code}} in {{ms}} ms",
+    "failed": "Test failed: {{error}}",
+    "failedWithCode": "Test failed with {{code}}: {{error}}",
+    "noResponse": "no response"
+  },
+  "form": {
+    "loadError": "Could not load this webhook.",
+    "fixFields": "Fix the highlighted fields before saving",
+    "saved": "Webhook saved",
+    "created": "Webhook created",
+    "deleted": "Deleted {{name}}",
+    "newTitle": "New webhook",
+    "delete": "Delete webhook",
+    "save": "Save webhook",
+    "name": "Name",
+    "url": "Endpoint URL",
+    "description": "Description",
+    "events": "Events",
+    "site": "Site",
+    "allSites": "All sites",
+    "active": "Active",
+    "deliveries": "Deliveries",
+    "sending": "Sending…",
+    "sendTest": "Send test",
+    "counts": "{{total}} total · {{delivered}} delivered · {{failed}} failed",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "It stops receiving events immediately."
+  },
+  "secret": {
+    "title": "Signing secret",
+    "preview": "Requests are signed with this secret. The current secret starts with <code>{{preview}}</code>",
+    "rotate": "Rotate secret",
+    "rotateTitle": "Rotate the signing secret?",
+    "rotateText": "The receiving service must switch to the new secret, or it will reject signed requests.",
+    "copied": "Secret copied",
+    "showOnce": "Copy it now: it is shown only once. Use it to verify the X-Webhook-Signature header on each request.",
+    "done": "Done"
+  },
+  "log": {
+    "empty": "No deliveries yet. Send a test to try it.",
+    "label": "Delivery log",
+    "time": "Time",
+    "event": "Event",
+    "result": "Result",
+    "code": "Code",
+    "duration": "Duration",
+    "status": {
+      "SUCCESS": "Delivered",
+      "FAILED": "Failed",
+      "RETRYING": "Retrying",
+      "PENDING": "Pending"
+    },
+    "payload": "Payload",
+    "ms": "{{ms}} ms"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "url": "Enter an http or https URL",
+    "events": "Choose at least one event"
+  }
+}

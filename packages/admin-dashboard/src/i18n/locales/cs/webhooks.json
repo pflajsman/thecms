@@ -1,1 +1,97 @@
-{}
+{
+  "groups": {
+    "entries": "Položky",
+    "models": "Modely obsahu",
+    "media": "Média"
+  },
+  "events": {
+    "entry_created": "Položka vytvořena",
+    "entry_updated": "Položka upravena",
+    "entry_deleted": "Položka smazána",
+    "entry_published": "Položka publikována",
+    "entry_unpublished": "Publikování položky zrušeno",
+    "entry_archived": "Položka archivována",
+    "content_type_created": "Model vytvořen",
+    "content_type_updated": "Model upraven",
+    "content_type_deleted": "Model smazán",
+    "media_uploaded": "Médium nahráno",
+    "media_deleted": "Médium smazáno"
+  },
+  "list": {
+    "title": "Webhooky",
+    "description": "Upozorněte jiné služby, když se obsah změní.",
+    "new": "Nový webhook",
+    "loadError": "Webhooky se nepodařilo načíst.",
+    "emptyTitle": "Zatím žádné webhooky",
+    "emptyText": "Webhooky zavolají vaši adresu, když se obsah změní, například kvůli novému sestavení webu.",
+    "eventCount_one": "{{count}} událost",
+    "eventCount_few": "{{count}} události",
+    "eventCount_other": "{{count}} událostí",
+    "active": "Aktivní",
+    "paused": "Pozastaveno",
+    "lastFailed": "Poslední doručení selhalo",
+    "delivered": "Doručeno {{when}}",
+    "noDeliveries": "Zatím žádná doručení"
+  },
+  "test": {
+    "delivered": "Test doručen: {{code}} za {{ms}} ms",
+    "failed": "Test selhal: {{error}}",
+    "failedWithCode": "Test selhal s kódem {{code}}: {{error}}",
+    "noResponse": "bez odpovědi"
+  },
+  "form": {
+    "loadError": "Webhook se nepodařilo načíst.",
+    "fixFields": "Před uložením opravte zvýrazněná pole",
+    "saved": "Webhook uložen",
+    "created": "Webhook vytvořen",
+    "deleted": "Webhook {{name}} smazán",
+    "newTitle": "Nový webhook",
+    "delete": "Smazat webhook",
+    "save": "Uložit webhook",
+    "name": "Název",
+    "url": "Adresa koncového bodu",
+    "description": "Popis",
+    "events": "Události",
+    "site": "Web",
+    "allSites": "Všechny weby",
+    "active": "Aktivní",
+    "deliveries": "Doručení",
+    "sending": "Odesílání…",
+    "sendTest": "Odeslat test",
+    "counts": "celkem {{total}} · doručeno {{delivered}} · selhalo {{failed}}",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteText": "Okamžitě přestane dostávat události."
+  },
+  "secret": {
+    "title": "Podpisový klíč",
+    "preview": "Požadavky jsou podepsané tímto klíčem. Současný klíč začíná <code>{{preview}}</code>",
+    "rotate": "Vyměnit klíč",
+    "rotateTitle": "Vyměnit podpisový klíč?",
+    "rotateText": "Přijímající služba musí přejít na nový klíč, jinak podepsané požadavky odmítne.",
+    "copied": "Klíč zkopírován",
+    "showOnce": "Zkopírujte si ho teď, zobrazí se jen jednou. Slouží k ověření hlavičky X-Webhook-Signature u každého požadavku.",
+    "done": "Hotovo"
+  },
+  "log": {
+    "empty": "Zatím žádná doručení. Zkuste odeslat test.",
+    "label": "Záznam doručení",
+    "time": "Čas",
+    "event": "Událost",
+    "result": "Výsledek",
+    "code": "Kód",
+    "duration": "Doba",
+    "status": {
+      "SUCCESS": "Doručeno",
+      "FAILED": "Selhalo",
+      "RETRYING": "Opakuje se",
+      "PENDING": "Čeká"
+    },
+    "payload": "Obsah požadavku",
+    "ms": "{{ms}} ms"
+  },
+  "validation": {
+    "nameRequired": "Název je povinný",
+    "url": "Zadejte adresu začínající http nebo https",
+    "events": "Vyberte alespoň jednu událost"
+  }
+}

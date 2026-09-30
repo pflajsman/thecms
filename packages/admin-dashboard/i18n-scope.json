@@ -75,6 +75,11 @@
     "src/features/sites/sites-utils.ts",
     "src/features/sites/pages/SitesListPage.tsx",
     "src/features/sites/pages/SiteFormPage.tsx",
-    "src/features/sites/components/ConnectSnippets.tsx"
+    "src/features/sites/components/ConnectSnippets.tsx",
+    "src/features/webhooks/webhook-events.ts",
+    "src/features/webhooks/pages/WebhooksListPage.tsx",
+    "src/features/webhooks/pages/WebhookFormPage.tsx",
+    "src/features/webhooks/components/SecretDialog.tsx",
+    "src/features/webhooks/components/DeliveryLog.tsx"
   ]
 }

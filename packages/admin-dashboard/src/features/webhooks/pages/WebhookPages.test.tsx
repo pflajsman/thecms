@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import apiClient from '@/lib/api'
 import { sitesService } from '@/services/sites'
 import { WebhooksListPage } from './WebhooksListPage'
@@ -109,5 +109,32 @@ describe('webhook scoped to a site', () => {
     await userEvent.click(await screen.findByRole('option', { name: 'All sites' }))
     await userEvent.click(screen.getByRole('button', { name: 'Save webhook' }))
     await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/webhooks/w2', expect.objectContaining({ siteId: null })))
+  })
+})
+
+describe('in Czech', () => {
+  it('lists webhooks with Czech counts', async () => {
+    await setTestLanguage('cs')
+    renderRoutes(routes, { route: '/webhooks' })
+    expect(await screen.findByText(/2 události/)).toBeInTheDocument()
+    expect(screen.getByText('Poslední doručení selhalo')).toBeInTheDocument()
+  })
+
+  it('reports a test delivery and shows the log in Czech', async () => {
+    await setTestLanguage('cs')
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { success: true, data: { success: true, statusCode: 200, responseTime: 85 } } })
+    renderRoutes(routes, { route: '/webhooks/w1' })
+    await userEvent.click(await screen.findByRole('button', { name: 'Odeslat test' }))
+    expect(await screen.findByText('Test doručen: 200 za 85 ms')).toBeInTheDocument()
+    const log = screen.getByRole('table', { name: 'Záznam doručení' })
+    expect(within(log).getByText('Selhalo')).toBeInTheDocument()
+    expect(within(log).getByText('Položka publikována')).toBeInTheDocument()
+  })
+
+  it('shows event checkboxes in Czech after switching language', async () => {
+    renderRoutes(routes, { route: '/webhooks/new' })
+    await screen.findByRole('checkbox', { name: 'Entry published' })
+    await setTestLanguage('cs')
+    expect(screen.getByRole('checkbox', { name: 'Položka publikována' })).toBeInTheDocument()
   })
 })

@@ -1,3 +1,5 @@
+import { Trans, useTranslation } from 'react-i18next'
+import { i18n } from '@/i18n'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { RefreshCw, Send } from 'lucide-react'
@@ -19,17 +21,18 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { TestResult, Webhook, WebhookPayload } from '../webhooks-api'
 import { useWebhook, useWebhookLogs, useWebhookWrites } from '../webhooks-queries'
-import { EVENT_GROUPS, validateWebhook } from '../webhook-events'
+import { getEventGroups, validateWebhook } from '../webhook-events'
 import { SecretDialog } from '../components/SecretDialog'
 import { DeliveryLog } from '../components/DeliveryLog'
 
 const EMPTY: WebhookPayload = { name: '', url: '', description: '', events: [] }
 
 export function WebhookFormPage() {
+  const { t } = useTranslation('webhooks')
   const { id = 'new' } = useParams()
   const hook = useWebhook(id === 'new' ? undefined : id)
   if (id === 'new') return <WebhookForm key="new" initial={EMPTY} />
-  if (hook.isError) return <ErrorState message="Could not load this webhook." onRetry={() => void hook.refetch()} />
+  if (hook.isError) return <ErrorState message={t('form.loadError')} onRetry={() => void hook.refetch()} />
   if (!hook.data) return <Skeleton className="h-64 w-full" />
   const h = hook.data
   return (
@@ -42,11 +45,13 @@ export function WebhookFormPage() {
 }
 
 function testMessage(r: TestResult): string {
-  if (r.success) return `Test delivered: ${r.statusCode ?? ''} in ${r.responseTime ?? 0} ms`
-  return `Test failed${r.statusCode ? ` with ${r.statusCode}` : ''}: ${r.error ?? 'no response'}`
+  if (r.success) return i18n.t('webhooks:test.delivered', { code: r.statusCode ?? '', ms: r.responseTime ?? 0 })
+  const error = r.error ?? i18n.t('webhooks:test.noResponse')
+  return r.statusCode ? i18n.t('webhooks:test.failedWithCode', { code: r.statusCode, error }) : i18n.t('webhooks:test.failed', { error })
 }
 
 function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: WebhookPayload }) {
+  const { t } = useTranslation('webhooks')
   const navigate = useNavigate()
   const writes = useWebhookWrites()
   const sites = useSites()
@@ -70,7 +75,7 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
   const save = async () => {
     setShowErrors(true)
     if (Object.keys(errors).length) {
-      toast.error('Fix the highlighted fields before saving')
+      toast.error(t('form.fixFields'))
       return
     }
     const payload: WebhookPayload = { ...draft, name: draft.name.trim(), url: draft.url.trim(), description: draft.description?.trim() }
@@ -83,13 +88,13 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
       if (webhook) {
         await writes.update(webhook.id, payload)
         setBaseline(stableStringify(draft))
-        toast.success('Webhook saved')
+        toast.success(t('form.saved'))
       } else {
         const created = await writes.create(payload)
         setBaseline(stableStringify(draft))
         setCreatedId(created.id)
         setSecret(created.secret)
-        toast.success('Webhook created')
+        toast.success(t('form.created'))
       }
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -120,7 +125,7 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
     setConfirm(null)
     try {
       await writes.remove(webhook!.id)
-      toast.success(`Deleted ${webhook!.name}`)
+      toast.success(t('form.deleted', { name: webhook!.name }))
       navigate('/webhooks', { state: { skipGuard: true } })
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -130,17 +135,17 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
   return (
     <>
       <PageHeader
-        title={draft.name.trim() || 'New webhook'}
-        breadcrumb={<Link to="/webhooks">Webhooks</Link>}
+        title={draft.name.trim() || t('form.newTitle')}
+        breadcrumb={<Link to="/webhooks">{t('list.title')}</Link>}
         actions={
           <>
             {webhook && (
               <Button variant="outline" onClick={() => setConfirm('delete')}>
-                Delete webhook
+                {t('form.delete')}
               </Button>
             )}
             <Button onClick={() => void save()} disabled={!!webhook && !dirty}>
-              Save webhook
+              {t('form.save')}
             </Button>
           </>
         }
@@ -148,12 +153,12 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <section className="flex min-w-0 flex-col gap-4 rounded-xl border bg-card p-4">
           <div className="space-y-1.5">
-            <Label htmlFor="wh-name">Name</Label>
+            <Label htmlFor="wh-name">{t('form.name')}</Label>
             <Input id="wh-name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} aria-invalid={visible.name ? true : undefined} />
             {visible.name && <p className="text-sm text-destructive">{visible.name}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="wh-url">Endpoint URL</Label>
+            <Label htmlFor="wh-url">{t('form.url')}</Label>
             <Input
               id="wh-url"
               type="url"
@@ -166,13 +171,13 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
             {visible.url && <p className="text-sm text-destructive">{visible.url}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="wh-description">Description</Label>
+            <Label htmlFor="wh-description">{t('form.description')}</Label>
             <Textarea id="wh-description" rows={2} value={draft.description ?? ''} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
           </div>
           <fieldset className="space-y-3">
-            <legend className="text-sm font-medium">Events</legend>
+            <legend className="text-sm font-medium">{t('form.events')}</legend>
             {visible.events && <p className="text-sm text-destructive">{visible.events}</p>}
-            {EVENT_GROUPS.map((group) => (
+            {getEventGroups().map((group) => (
               <div key={group.label}>
                 <p className="mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">{group.label}</p>
                 <div className="grid gap-1.5 sm:grid-cols-2">
@@ -187,13 +192,13 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
             ))}
           </fieldset>
           <div className="space-y-1.5">
-            <Label htmlFor="wh-site">Site</Label>
+            <Label htmlFor="wh-site">{t('form.site')}</Label>
             <Select value={draft.siteId ?? 'none'} onValueChange={(v) => setDraft({ ...draft, siteId: v === 'none' ? undefined : v })}>
               <SelectTrigger id="wh-site">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">All sites</SelectItem>
+                <SelectItem value="none">{t('form.allSites')}</SelectItem>
                 {(sites.data ?? []).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}
@@ -204,7 +209,7 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
           </div>
           {webhook && (
             <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="wh-active">Active</Label>
+              <Label htmlFor="wh-active">{t('form.active')}</Label>
               <Switch id="wh-active" checked={draft.isActive !== false} onCheckedChange={(checked) => setDraft({ ...draft, isActive: checked })} />
             </div>
           )}
@@ -213,28 +218,28 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
         {webhook && (
           <div className="flex min-w-0 flex-col gap-6">
             <section className="flex flex-col gap-3 rounded-xl border bg-card p-4">
-              <h2 className="font-serif text-lg font-semibold">Signing secret</h2>
+              <h2 className="font-serif text-lg font-semibold">{t('secret.title')}</h2>
               <p className="text-sm text-muted-foreground">
-                Requests are signed with this secret. The current secret starts with <code className="font-mono">{webhook.secretPreview}</code>
+                <Trans t={t} i18nKey="secret.preview" values={{ preview: webhook.secretPreview }} components={{ code: <code className="font-mono" /> }} />
               </p>
               <Button variant="outline" size="sm" className="self-start" onClick={() => setConfirm('rotate')}>
                 <RefreshCw aria-hidden />
-                Rotate secret
+                {t('secret.rotate')}
               </Button>
             </section>
             <section className="flex flex-col gap-3 rounded-xl border bg-card p-4">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="font-serif text-lg font-semibold">Deliveries</h2>
+                <h2 className="font-serif text-lg font-semibold">{t('form.deliveries')}</h2>
                 <Button variant="outline" size="sm" onClick={() => void sendTest()} disabled={testing}>
                   <Send aria-hidden />
-                  {testing ? 'Sending…' : 'Send test'}
+                  {testing ? t('form.sending') : t('form.sendTest')}
                 </Button>
               </div>
               <div role="status">
                 {testResult && <p className={testResult.success ? 'text-sm text-status-published-fg' : 'text-sm text-destructive'}>{testMessage(testResult)}</p>}
               </div>
               <p className="text-sm text-muted-foreground">
-                {webhook.totalDeliveries} total · {webhook.successfulDeliveries} delivered · {webhook.failedDeliveries} failed
+                {t('form.counts', { total: webhook.totalDeliveries, delivered: webhook.successfulDeliveries, failed: webhook.failedDeliveries })}
               </p>
               {logs.isPending ? <Skeleton className="h-20 w-full" /> : <DeliveryLog logs={logs.data ?? []} />}
             </section>
@@ -255,18 +260,18 @@ function WebhookForm({ webhook, initial }: { webhook?: Webhook; initial: Webhook
           <ConfirmDialog
             open={confirm === 'rotate'}
             onOpenChange={(o) => !o && setConfirm(null)}
-            title="Rotate the signing secret?"
-            description="The receiving service must switch to the new secret, or it will reject signed requests."
-            confirmLabel="Rotate secret"
+            title={t('secret.rotateTitle')}
+            description={t('secret.rotateText')}
+            confirmLabel={t('secret.rotate')}
             destructive
             onConfirm={() => void rotate()}
           />
           <ConfirmDialog
             open={confirm === 'delete'}
             onOpenChange={(o) => !o && setConfirm(null)}
-            title={`Delete ${webhook.name}?`}
-            description="It stops receiving events immediately."
-            confirmLabel="Delete"
+            title={t('form.deleteTitle', { name: webhook.name })}
+            description={t('form.deleteText')}
+            confirmLabel={t('actions.delete', { ns: 'common' })}
             destructive
             onConfirm={() => void remove()}
           />

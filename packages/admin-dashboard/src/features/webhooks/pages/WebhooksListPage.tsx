@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '@/i18n'
 import { Link } from 'react-router-dom'
 import { Plus, Webhook as WebhookIcon } from 'lucide-react'
 import { formatRelative } from '@/lib/format'
@@ -10,30 +12,31 @@ import type { Webhook } from '../webhooks-api'
 import { useWebhooks } from '../webhooks-queries'
 
 function lastDelivery(h: Webhook): string {
-  if (h.lastDeliveryStatus === 'FAILED') return 'Last delivery failed'
-  if (h.lastDeliveryAt) return `Delivered ${formatRelative(h.lastDeliveryAt)}`
-  return 'No deliveries yet'
+  if (h.lastDeliveryStatus === 'FAILED') return i18n.t('webhooks:list.lastFailed')
+  if (h.lastDeliveryAt) return i18n.t('webhooks:list.delivered', { when: formatRelative(h.lastDeliveryAt) })
+  return i18n.t('webhooks:list.noDeliveries')
 }
 
 export function WebhooksListPage() {
+  const { t } = useTranslation('webhooks')
   const hooks = useWebhooks()
   const action = (
     <Button asChild>
       <Link to="/webhooks/new">
         <Plus aria-hidden />
-        New webhook
+        {t('list.new')}
       </Link>
     </Button>
   )
   let body: React.ReactNode
   if (hooks.isPending) body = <Skeleton className="h-32 w-full" />
-  else if (hooks.isError) body = <ErrorState message="Could not load webhooks." onRetry={() => void hooks.refetch()} />
+  else if (hooks.isError) body = <ErrorState message={t('list.loadError')} onRetry={() => void hooks.refetch()} />
   else if (hooks.data.length === 0)
     body = (
       <EmptyState
         icon={WebhookIcon}
-        title="No webhooks yet"
-        description="Webhooks call your endpoint when content changes, for example to rebuild your site."
+        title={t('list.emptyTitle')}
+        description={t('list.emptyText')}
         action={action}
       />
     )
@@ -48,7 +51,7 @@ export function WebhooksListPage() {
                 <span className="block truncate font-mono text-xs text-muted-foreground">{h.url}</span>
               </span>
               <span className="text-sm text-muted-foreground">
-                {h.events.length} {h.events.length === 1 ? 'event' : 'events'} · {h.isActive ? 'Active' : 'Paused'}
+                {t('list.eventCount', { count: h.events.length })} · {h.isActive ? t('list.active') : t('list.paused')}
               </span>
               <span className="text-sm text-muted-foreground">{lastDelivery(h)}</span>
             </Link>
@@ -58,7 +61,7 @@ export function WebhooksListPage() {
     )
   return (
     <>
-      <PageHeader title="Webhooks" description="Notify other services when content changes." actions={action} />
+      <PageHeader title={t('list.title')} description={t('list.description')} actions={action} />
       {body}
     </>
   )
