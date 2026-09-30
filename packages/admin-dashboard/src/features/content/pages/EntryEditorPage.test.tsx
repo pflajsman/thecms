@@ -165,4 +165,15 @@ describe('in Czech', () => {
     await setTestLanguage('cs')
     expect(i18n.t('editor:fixFieldsToast', { count })).toBe(message)
   })
+
+  it('re-translates a visible validation error when the language changes', async () => {
+    renderRoutes(routes, { route: `/content/new?type=${tripType.id}` })
+    const title = await screen.findByLabelText('Title')
+    await userEvent.click(title)
+    await userEvent.tab()
+    expect(await screen.findByText('Title is required')).toBeInTheDocument()
+    await setTestLanguage('cs')
+    expect(await screen.findByText('Title je povinné pole')).toBeInTheDocument()
+    expect(screen.queryByText('Title is required')).not.toBeInTheDocument()
+  })
 })

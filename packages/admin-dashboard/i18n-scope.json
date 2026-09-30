@@ -44,6 +44,7 @@
     "src/lib/entry-schema.ts",
     "src/components/RichTextEditor.tsx",
     "src/components/rich-text/EditorToolbar.tsx",
-    "src/components/ResizableImage.tsx"
+    "src/components/ResizableImage.tsx",
+    "src/lib/api-error.ts"
   ]
 }

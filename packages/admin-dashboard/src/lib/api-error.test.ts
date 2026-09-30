@@ -1,5 +1,6 @@
 import { AxiosError, AxiosHeaders } from 'axios'
 import { apiErrorMessage } from './api-error'
+import { i18n } from '@/i18n'
 
 function axiosError(status: number, data: unknown) {
   const headers = new AxiosHeaders()
@@ -22,4 +23,11 @@ describe('apiErrorMessage', () => {
     expect(apiErrorMessage(axiosError(400, { error: 'Validation error', details: [{ path: ['fields', 0, 'validation', 'minLength'], message: 'Number must be greater than 0' }] })))
       .toBe('Validation error: Number must be greater than 0')
   })
+})
+
+it('shows our own fallbacks in Czech; server messages stay as sent', async () => {
+  await i18n.changeLanguage('cs')
+  expect(apiErrorMessage(new AxiosError('Network Error'))).toBe('Nepodařilo se spojit se serverem. Zkontrolujte připojení a zkuste to znovu.')
+  expect(apiErrorMessage('boom')).toBe('Něco se pokazilo. Zkuste to prosím znovu.')
+  expect(apiErrorMessage(axiosError(400, { error: 'Validation failed' }))).toBe('Validation failed')
 })

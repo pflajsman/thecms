@@ -31,46 +31,46 @@ function safeRegExp(pattern: string): RegExp | null {
   }
 }
 
-function fieldError(field: Field, value: unknown): string | null {
+function fieldError(field: Field, value: unknown, lng?: string): string | null {
   const label = field.label || field.name
   const rules = field.validation ?? {}
 
   switch (field.type) {
     case 'TEXT': {
-      if (typeof value !== 'string') return i18n.t('editor:validation.text', { label })
-      if (rules.minLength !== undefined && value.length < rules.minLength) return i18n.t('editor:validation.minLength', { label, count: rules.minLength })
-      if (rules.maxLength !== undefined && value.length > rules.maxLength) return i18n.t('editor:validation.maxLength', { label, count: rules.maxLength })
+      if (typeof value !== 'string') return i18n.t('editor:validation.text', { lng, label })
+      if (rules.minLength !== undefined && value.length < rules.minLength) return i18n.t('editor:validation.minLength', { lng, label, count: rules.minLength })
+      if (rules.maxLength !== undefined && value.length > rules.maxLength) return i18n.t('editor:validation.maxLength', { lng, label, count: rules.maxLength })
       const re = rules.pattern ? safeRegExp(rules.pattern) : null
-      if (re && !re.test(value)) return i18n.t('editor:validation.pattern', { label })
+      if (re && !re.test(value)) return i18n.t('editor:validation.pattern', { lng, label })
       return null
     }
     case 'RICH_TEXT': {
-      if (typeof value !== 'string') return i18n.t('editor:validation.text', { label })
-      if (rules.maxLength !== undefined && value.length > rules.maxLength) return i18n.t('editor:validation.maxLength', { label, count: rules.maxLength })
+      if (typeof value !== 'string') return i18n.t('editor:validation.text', { lng, label })
+      if (rules.maxLength !== undefined && value.length > rules.maxLength) return i18n.t('editor:validation.maxLength', { lng, label, count: rules.maxLength })
       return null
     }
     case 'NUMBER': {
-      if (typeof value !== 'number' || !Number.isFinite(value)) return i18n.t('editor:validation.number', { label })
-      if (rules.integer && !Number.isInteger(value)) return i18n.t('editor:validation.integer', { label })
-      if (rules.min !== undefined && value < rules.min) return i18n.t('editor:validation.min', { label, min: formatNumber(rules.min) })
-      if (rules.max !== undefined && value > rules.max) return i18n.t('editor:validation.max', { label, max: formatNumber(rules.max) })
+      if (typeof value !== 'number' || !Number.isFinite(value)) return i18n.t('editor:validation.number', { lng, label })
+      if (rules.integer && !Number.isInteger(value)) return i18n.t('editor:validation.integer', { lng, label })
+      if (rules.min !== undefined && value < rules.min) return i18n.t('editor:validation.min', { lng, label, min: formatNumber(rules.min) })
+      if (rules.max !== undefined && value > rules.max) return i18n.t('editor:validation.max', { lng, label, max: formatNumber(rules.max) })
       return null
     }
     case 'DATE': {
       const time = typeof value === 'string' ? new Date(value).getTime() : Number.NaN
-      if (Number.isNaN(time)) return i18n.t('editor:validation.date', { label })
-      if (rules.minDate && time < new Date(rules.minDate).getTime()) return i18n.t('editor:validation.minDate', { label, date: formatDate(rules.minDate) })
-      if (rules.maxDate && time > new Date(rules.maxDate).getTime()) return i18n.t('editor:validation.maxDate', { label, date: formatDate(rules.maxDate) })
+      if (Number.isNaN(time)) return i18n.t('editor:validation.date', { lng, label })
+      if (rules.minDate && time < new Date(rules.minDate).getTime()) return i18n.t('editor:validation.minDate', { lng, label, date: formatDate(rules.minDate) })
+      if (rules.maxDate && time > new Date(rules.maxDate).getTime()) return i18n.t('editor:validation.maxDate', { lng, label, date: formatDate(rules.maxDate) })
       return null
     }
     case 'BOOLEAN':
-      return typeof value === 'boolean' ? null : i18n.t('editor:validation.boolean', { label })
+      return typeof value === 'boolean' ? null : i18n.t('editor:validation.boolean', { lng, label })
     case 'MEDIA':
     case 'RELATION': {
       if (rules.multiple) {
-        return Array.isArray(value) && value.every((v) => typeof v === 'string') ? null : i18n.t('editor:validation.list', { label })
+        return Array.isArray(value) && value.every((v) => typeof v === 'string') ? null : i18n.t('editor:validation.list', { lng, label })
       }
-      return typeof value === 'string' ? null : i18n.t('editor:validation.single', { label })
+      return typeof value === 'string' ? null : i18n.t('editor:validation.single', { lng, label })
     }
     default:
       return null
@@ -78,15 +78,16 @@ function fieldError(field: Field, value: unknown): string | null {
 }
 
 /** Field name to its first error. Mirrors packages/backend/.../validation.helper.ts, plus: empty strings count as missing. */
-export function validateEntry(fields: Field[], values: EntryValues): Record<string, string> {
+/** `lng` builds the messages in that language (defaults to the current one). */
+export function validateEntry(fields: Field[], values: EntryValues, lng?: string): Record<string, string> {
   const errors: Record<string, string> = {}
   for (const field of fields) {
     const value = values[field.name]
     if (isEmptyValue(field, value)) {
-      if (field.required) errors[field.name] = i18n.t('editor:validation.required', { label: field.label || field.name })
+      if (field.required) errors[field.name] = i18n.t('editor:validation.required', { lng, label: field.label || field.name })
       continue
     }
-    const error = fieldError(field, value)
+    const error = fieldError(field, value, lng)
     if (error) errors[field.name] = error
   }
   return errors

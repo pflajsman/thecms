@@ -1,4 +1,5 @@
 import { isAxiosError } from 'axios'
+import { i18n } from '@/i18n'
 
 export function apiErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
@@ -8,7 +9,8 @@ export function apiErrorMessage(error: unknown): string {
     if (typeof serverMessage === 'string' && serverMessage) {
       return typeof detail === 'string' && detail ? `${serverMessage}: ${detail}` : serverMessage
     }
-    if (!error.response) return 'Could not reach the server. Check your connection and try again.'
+    if (!error.response) return i18n.t('errors.network')
   }
-  return 'Something went wrong. Please try again.'
+  // Server messages above are shown as sent; these fallbacks are ours, so they follow the admin language.
+  return i18n.t('errors.generic')
 }

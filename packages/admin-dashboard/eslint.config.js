@@ -8,6 +8,7 @@ import i18next from 'eslint-plugin-i18next'
 import { readFileSync } from 'node:fs'
 
 const i18nScope = JSON.parse(readFileSync(new URL('./i18n-scope.json', import.meta.url), 'utf8')).files
+const i18nScopeTs = i18nScope.filter((f) => f.endsWith('.ts'))
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -51,6 +52,22 @@ export default defineConfig([
           // Editor and state APIs take identifiers, not copy.
           callees: { exclude: ['i18n(ext)?', 't', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'includes', 'startsWith', 'endsWith'] },
           'object-properties': { exclude: ['[A-Z_-]+', 'textAlign', 'float'] },
+        },
+      ],
+    },
+  },
+  {
+    // Plain .ts files in scope have no JSX, so check every string literal there.
+    files: i18nScopeTs.length ? i18nScopeTs : ['__no-files-yet__'],
+    plugins: { i18next },
+    rules: {
+      'i18next/no-literal-string': [
+        'error',
+        {
+          mode: 'all',
+          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'https?://\\S*'] },
+          callees: { exclude: ['i18n(ext)?', 't', 'useTranslation', 'includes', 'startsWith', 'endsWith', 'RegExp', 'test', 'split', 'join', 'replace'] },
+          'object-properties': { exclude: ['[A-Z_-]+', 'action', 'status', 'type', 'queryKey', 'labelKey', 'id', 'to'] },
         },
       ],
     },

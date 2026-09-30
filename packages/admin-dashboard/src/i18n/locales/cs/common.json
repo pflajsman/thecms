@@ -31,5 +31,9 @@
   },
   "confirm": {
     "typeToConfirm": "Pro potvrzení napište <name>{{name}}</name>"
+  },
+  "errors": {
+    "network": "Nepodařilo se spojit se serverem. Zkontrolujte připojení a zkuste to znovu.",
+    "generic": "Něco se pokazilo. Zkuste to prosím znovu."
   }
 }

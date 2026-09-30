@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Field } from '@/types'
 import { validateEntry, type EntryValues } from '@/lib/entry-schema'
 
@@ -17,7 +18,10 @@ export function useEntryForm(fields: Field[], initial: EntryValues) {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [revealAll, setRevealAll] = useState(false)
 
-  const errors = useMemo(() => validateEntry(fields, values), [fields, values])
+  // Messages are built in the current language, so a language switch must rebuild them.
+  const { i18n } = useTranslation()
+  const language = i18n.language
+  const errors = useMemo(() => validateEntry(fields, values, language), [fields, values, language])
   const changeKey = useMemo(() => stableStringify(values), [values])
   const isDirty = useMemo(() => changeKey !== stableStringify(baseline), [changeKey, baseline])
   const visibleErrors = useMemo(
