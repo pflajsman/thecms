@@ -40,16 +40,19 @@ export default defineConfig([
         'error',
         {
           mode: 'jsx-only',
+          // Also check template literals such as aria-label={`Move ${name} up`}.
+          'should-validate-template': true,
           'jsx-attributes': {
             exclude: [
               'className', 'style', 'type', 'key', 'id', 'width', 'height', 'variant', 'size', 'align', 'side',
               'sideOffset', 'role', 'to', 'href', 'htmlFor', 'name', 'value', 'autoComplete', 'inputMode', 'rel',
               'target', 'accept', 'orientation', 'src', 'method', 'lang', 'dir', 'viewBox', 'fill', 'stroke', 'd',
-              'xmlns', 'strokeWidth', 'tabIndex', 'pattern', 'min', 'max', 'step', 'scope', 'dateTime', 'mode', 'as', 'saveTone', 'position',
+              'xmlns', 'strokeWidth', 'tabIndex', 'pattern', 'min', 'max', 'step', 'scope', 'dateTime', 'mode', 'as', 'saveTone', 'position', 'code',
               'data-.+', 'aria-(hidden|pressed|invalid|busy|current|expanded|live|haspopup|controls|describedby|labelledby|multiline|modal|selected|checked|disabled|level|orientation|atomic)',
             ],
           },
-          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS', '⌘[A-Z]', 'https?://\\S*', '\\s*px'] },
+          // Template literal parts that are paths, key prefixes (label:, preview-) or arrows are not copy.
+          words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS', '⌘[A-Z]', 'https?://\\S*', '\\s*px', '/[\\w/?=&.-]*', '[a-z]+[:-]', '\\s*→\\s*'] },
           // Editor and state APIs take identifiers, not copy.
           callees: { exclude: ['i18n(ext)?', 't', 'tr', 'numberInput', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'setParam', 'setParams', 'includes', 'startsWith', 'endsWith'] },
           'object-properties': { exclude: ['[A-Z_-]+', 'textAlign', 'float', 'ns'] },

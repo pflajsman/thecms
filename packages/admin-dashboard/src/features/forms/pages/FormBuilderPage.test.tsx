@@ -104,3 +104,12 @@ describe('in Czech', () => {
     expect(screen.getByLabelText('Ukázka odeslání')).toHaveTextContent('/forms/contact-us/submit')
   })
 })
+
+it('re-translates visible builder errors when the language changes', async () => {
+  renderRoutes(routes, { route: '/forms/new' })
+  await userEvent.click(await screen.findByRole('button', { name: 'Save form' }))
+  expect(await screen.findByText('Name is required')).toBeInTheDocument()
+  await setTestLanguage('cs')
+  expect(await screen.findByText('Název je povinný')).toBeInTheDocument()
+  expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
+})

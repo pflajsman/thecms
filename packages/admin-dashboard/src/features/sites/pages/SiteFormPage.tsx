@@ -48,7 +48,9 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
   const [draft, setDraft] = useState(initial)
   const [baseline, setBaseline] = useState(() => stableStringify(initial))
   const [origin, setOrigin] = useState('')
-  const [originMessage, setOriginMessage] = useState<string | null>(null)
+  // The rejected value, not its message, so the message follows a language switch.
+  const [rejectedOrigin, setRejectedOrigin] = useState<string | null>(null)
+  const originMessage = rejectedOrigin === null ? null : originError(rejectedOrigin, draft.allowedOrigins)
   const [showErrors, setShowErrors] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const errors = validateSite(draft)
@@ -59,7 +61,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
 
   const addOrigin = () => {
     const message = originError(origin, draft.allowedOrigins)
-    setOriginMessage(message)
+    setRejectedOrigin(message ? origin : null)
     if (message) return
     setDraft({ ...draft, allowedOrigins: [...draft.allowedOrigins, normalizeOrigin(origin)] })
     setOrigin('')
@@ -77,7 +79,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
     let allowedOrigins = draft.allowedOrigins
     if (pendingOrigin) {
       const message = originError(origin, allowedOrigins)
-      setOriginMessage(message)
+      setRejectedOrigin(message ? origin : null)
       if (message) {
         toast.error(t('form.fixFields'))
         return

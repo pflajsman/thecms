@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderRoutes, setTestLanguage } from '@/test/render'
+import { i18n } from '@/i18n'
 import { setViewport } from '@/test/viewport'
 import type { ContentType } from '@/types'
 import * as contentApi from '@/features/content/content-api'
@@ -158,4 +159,19 @@ describe('in Czech', () => {
     expect(screen.getByRole('button', { name: 'Přidat pole Formátovaný text' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Přidat pole Ano, nebo ne' })).toBeInTheDocument()
   })
+})
+
+it('re-translates visible model errors when the language changes', async () => {
+  renderRoutes(routes, { route: '/models/new?template=scratch' })
+  await userEvent.click(await screen.findByRole('button', { name: 'Save model' }))
+  expect(await screen.findByText('Name must be at least 2 characters')).toBeInTheDocument()
+  await setTestLanguage('cs')
+  expect(await screen.findByText('Název musí mít alespoň 2 znaky')).toBeInTheDocument()
+})
+
+it('explains entry usage in the rename confirmation in natural Czech', async () => {
+  await setTestLanguage('cs')
+  expect(i18n.t('models:builder.usedBy', { count: 1 })).toBe('Tento model má 1 položku.')
+  expect(i18n.t('models:builder.usedBy', { count: 3 })).toBe('Tento model má 3 položky.')
+  expect(i18n.t('models:builder.usedBy', { count: 5 })).toBe('Tento model má 5 položek.')
 })

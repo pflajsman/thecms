@@ -54,7 +54,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
 
   const uploadErrors = uploads.items
     .filter((u) => u.status === 'error' && u.error)
-    .map((u) => (u.error!.startsWith(u.name) ? u.error! : `${u.name}: ${u.error}`))
+    .map((u) => (u.error!.includes(u.name) ? u.error! : `${u.name}: ${u.error}`))
 
   const upload = (files: File[]) => {
     const rejected = files.filter((f) => !matchesAccept({ mimeType: f.type, originalName: f.name }, accept))

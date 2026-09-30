@@ -136,3 +136,11 @@ describe('in Czech', () => {
     expect(await screen.findByText('Validation failed: Invalid url')).toBeInTheDocument()
   })
 })
+
+it('re-translates a visible origin error when the language changes', async () => {
+  renderRoutes(routes, { route: '/sites/s1' })
+  await userEvent.type(await screen.findByLabelText('Add allowed origin'), 'blog.test{Enter}')
+  expect(screen.getByText('Enter a full URL, for example https://example.com')).toBeInTheDocument()
+  await setTestLanguage('cs')
+  expect(screen.getByText('Zadejte celou adresu URL, například https://example.com')).toBeInTheDocument()
+})

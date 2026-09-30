@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useMemo, useState } from 'react'
+import {useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { ContactForm, FormFieldType } from '@/types'
@@ -65,7 +65,8 @@ function FormBuilder({ form, initial }: { form?: ContactForm; initial: FormDraft
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const errors = useMemo(() => validateForm(draft), [draft])
+  // Recomputed each render so messages follow a language switch (validation is cheap).
+  const errors = validateForm(draft)
   const visible = showErrors ? errors : {}
   const payload = toFormPayload(draft)
   const dirty = stableStringify(payload) !== baseline

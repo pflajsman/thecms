@@ -70,6 +70,16 @@ describe('MediaField', () => {
     await waitFor(() => expect(screen.getByTestId('value')).toHaveTextContent('["a","c"]'))
   })
 
+  it('shows a Czech upload error once, without repeating the file name', async () => {
+    await setTestLanguage('cs')
+    renderWithProviders(<Harness field={gallery} initial={[]} />)
+    const zone = await screen.findByRole('group', { name: 'Gallery' })
+    const big = new File(['x'], 'mapa.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(big, 'size', { value: 11 * 1024 * 1024 })
+    fireEvent.drop(zone, { dataTransfer: { types: ['Files'], files: [big] } })
+    expect(await screen.findByText('Soubor mapa.jpg je větší než 10 MB.')).toBeInTheDocument()
+  })
+
   it('rejects dropped files the field does not accept', async () => {
     renderWithProviders(<Harness field={gallery} initial={[]} />)
     const zone = await screen.findByRole('group', { name: 'Gallery' })

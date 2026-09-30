@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useMemo, useState } from 'react'
+import {useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { ContentType, FieldType } from '@/types'
@@ -83,7 +83,8 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
   const [confirm, setConfirm] = useState<'save' | 'delete' | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const errors = useMemo(() => validateModel(draft), [draft])
+  // Recomputed each render so messages follow a language switch (validation is cheap).
+  const errors = validateModel(draft)
   const visible = showErrors ? errors : {}
   const dirty = stableStringify(toModelPayload(draft)) !== baseline
   const blocker = useUnsavedGuard(dirty)
