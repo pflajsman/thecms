@@ -397,3 +397,21 @@ Environment: local mongod and Azurite, backend and admin dev servers from the Pl
 | Model builder palette in Czech (Text, Formátovaný text, Číslo, Datum, Ano, nebo ne, Média, Odkaz na položku) wraps cleanly | Pass |
 | Switch back to English: every screen shows English, `<html lang="en">`; the only Czech left is entry titles (user content) | Pass |
 | Template in Czech creates Czech labels with English keys | Covered by unit tests (no model created in the local data) |
+
+## Content languages Plan 1 verification (2026-09-30)
+
+Environment: local mongod and Azurite, backend from the Plan 1 worktree on a throwaway copy of the local database (27 entries, 1 site key created for the check), dropped afterwards. The real local database was not touched.
+
+| Check | Result |
+|---|---|
+| Backend tests (89), build | Pass |
+| First startup: `Content languages migrated (default created: true, entries: 27)`; restart prints no migration line | Pass |
+| `GET /languages` returns English as default; `POST /languages` adds `cs` (order 1, not default) | Pass |
+| Move a published trip to `cs` (same id): public list without `language` drops from 6 to 5; with `language=cs` total 6, the moved entry `fallback: false`, 5 others `fallback: true` | Pass |
+| Translate it back to `en` and publish: public default total back to 6; single entry by item id with `language=cs` returns `cs`; versions list `en PUBLISHED, cs PUBLISHED` | Pass |
+| Admin `missing=cs` total 26; `/stats` `entries.total` 27 (items, not versions) | Pass |
+| `language=xx` returns 400 "Unknown language 'xx'. Use one of: en, cs" | Pass |
+| Delete `cs` with a wrong confirmation: 400; delete the default `en`: 409 | Pass |
+| Text index language override: a MongoDB text index read the entry `language` field as its stemming language and rejected `cs`; the migration now rebuilds text indexes with `language_override: textSearchLanguage` | Fixed in this plan (unit test) |
+
+**After deploy to Azure Cosmos DB:** request `GET /api/v1/public/content/<type>?language=<non-default code>` once. It uses an aggregation (`$group`, then `$sort` on the grouped result) that local MongoDB accepts but Cosmos DB has not been checked with. If Cosmos DB rejects it, sort before grouping on a single-field index.
