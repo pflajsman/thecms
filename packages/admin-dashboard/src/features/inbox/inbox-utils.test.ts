@@ -1,5 +1,6 @@
 import { displayFields, preview, replyAddress, senderName, viewStatus } from './inbox-utils'
 import type { InboxItem } from './inbox-api'
+import { i18n } from '@/i18n'
 
 const item = (over: Partial<InboxItem> = {}): InboxItem => ({
   id: 's1',
@@ -48,4 +49,11 @@ it('previews the longest text value', () => {
 
 it('maps views to statuses', () => {
   expect([viewStatus('unread'), viewStatus('all'), viewStatus('archived')]).toEqual(['UNREAD', undefined, 'ARCHIVED'])
+})
+
+it('shows booleans and anonymous senders in Czech', async () => {
+  await i18n.changeLanguage('cs')
+  const item = { id: 'x', formId: 'f', status: 'UNREAD', emailSent: true, createdAt: '', updatedAt: '', data: { agree: true, spam: false } } as unknown as InboxItem
+  expect(displayFields(item).map((r) => r.value)).toEqual(['Ano', 'Ne'])
+  expect(senderName(item)).toBe('Anonym')
 })

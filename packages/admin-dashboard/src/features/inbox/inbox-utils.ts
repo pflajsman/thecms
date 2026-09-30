@@ -1,9 +1,10 @@
+import { i18n } from '@/i18n'
 import type { SubmissionStatus } from '@/types'
 import type { InboxItem, InboxView } from './inbox-api'
 
 function text(value: unknown): string {
-  if (value === true) return 'Yes'
-  if (value === false) return 'No'
+  if (value === true) return i18n.t('inbox:yes')
+  if (value === false) return i18n.t('inbox:no')
   if (value === null || value === undefined) return ''
   return typeof value === 'object' ? JSON.stringify(value) : String(value)
 }
@@ -24,7 +25,7 @@ export function replyAddress(item: InboxItem): string | undefined {
 export function senderName(item: InboxItem): string {
   const name = item.data.name ?? item.data.fullName
   if (typeof name === 'string' && name.trim()) return name.trim()
-  return replyAddress(item) ?? 'Anonymous'
+  return replyAddress(item) ?? i18n.t('inbox:anonymous')
 }
 
 export function preview(item: InboxItem): string {

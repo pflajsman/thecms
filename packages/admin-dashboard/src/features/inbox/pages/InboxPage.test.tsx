@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import { setViewport } from '@/test/viewport'
 import apiClient from '@/lib/api'
 import type { InboxItem } from '../inbox-api'
@@ -130,3 +130,13 @@ describe('InboxPage', () => {
   })
 })
 
+describe('in Czech', () => {
+  it('shows the inbox and a message in Czech, keeping the server email error as sent', async () => {
+    await setTestLanguage('cs')
+    renderRoutes(routes, { route: '/inbox/s1' })
+    expect(await screen.findByRole('heading', { level: 1, name: 'Zprávy' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Odpovědět' })).toHaveAttribute('href', expect.stringContaining('mailto:jana@x.test'))
+    expect(screen.getByText(/Oznámení e-mailem se nepodařilo odeslat: SMTP down/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Nepřečtené' })).toBeInTheDocument()
+  })
+})

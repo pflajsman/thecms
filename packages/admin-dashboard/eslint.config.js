@@ -50,7 +50,7 @@ export default defineConfig([
           },
           words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS', '⌘[A-Z]', 'https?://\\S*', '\\s*px'] },
           // Editor and state APIs take identifiers, not copy.
-          callees: { exclude: ['i18n(ext)?', 't', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'includes', 'startsWith', 'endsWith'] },
+          callees: { exclude: ['i18n(ext)?', 't', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'setParam', 'setParams', 'includes', 'startsWith', 'endsWith'] },
           'object-properties': { exclude: ['[A-Z_-]+', 'textAlign', 'float'] },
         },
       ],

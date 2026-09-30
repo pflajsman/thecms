@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Inbox, MailCheck } from 'lucide-react'
@@ -15,14 +16,15 @@ import { useInbox, useSubmissionWrites } from '../inbox-queries'
 import { preview, senderName, viewStatus } from '../inbox-utils'
 import { MessageView } from '../components/MessageView'
 
-const VIEWS: { id: InboxView; label: string }[] = [
-  { id: 'unread', label: 'Unread' },
-  { id: 'all', label: 'All' },
-  { id: 'archived', label: 'Archived' },
-]
+const VIEWS = [
+  { id: 'unread', labelKey: 'views.unread' },
+  { id: 'all', labelKey: 'views.all' },
+  { id: 'archived', labelKey: 'views.archived' },
+] as const satisfies readonly { id: InboxView; labelKey: string }[]
 
 export function InboxPage() {
   const { submissionId } = useParams()
+  const { t } = useTranslation('inbox')
   const [sp, setSp] = useSearchParams()
   const navigate = useNavigate()
   const desktop = useIsDesktop()
@@ -67,15 +69,15 @@ export function InboxPage() {
   const list = inbox.isPending ? (
     <Skeleton className="h-40 w-full" />
   ) : inbox.isError ? (
-    <ErrorState message="Could not load messages." onRetry={() => void inbox.refetch()} />
+    <ErrorState message={t('loadError')} onRetry={() => void inbox.refetch()} />
   ) : items.length === 0 ? (
     view === 'unread' ? (
-      <EmptyState icon={MailCheck} title="You are all caught up" description="New messages from your forms appear here." />
+      <EmptyState icon={MailCheck} title={t('caughtUpTitle')} description={t('caughtUpText')} />
     ) : (
-      <EmptyState icon={Inbox} title={view === 'archived' ? 'Nothing archived' : 'No messages yet'} action={view === 'all' ? <Link to="/forms" className="text-sm text-primary hover:underline">Set up a form</Link> : undefined} />
+      <EmptyState icon={Inbox} title={view === 'archived' ? t('nothingArchived') : t('noMessages')} action={view === 'all' ? <Link to="/forms" className="text-sm text-primary hover:underline">{t('setUpForm')}</Link> : undefined} />
     )
   ) : (
-    <ul aria-label="Messages" className="flex flex-col divide-y rounded-xl border bg-card">
+    <ul aria-label={t('listLabel')} className="flex flex-col divide-y rounded-xl border bg-card">
       {items.map((item) => (
         <li key={item.id}>
           <Link
@@ -88,7 +90,7 @@ export function InboxPage() {
               <span className="shrink-0 text-xs text-muted-foreground">{formatRelative(item.createdAt)}</span>
             </span>
             <span className="block truncate text-sm text-muted-foreground">{preview(item)}</span>
-            <span className="block text-xs text-muted-foreground">{item.form?.name ?? 'Deleted form'}</span>
+            <span className="block text-xs text-muted-foreground">{item.form?.name ?? t('deletedForm')}</span>
           </Link>
         </li>
       ))}
@@ -97,10 +99,10 @@ export function InboxPage() {
 
   return (
     <>
-      <PageHeader title="Inbox" description="Messages sent through your forms." />
+      <PageHeader title={t('title')} description={t('description')} />
       {showList && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <div role="group" aria-label="View" className="flex gap-1.5">
+          <div role="group" aria-label={t('viewLabel')} className="flex gap-1.5">
             {VIEWS.map((v) => (
               <button
                 key={v.id}
@@ -109,14 +111,14 @@ export function InboxPage() {
                 onClick={() => setParam('view', v.id === 'unread' ? undefined : v.id)}
                 className={cn('rounded-full border px-3 py-1 text-sm', v.id === view ? 'border-foreground bg-foreground text-background' : 'bg-card hover:bg-accent')}
               >
-                {v.label}
+                {t(v.labelKey)}
               </button>
             ))}
           </div>
           <Select value={formId ?? 'all'} onValueChange={(v) => setParam('form', v === 'all' ? undefined : v)}>
-            <SelectTrigger aria-label="Form" className="w-48 rounded-full"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label={t('formLabel')} className="w-auto min-w-48 rounded-full"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All forms</SelectItem>
+              <SelectItem value="all">{t('allForms')}</SelectItem>
               {(forms.data ?? []).map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -127,11 +129,11 @@ export function InboxPage() {
           <div>
             {list}
             {inbox.data && inbox.data.pagination.totalPages > 1 && (
-              <nav aria-label="Message pages" className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Page {pageNo} of {inbox.data.pagination.totalPages}</span>
+              <nav aria-label={t('pagesLabel')} className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t('pageOf', { page: pageNo, total: inbox.data.pagination.totalPages })}</span>
                 <span className="flex gap-2">
-                  <button type="button" className="rounded-full border px-3 py-1 disabled:opacity-40" disabled={pageNo <= 1} onClick={() => setParam('page', pageNo > 2 ? String(pageNo - 1) : undefined)}>Newer</button>
-                  <button type="button" className="rounded-full border px-3 py-1 disabled:opacity-40" disabled={pageNo >= inbox.data.pagination.totalPages} onClick={() => setParam('page', String(pageNo + 1))}>Older</button>
+                  <button type="button" className="rounded-full border px-3 py-1 disabled:opacity-40" disabled={pageNo <= 1} onClick={() => setParam('page', pageNo > 2 ? String(pageNo - 1) : undefined)}>{t('newer')}</button>
+                  <button type="button" className="rounded-full border px-3 py-1 disabled:opacity-40" disabled={pageNo >= inbox.data.pagination.totalPages} onClick={() => setParam('page', String(pageNo + 1))}>{t('older')}</button>
                 </span>
               </nav>
             )}
@@ -150,9 +152,9 @@ export function InboxPage() {
                 }}
               />
             ) : desktop && items.length > 0 ? (
-              <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Select a message to read it.</p>
+              <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">{t('selectMessage')}</p>
             ) : submissionId && !inbox.isPending ? (
-              <EmptyState icon={Inbox} title="Message not found" description="It may be in another view or deleted." action={<Link to="/inbox?view=all" className="text-sm text-primary hover:underline">Show all messages</Link>} />
+              <EmptyState icon={Inbox} title={t('notFoundTitle')} description={t('notFoundText')} action={<Link to="/inbox?view=all" className="text-sm text-primary hover:underline">{t('showAll')}</Link>} />
             ) : null}
           </div>
         )}

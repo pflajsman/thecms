@@ -53,6 +53,9 @@
     "src/features/media/components/MediaPickerDialog.tsx",
     "src/features/media/components/MediaDetailSheet.tsx",
     "src/features/media/components/MediaGrid.tsx",
-    "src/features/media/components/MediaTile.tsx"
+    "src/features/media/components/MediaTile.tsx",
+    "src/features/inbox/pages/InboxPage.tsx",
+    "src/features/inbox/components/MessageView.tsx",
+    "src/features/inbox/inbox-utils.ts"
   ]
 }

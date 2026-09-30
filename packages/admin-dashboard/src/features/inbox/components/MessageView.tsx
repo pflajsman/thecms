@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, ArrowLeft } from 'lucide-react'
@@ -19,6 +20,7 @@ interface MessageViewProps {
 }
 
 export function MessageView({ item, backTo, onDeleted, onStatusChange }: MessageViewProps) {
+  const { t } = useTranslation('inbox')
   const writes = useSubmissionWrites()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const sender = senderName(item)
@@ -34,66 +36,66 @@ export function MessageView({ item, backTo, onDeleted, onStatusChange }: Message
   }
 
   return (
-    <article aria-label={`Message from ${sender}`} className="rounded-xl border bg-card p-4 md:p-6">
+    <article aria-label={t('messageFrom', { sender })} className="rounded-xl border bg-card p-4 md:p-6">
       {backTo && (
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
           <Link to={backTo}>
             <ArrowLeft aria-hidden />
-            Back to messages
+            {t('back')}
           </Link>
         </Button>
       )}
       <header className="mb-4">
         <h2 className="font-serif text-2xl font-semibold">{sender}</h2>
         <p className="text-sm text-muted-foreground">
-          {item.form?.name ?? 'Deleted form'} · {formatAbsolute(item.createdAt)}
+          {item.form?.name ?? t('deletedForm')} · {formatAbsolute(item.createdAt)}
         </p>
       </header>
       {!item.emailSent && item.emailError && (
         <p className="mb-4 flex items-start gap-2 rounded-lg bg-status-draft-bg px-3 py-2 text-sm text-status-draft-fg">
           <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
-          Notification email failed: {item.emailError}
+          {t('emailFailed', { error: item.emailError })}
         </p>
       )}
       <dl className="flex flex-col gap-3">
         {displayFields(item).map((row) => (
           <div key={row.label}>
             <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{row.label}</dt>
-            <dd className="whitespace-pre-wrap break-words">{row.value || <span className="text-muted-foreground">Empty</span>}</dd>
+            <dd className="whitespace-pre-wrap break-words">{row.value || <span className="text-muted-foreground">{t('empty')}</span>}</dd>
           </div>
         ))}
       </dl>
       <div className="mt-6 flex flex-wrap gap-2">
         {reply && (
           <Button asChild>
-            <a href={`mailto:${reply}?subject=${encodeURIComponent(`Re: ${item.form?.name ?? 'your message'}`)}`}>Reply</a>
+            <a href={`mailto:${reply}?subject=${encodeURIComponent(`Re: ${item.form?.name ?? t('yourMessage')}`)}`}>{t('reply')}</a>
           </Button>
         )}
         {item.status === 'UNREAD' ? (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ').then(() => onStatusChange?.('READ')), 'Marked as read')}>Mark read</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ').then(() => onStatusChange?.('READ')), t('toast.markedRead'))}>{t('markRead')}</Button>
         ) : item.status === 'READ' ? (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'UNREAD').then(() => onStatusChange?.('UNREAD')), 'Marked as unread')}>Mark unread</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'UNREAD').then(() => onStatusChange?.('UNREAD')), t('toast.markedUnread'))}>{t('markUnread')}</Button>
         ) : null}
         {item.status === 'ARCHIVED' ? (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ').then(() => onStatusChange?.('READ')), 'Moved back to inbox')}>Restore</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'READ').then(() => onStatusChange?.('READ')), t('toast.restored'))}>{t('restore')}</Button>
         ) : (
-          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'ARCHIVED').then(() => onStatusChange?.('ARCHIVED')), 'Archived')}>Archive</Button>
+          <Button variant="outline" onClick={() => void run(() => writes.setStatus(item, 'ARCHIVED').then(() => onStatusChange?.('ARCHIVED')), t('toast.archived'))}>{t('archive')}</Button>
         )}
-        <Button variant="outline" className="text-destructive" onClick={() => setConfirmDelete(true)}>Delete</Button>
+        <Button variant="outline" className="text-destructive" onClick={() => setConfirmDelete(true)}>{t('actions.delete', { ns: 'common' })}</Button>
       </div>
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete this message?"
-        description="This permanently removes the message."
-        confirmLabel="Delete"
+        title={t('deleteTitle')}
+        description={t('deleteText')}
+        confirmLabel={t('actions.delete', { ns: 'common' })}
         destructive
         onConfirm={() => {
           setConfirmDelete(false)
           void run(async () => {
             await writes.remove(item)
             onDeleted()
-          }, 'Message deleted')
+          }, t('toast.deleted'))
         }}
       />
     </article>
