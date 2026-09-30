@@ -1,3 +1,6 @@
 {
-  "files": []
+  "files": [
+    "src/app/shell/SignInScreen.tsx",
+    "src/i18n/LanguageSwitcher.tsx"
+  ]
 }

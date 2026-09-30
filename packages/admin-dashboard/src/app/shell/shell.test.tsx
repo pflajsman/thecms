@@ -8,6 +8,7 @@ import { Sidebar } from './Sidebar'
 import { MobileTabs } from './MobileTabs'
 import { CommandPaletteProvider } from './CommandPalette'
 import { AppShell } from './AppShell'
+import { UserMenu } from './UserMenu'
 import * as contentApi from '@/features/content/content-api'
 import { makeListItem, page } from '@/features/content/test-fixtures'
 
@@ -137,5 +138,18 @@ describe('AppShell', () => {
     renderWithProviders(<AppShell />)
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(auth.value.login).toHaveBeenCalled()
+  })
+})
+
+describe('UserMenu language', () => {
+  it('switches language from the account menu', async () => {
+    auth.value = { ...auth.value, isAuthenticated: true, isLoading: false }
+    renderWithProviders(<UserMenu variant="sidebar" />)
+    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }))
+    await userEvent.click(await screen.findByRole('menuitemradio', { name: 'Čeština' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Nabídka účtu' }))
+    expect(await screen.findByText('Jazyk')).toBeInTheDocument()
+    expect(screen.getByRole('menuitemradio', { name: 'Čeština' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('menuitem', { name: 'Odhlásit se' })).toBeInTheDocument()
   })
 })

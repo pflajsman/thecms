@@ -1,1 +1,18 @@
-{}
+{
+  "userMenu": {
+    "account": "Účet",
+    "accountMenu": "Nabídka účtu",
+    "setup": "Nastavení",
+    "theme": "Motiv",
+    "themeLight": "Světlý",
+    "themeDark": "Tmavý",
+    "themeSystem": "Podle systému",
+    "language": "Jazyk",
+    "signOut": "Odhlásit se"
+  },
+  "signIn": {
+    "title": "Vítejte v TheCMS",
+    "subtitle": "Přihlaste se a spravujte svůj obsah.",
+    "button": "Přihlásit se"
+  }
+}
