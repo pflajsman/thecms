@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { contentEntriesController } from './content-entries.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { validate } from '../../middleware/validation.middleware';
+import { versionLanguageSchema } from './content-entries.schema';
 
 /**
  * Content Entries Routes
@@ -206,6 +208,52 @@ router.get('/search', (req, res, next) => contentEntriesController.searchEntries
 router.get('/:id', (req, res, next) => contentEntriesController.getEntry(req, res, next));
 router.put('/:id', (req, res, next) => contentEntriesController.updateEntry(req, res, next));
 router.delete('/:id', (req, res, next) => contentEntriesController.deleteEntry(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/entries/{id}/versions:
+ *   get:
+ *     summary: List the language versions of the entry's item
+ *     tags: [Content Entries]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Versions { id, language, status, title, updatedAt } in language order
+ *   post:
+ *     summary: Create a DRAFT version in another language, copied from this version
+ *     tags: [Content Entries]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { type: object, properties: { language: { type: string } } }
+ *     responses:
+ *       201: { description: Version created }
+ *       409: { description: The item already has a version in this language }
+ */
+router.get('/:id/versions', (req, res, next) => contentEntriesController.listVersions(req, res, next));
+router.post('/:id/versions', validate(versionLanguageSchema), (req, res, next) =>
+  contentEntriesController.createVersion(req, res, next)
+);
+
+/**
+ * @swagger
+ * /api/v1/entries/{id}/language:
+ *   put:
+ *     summary: Move this version to another language
+ *     tags: [Content Entries]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Version moved }
+ *       409: { description: The item already has a version in this language }
+ */
+router.put('/:id/language', validate(versionLanguageSchema), (req, res, next) =>
+  contentEntriesController.changeLanguage(req, res, next)
+);
 
 /**
  * @swagger

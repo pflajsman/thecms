@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
-import { ContentEntryModel, type IContentEntry } from '../../models/content-entry.model';
+import { ContentEntryModel, ContentStatus, type IContentEntry } from '../../models/content-entry.model';
+import { ContentTypeModel } from '../../models/content-type.model';
+import { LanguageModel } from '../../models/language.model';
+import { WebhookEvent } from '../../models/webhook.model';
+import { WebhookService } from '../../services/webhook.service';
+import { AppError } from '../../middleware/error.middleware';
 import { LanguagesService } from '../languages/languages.service';
 import { sharedFieldNames } from '../../utils/localized';
 import { resolveTitleField } from '../../utils/entryTitle';
@@ -61,4 +66,80 @@ export async function unifySharedField(contentTypeId: string, fieldName: string)
         : { $set: { [`data.${fieldName}`]: value } };
     await ContentEntryModel.updateMany({ itemId: source.itemId, _id: { $ne: source._id } }, update);
   }
+}
+
+async function loadVersion(entryId: string): Promise<IContentEntry> {
+  if (!mongoose.Types.ObjectId.isValid(entryId)) throw new AppError('Invalid entry ID', 400);
+  const entry = await ContentEntryModel.findById(entryId);
+  if (!entry) throw new AppError('Content entry not found', 404);
+  return entry;
+}
+
+async function assertLanguageFree(itemId: mongoose.Types.ObjectId, language: string): Promise<void> {
+  if (await ContentEntryModel.exists({ itemId, language })) {
+    throw new AppError('This language already exists for this entry', 409);
+  }
+}
+
+async function contentTypeRef(contentTypeId: mongoose.Types.ObjectId) {
+  const type = await ContentTypeModel.findById(contentTypeId).select('name slug').lean();
+  return type ? { id: type._id, name: type.name, slug: type.slug } : undefined;
+}
+
+export interface EntryVersionSummary {
+  id: string;
+  language: string;
+  status: ContentStatus;
+  title: string;
+  updatedAt: Date;
+}
+
+/** Every version of the entry's item, in the configured language order. */
+export async function listVersions(entryId: string): Promise<EntryVersionSummary[]> {
+  const entry = await loadVersion(entryId);
+  const [versions, languages] = await Promise.all([
+    ContentEntryModel.find({ itemId: entry.itemId }).select('_id language status title updatedAt').lean(),
+    LanguageModel.find().select('code order').lean(),
+  ]);
+  const order = new Map(languages.map((l) => [l.code, l.order]));
+  return versions
+    .map((v) => ({ id: String(v._id), language: v.language, status: v.status, title: v.title, updatedAt: v.updatedAt }))
+    .sort((a, b) => (order.get(a.language) ?? Number.MAX_SAFE_INTEGER) - (order.get(b.language) ?? Number.MAX_SAFE_INTEGER));
+}
+
+/** New DRAFT version in `language`, copied from the given version. */
+export async function createVersion(entryId: string, language: string, userId?: string): Promise<IContentEntry> {
+  const source = await loadVersion(entryId);
+  await LanguagesService.assertExists(language);
+  await assertLanguageFree(source.itemId, language);
+  const version = await ContentEntryModel.create({
+    contentTypeId: source.contentTypeId,
+    itemId: source.itemId,
+    language,
+    data: source.data,
+    title: source.title,
+    status: ContentStatus.DRAFT,
+    createdBy: userId,
+    updatedBy: userId,
+  });
+  WebhookService.triggerEvent(WebhookEvent.ENTRY_CREATED, {
+    entry: version.toJSON(),
+    contentType: await contentTypeRef(source.contentTypeId),
+  }).catch((err) => console.error('Webhook trigger error:', err));
+  return version;
+}
+
+/** Move a version to another language that the item does not have yet. */
+export async function changeLanguage(entryId: string, language: string): Promise<IContentEntry> {
+  const entry = await loadVersion(entryId);
+  if (entry.language === language) return entry;
+  await LanguagesService.assertExists(language);
+  await assertLanguageFree(entry.itemId, language);
+  entry.language = language;
+  await entry.save();
+  WebhookService.triggerEvent(WebhookEvent.ENTRY_UPDATED, {
+    entry: entry.toJSON(),
+    contentType: await contentTypeRef(entry.contentTypeId),
+  }).catch((err) => console.error('Webhook trigger error:', err));
+  return entry;
 }

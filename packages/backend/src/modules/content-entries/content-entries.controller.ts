@@ -14,6 +14,7 @@ import {
   listAllEntriesSchema,
 } from './content-entries.schema';
 import { z } from 'zod';
+import { changeLanguage, createVersion, listVersions } from './entry-versions.service';
 
 /**
  * Content Entries Controller
@@ -209,6 +210,41 @@ export class ContentEntriesController {
         return;
       }
 
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/entries/:id/versions
+   */
+  async listVersions(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      res.json({ success: true, data: await listVersions(req.params.id) });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/entries/:id/versions
+   */
+  async createVersion(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user?.userId;
+      const version = await createVersion(req.params.id, req.body.language, userId);
+      res.status(201).json({ success: true, data: version });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PUT /api/v1/entries/:id/language
+   */
+  async changeLanguage(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      res.json({ success: true, data: await changeLanguage(req.params.id, req.body.language) });
+    } catch (error) {
       next(error);
     }
   }

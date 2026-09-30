@@ -266,6 +266,14 @@ export type CreateContentEntryInput = z.infer<typeof createContentEntrySchema>;
 export type UpdateContentEntryInput = z.infer<typeof updateContentEntrySchema>;
 export type ListContentEntriesInput = z.infer<typeof listContentEntriesSchema>;
 export type GetContentEntryInput = z.infer<typeof getContentEntrySchema>;
+/**
+ * Schema for creating a language version or moving a version to another language
+ */
+export const versionLanguageSchema = z.object({
+  params: z.object({ id: z.string().min(1) }),
+  body: z.object({ language: z.string().trim().toLowerCase().regex(LANGUAGE_CODE) }),
+});
+
 export type CreateEntryForTypeInput = z.infer<typeof createEntryForTypeSchema>;
 export type ListEntriesForTypeInput = z.infer<typeof listEntriesForTypeSchema>;
 export type SearchContentEntriesInput = z.infer<typeof searchContentEntriesSchema>;
