@@ -14,6 +14,7 @@ import '../models/content-type.model';
 import '../models/content-entry.model';
 import '../models/media.model';
 import '../models/site.model';
+import { TEXT_LANGUAGE_OVERRIDE } from '../utils/migrate-languages';
 
 async function syncIndexes() {
   try {
@@ -42,7 +43,7 @@ async function syncIndexes() {
             // Use MongoDB's text index on the entire data object
             await model.collection.createIndex(
               { data: 'text' },
-              { name: 'data_text_search', weights: { data: 1 } }
+              { name: 'data_text_search', weights: { data: 1 }, language_override: TEXT_LANGUAGE_OVERRIDE }
             );
             console.log('   ✅ Text index created successfully');
           } catch (error: any) {

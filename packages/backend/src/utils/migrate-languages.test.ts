@@ -39,3 +39,21 @@ it('uses the configured default when languages already exist', async () => {
   await migrateLanguages();
   expect((await ContentEntryModel.findOne().lean())?.language).toBe('cs');
 });
+
+it('rebuilds a text index so the entry language field is not read as a stemming language', async () => {
+  await ContentEntryModel.collection.createIndex({ data: 'text' }, { name: 'data_text_search', weights: { data: 1 } });
+  await migrateLanguages();
+  const text = (await ContentEntryModel.collection.indexes()).find((i) => i.name === 'data_text_search');
+  expect(text).toMatchObject({ language_override: 'textSearchLanguage', weights: { data: 1 } });
+  await expect(
+    ContentEntryModel.collection.insertOne({
+      contentTypeId: new mongoose.Types.ObjectId(),
+      itemId: new mongoose.Types.ObjectId(),
+      language: 'cs',
+      data: { title: 'Přes Šumavu' },
+    })
+  ).resolves.toBeTruthy();
+  // A second run leaves the rebuilt index alone.
+  await migrateLanguages();
+  expect((await ContentEntryModel.collection.indexes()).filter((i) => i.name === 'data_text_search')).toHaveLength(1);
+});

@@ -4,6 +4,7 @@ import { ContentEntriesService } from '../content-entries/content-entries.servic
 import { ContentStatus } from '../../models/content-entry.model';
 import { ContactFormsService } from '../contact-forms/contact-forms.service';
 import { MediaService } from '../media/media.service';
+import { getPublished, listPublished, onePerItem, resolveLanguage } from './public-content.service';
 
 /**
  * Public API Controller
@@ -81,11 +82,14 @@ export class PublicController {
         return;
       }
 
-      // List published entries only
-      const result = await ContentEntriesService.listEntries(contentType._id.toString(), {
+      const { language, defaultLanguage } = await resolveLanguage(req.query.language);
+
+      // Published entries only, one version per item
+      const result = await listPublished(contentType._id.toString(), {
+        language,
+        defaultLanguage,
         page,
         limit,
-        status: ContentStatus.PUBLISHED,
         sortBy,
         sortOrder,
       });
@@ -119,37 +123,12 @@ export class PublicController {
         return;
       }
 
-      // Get entry
-      const entry = await ContentEntriesService.getEntryById(entryId);
+      const { language, defaultLanguage } = await resolveLanguage(req.query.language);
+
+      // entryId may be an item id or the id of any of its versions
+      const entry = await getPublished(contentType._id.toString(), entryId, language, defaultLanguage);
 
       if (!entry) {
-        res.status(404).json({
-          success: false,
-          error: 'Entry not found',
-        });
-        return;
-      }
-
-      // Check if entry is published
-      if (entry.status !== ContentStatus.PUBLISHED) {
-        res.status(404).json({
-          success: false,
-          error: 'Entry not found',
-        });
-        return;
-      }
-
-      // Check if entry belongs to the content type.
-      // getEntryById populates contentTypeId, so it may be the full content-type
-      // document rather than a raw ObjectId — normalise to the id either way.
-      const rawContentTypeId = entry.contentTypeId as unknown as
-        | { _id?: { toString(): string }; toString(): string };
-      const entryTypeId =
-        rawContentTypeId && typeof rawContentTypeId === 'object' && rawContentTypeId._id
-          ? rawContentTypeId._id.toString()
-          : rawContentTypeId.toString();
-
-      if (entryTypeId !== contentType._id.toString()) {
         res.status(404).json({
           success: false,
           error: 'Entry not found',
@@ -184,15 +163,19 @@ export class PublicController {
         return;
       }
 
+      const { language, defaultLanguage } = await resolveLanguage(req.query.language);
+
+      // Totals count matching versions; the page keeps one version per item.
       const result = await ContentEntriesService.searchEntries(query, {
         page,
         limit,
         status: ContentStatus.PUBLISHED,
+        languages: [...new Set([language, defaultLanguage])],
       });
 
       res.status(200).json({
         success: true,
-        data: result.entries,
+        data: onePerItem(result.entries, language),
         pagination: result.pagination,
       });
     } catch (error) {

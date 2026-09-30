@@ -526,9 +526,9 @@ export class ContentEntriesService {
    */
   static async searchEntries(
     searchTerm: string,
-    options: Omit<ListEntriesOptions, 'search'> = {}
+    options: Omit<ListEntriesOptions, 'search'> & { languages?: string[] } = {}
   ): Promise<PaginatedEntries> {
-    const { page = 1, limit = 10, status, sortOrder = 'desc' } = options;
+    const { page = 1, limit = 10, status, sortOrder = 'desc', languages } = options;
 
     // Build query
     const query: any = {
@@ -538,6 +538,10 @@ export class ContentEntriesService {
     // Filter by status if provided
     if (status) {
       query.status = status;
+    }
+
+    if (languages && languages.length > 0) {
+      query.language = { $in: languages };
     }
 
     // Calculate pagination
