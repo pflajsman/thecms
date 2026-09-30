@@ -75,9 +75,24 @@ async function loadVersion(entryId: string): Promise<IContentEntry> {
   return entry;
 }
 
+/**
+ * There is no unique index on { itemId, language } (Cosmos DB cannot add one to a non-empty collection),
+ * so two concurrent requests can both pass the check. After writing, the version with the lowest _id in
+ * that language wins; every other request sees the same winner and undoes its own write.
+ */
+export async function isFirstInLanguage(entry: IContentEntry): Promise<boolean> {
+  const first = await ContentEntryModel.findOne({ itemId: entry.itemId, language: entry.language })
+    .sort({ _id: 1 })
+    .select('_id')
+    .lean();
+  return !first || String(first._id) === String(entry._id);
+}
+
+const LANGUAGE_TAKEN = 'This language already exists for this entry';
+
 async function assertLanguageFree(itemId: mongoose.Types.ObjectId, language: string): Promise<void> {
   if (await ContentEntryModel.exists({ itemId, language })) {
-    throw new AppError('This language already exists for this entry', 409);
+    throw new AppError(LANGUAGE_TAKEN, 409);
   }
 }
 
@@ -122,6 +137,10 @@ export async function createVersion(entryId: string, language: string, userId?: 
     createdBy: userId,
     updatedBy: userId,
   });
+  if (!(await isFirstInLanguage(version))) {
+    await version.deleteOne();
+    throw new AppError(LANGUAGE_TAKEN, 409);
+  }
   WebhookService.triggerEvent(WebhookEvent.ENTRY_CREATED, {
     entry: version.toJSON(),
     contentType: await contentTypeRef(source.contentTypeId),
@@ -135,8 +154,14 @@ export async function changeLanguage(entryId: string, language: string): Promise
   if (entry.language === language) return entry;
   await LanguagesService.assertExists(language);
   await assertLanguageFree(entry.itemId, language);
+  const previous = entry.language;
   entry.language = language;
   await entry.save();
+  if (!(await isFirstInLanguage(entry))) {
+    entry.language = previous;
+    await entry.save();
+    throw new AppError(LANGUAGE_TAKEN, 409);
+  }
   WebhookService.triggerEvent(WebhookEvent.ENTRY_UPDATED, {
     entry: entry.toJSON(),
     contentType: await contentTypeRef(entry.contentTypeId),

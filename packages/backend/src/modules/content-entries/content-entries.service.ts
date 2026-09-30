@@ -8,7 +8,7 @@ import { computeEntryTitle } from '../../utils/entryTitle';
 import { escapeRegex } from '../../utils/regex';
 import { AppError } from '../../middleware/error.middleware';
 import { LanguagesService } from '../languages/languages.service';
-import { syncSharedFields } from './entry-versions.service';
+import { isFirstInLanguage, syncSharedFields } from './entry-versions.service';
 
 /**
  * Query options for listing content entries
@@ -146,6 +146,10 @@ export class ContentEntriesService {
     });
 
     await entry.save();
+    if (entryData.itemId && !(await isFirstInLanguage(entry))) {
+      await entry.deleteOne();
+      throw new AppError('This language already exists for this entry', 409);
+    }
 
     // Trigger webhook for entry creation
     WebhookService.triggerEvent(WebhookEvent.ENTRY_CREATED, {
@@ -245,7 +249,10 @@ export class ContentEntriesService {
     if (missing) {
       const covered = await ContentEntryModel.distinct('itemId', { language: missing });
       query.itemId = { $nin: covered };
-      if (!language) query.language = await LanguagesService.defaultCode();
+      // One row per item: its default-language version. Items missing the default language itself
+      // list their versions in the other languages.
+      const defaultCode = await LanguagesService.defaultCode();
+      if (!language && missing !== defaultCode) query.language = defaultCode;
     }
 
     const direction = sortOrder === 'asc' ? 1 : -1;
@@ -293,7 +300,12 @@ export class ContentEntriesService {
     }
 
     const entry = await ContentEntryModel.findById(entryId).populate('contentTypeId').exec();
-    return entry;
+    if (entry) return entry;
+
+    // Relations store item ids; the version whose _id was the item id may have been deleted.
+    const versions = await ContentEntryModel.find({ itemId: entryId }).populate('contentTypeId').exec();
+    const defaultCode = await LanguagesService.defaultCode();
+    return versions.find((v) => v.language === defaultCode) ?? versions[0] ?? null;
   }
 
   /**

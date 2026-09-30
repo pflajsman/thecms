@@ -130,3 +130,18 @@ it('search returns one version per item in the requested language with fallback'
     ['C en', true],
   ]);
 });
+
+it('the non-default list groups only ids and the sort key, not whole documents', async () => {
+  await seed();
+  const spy = jest.spyOn(ContentEntryModel, 'aggregate');
+  const res = await request(app).get('/public/content/trip').query({ language: 'cs', sortBy: 'title', sortOrder: 'asc' });
+  expect(res.body.data.map((e: { title: string; data: { title: string } }) => [e.title, e.data.title])).toEqual([
+    ['A cs', 'A cs'],
+    ['B en', 'B en'],
+    ['C en', 'C en'],
+  ]);
+  const pipelines = spy.mock.calls.map(([p]) => JSON.stringify(p));
+  expect(pipelines.length).toBeGreaterThan(0);
+  for (const p of pipelines) expect(p).not.toContain('$$ROOT');
+  spy.mockRestore();
+});

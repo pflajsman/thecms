@@ -10,6 +10,7 @@ import { FieldType } from '../../types/field-types';
 import { ContentEntriesService } from './content-entries.service';
 import { contentTypesService } from '../content-types/content-types.service';
 import { isLocalized } from '../../utils/localized';
+import { changeLanguage, createVersion } from './entry-versions.service';
 
 useTestDb();
 
@@ -88,4 +89,29 @@ it('turning a shared field into a translated one keeps each version’s value', 
   });
   expect((await ContentEntryModel.findById(en._id).lean())?.data.km).toBe(10);
   expect((await ContentEntryModel.findById(cs._id).lean())?.data.km).toBe(99);
+});
+
+describe('review fixes', () => {
+  it('two concurrent translations into the same language leave one version', async () => {
+    const { en } = await twoVersions();
+    await LanguageModel.create({ code: 'de', name: 'Deutsch', order: 2 });
+    const results = await Promise.allSettled([createVersion(String(en._id), 'de'), createVersion(String(en._id), 'de')]);
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(results.find((r) => r.status === 'rejected')).toMatchObject({ reason: { statusCode: 409 } });
+    expect(await ContentEntryModel.countDocuments({ itemId: en.itemId, language: 'de' })).toBe(1);
+  });
+
+  it('a language change racing a translation into the same language leaves one version', async () => {
+    const { en, cs } = await twoVersions();
+    await LanguageModel.create({ code: 'de', name: 'Deutsch', order: 2 });
+    await Promise.allSettled([createVersion(String(en._id), 'de'), changeLanguage(String(cs._id), 'de')]);
+    expect(await ContentEntryModel.countDocuments({ itemId: en.itemId, language: 'de' })).toBe(1);
+  });
+
+  it('opens an item by its item id after the original version was deleted', async () => {
+    const { en, cs } = await twoVersions();
+    await ContentEntriesService.deleteEntry(String(en._id));
+    const found = await ContentEntriesService.getEntryById(String(en.itemId));
+    expect(String(found?._id)).toBe(String(cs._id));
+  });
 });

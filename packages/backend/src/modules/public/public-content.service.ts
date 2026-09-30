@@ -27,8 +27,11 @@ export async function resolveLanguage(requested?: unknown): Promise<{ language: 
   return { language, defaultLanguage };
 }
 
-/** One published version per item: the requested language when it exists, else the default language. */
-function pickVersionPipeline(contentTypeId: string, language: string, defaultLanguage: string) {
+/**
+ * Ids of one published version per item, in page order: the requested language when it exists,
+ * else the default language. Only ids, the language and the sort key are grouped, not whole documents.
+ */
+function pickVersionPipeline(contentTypeId: string, language: string, defaultLanguage: string, sortBy: string) {
   return [
     {
       $match: {
@@ -37,7 +40,8 @@ function pickVersionPipeline(contentTypeId: string, language: string, defaultLan
         language: { $in: [language, defaultLanguage] },
       },
     },
-    { $group: { _id: '$itemId', versions: { $push: '$$ROOT' } } },
+    { $project: { _id: 1, itemId: 1, language: 1, sortKey: `$${sortBy}` } },
+    { $group: { _id: '$itemId', versions: { $push: { _id: '$_id', language: '$language', sortKey: '$sortKey' } } } },
     {
       $project: {
         chosen: {
@@ -74,12 +78,19 @@ export async function listPublished(contentTypeId: string, opts: PublicListOptio
     ]);
   } else {
     // Choosing before sorting and paging keeps totals and page sizes in items, not versions.
-    const pipeline = pickVersionPipeline(contentTypeId, language, defaultLanguage);
-    const [docs, counted] = await Promise.all([
-      ContentEntryModel.aggregate([...pipeline, { $sort: { [sortBy]: direction } }, { $skip: skip }, { $limit: limit }]),
+    const pipeline = pickVersionPipeline(contentTypeId, language, defaultLanguage, sortBy);
+    const [picked, counted] = await Promise.all([
+      ContentEntryModel.aggregate<{ _id: mongoose.Types.ObjectId }>([
+        ...pipeline,
+        { $sort: { sortKey: direction } },
+        { $skip: skip },
+        { $limit: limit },
+      ]),
       ContentEntryModel.aggregate<{ total: number }>([...pipeline, { $count: 'total' }]),
     ]);
-    entries = docs.map((d) => ContentEntryModel.hydrate(d));
+    const docs = await ContentEntryModel.find({ _id: { $in: picked.map((p) => p._id) } }).exec();
+    const byId = new Map<string, IContentEntry>(docs.map((d) => [String(d._id), d]));
+    entries = picked.flatMap((p) => byId.get(String(p._id)) ?? []);
     total = counted[0]?.total ?? 0;
   }
 

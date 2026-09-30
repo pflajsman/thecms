@@ -11,7 +11,7 @@ import request from 'supertest';
 import { useTestDb } from '../../test/db';
 import { ContentEntriesService } from './content-entries.service';
 import { ContentTypeModel } from '../../models/content-type.model';
-import { ContentStatus } from '../../models/content-entry.model';
+import { ContentEntryModel, ContentStatus } from '../../models/content-entry.model';
 import { FieldType } from '../../types/field-types';
 import { LanguageModel } from '../../models/language.model';
 import entriesRoutes from './content-entries.routes';
@@ -155,6 +155,13 @@ describe('content languages in the entry list', () => {
     const missing = await request(app).get('/entries').query({ missing: 'cs' });
     expect(missing.body.data.map((e: { title: string }) => e.title)).toEqual(['B']);
     expect(missing.body.pagination.total).toBe(1);
+  });
+
+  it('finds items missing the default language after they moved to another one', async () => {
+    await seedVersions();
+    await ContentEntryModel.updateOne({ title: 'B', language: 'en' }, { $set: { language: 'cs' } });
+    const missing = await request(app).get('/entries').query({ missing: 'en' });
+    expect(missing.body.data.map((e: { title: string; language: string }) => [e.title, e.language])).toEqual([['B', 'cs']]);
   });
 
   it('lists every version without a language filter', async () => {

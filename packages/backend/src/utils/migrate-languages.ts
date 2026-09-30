@@ -8,8 +8,17 @@ import { ContentEntryModel } from '../models/content-entry.model';
  */
 export const TEXT_LANGUAGE_OVERRIDE = 'textSearchLanguage';
 
+const NAMESPACE_NOT_FOUND = 26;
+
 async function rebuildTextIndexes(): Promise<void> {
-  const indexes = await ContentEntryModel.collection.indexes();
+  let indexes: Array<Record<string, any>>;
+  try {
+    indexes = await ContentEntryModel.collection.indexes();
+  } catch (error) {
+    // Fresh database: no entries collection means no text index to fix.
+    if ((error as { code?: number }).code === NAMESPACE_NOT_FOUND) return;
+    throw error;
+  }
   for (const index of indexes) {
     if (!index.weights || index.language_override === TEXT_LANGUAGE_OVERRIDE) continue;
     const key = Object.fromEntries(Object.keys(index.weights).map((field) => [field, 'text' as const]));
@@ -28,6 +37,9 @@ async function rebuildTextIndexes(): Promise<void> {
  * assigns entries without a language to the default, using their own id as item id.
  */
 export async function migrateLanguages(): Promise<{ createdDefault: boolean; migratedEntries: number }> {
+  // Build the unique code index before the first language is inserted: Cosmos DB only creates
+  // unique indexes on empty collections.
+  await LanguageModel.createIndexes();
   await rebuildTextIndexes();
 
   let createdDefault = false;

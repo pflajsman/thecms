@@ -57,3 +57,13 @@ it('rebuilds a text index so the entry language field is not read as a stemming 
   await migrateLanguages();
   expect((await ContentEntryModel.collection.indexes()).filter((i) => i.name === 'data_text_search')).toHaveLength(1);
 });
+
+it('runs on a fresh database where no collections exist yet, and builds the languages index first', async () => {
+  const db = mongoose.connection.db;
+  for (const name of ['contententries', 'languages']) {
+    if ((await db.listCollections({ name }).toArray()).length > 0) await db.dropCollection(name);
+  }
+  await expect(migrateLanguages()).resolves.toEqual({ createdDefault: true, migratedEntries: 0 });
+  const codeIndex = (await LanguageModel.collection.indexes()).find((i) => i.key.code === 1);
+  expect(codeIndex?.unique).toBe(true);
+});
