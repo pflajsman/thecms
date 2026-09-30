@@ -1,0 +1,26 @@
+{
+  "actions": {
+    "cancel": "Zrušit",
+    "confirm": "Potvrdit",
+    "save": "Uložit",
+    "delete": "Smazat",
+    "close": "Zavřít",
+    "retry": "Zkusit znovu",
+    "copy": "Kopírovat",
+    "undo": "Vrátit zpět"
+  },
+  "status": {
+    "PUBLISHED": "Publikováno",
+    "DRAFT": "Koncept",
+    "ARCHIVED": "Archivováno",
+    "UNREAD": "Nová",
+    "READ": "Přečtená"
+  },
+  "time": {
+    "justNow": "právě teď",
+    "minutesAgo": "před {{count}} min",
+    "hoursAgo": "před {{count}} h",
+    "yesterday": "včera",
+    "daysAgo": "před {{count}} dny"
+  }
+}

@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { msalConfig, isEntraConfigured } from './config/msalConfig'
 import { setMsalInstance } from './lib/api'
 import { ThemeProvider } from './app/theme/ThemeProvider'
+import { LanguageProvider } from './i18n/LanguageProvider'
 import { Toaster } from './components/ui/sonner'
 import { routes } from './app/routes'
 
@@ -41,10 +42,12 @@ function AppContent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <RouterProvider router={router} />
-          <Toaster position="bottom-right" />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <RouterProvider router={router} />
+            <Toaster position="bottom-right" />
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

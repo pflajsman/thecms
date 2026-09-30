@@ -1,10 +1,14 @@
 import '@testing-library/jest-dom/vitest'
 import { afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
+import { i18n } from '@/i18n'
 
 afterEach(() => {
   cleanup()
   document.documentElement.classList.remove('dark')
+  // Every test starts in English; tests that check Czech switch explicitly.
+  void i18n.changeLanguage('en')
+  document.documentElement.lang = 'en'
 })
 
 if (!window.matchMedia) {

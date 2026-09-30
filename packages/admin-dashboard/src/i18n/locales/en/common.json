@@ -1,0 +1,26 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "retry": "Try again",
+    "copy": "Copy",
+    "undo": "Undo"
+  },
+  "status": {
+    "PUBLISHED": "Published",
+    "DRAFT": "Draft",
+    "ARCHIVED": "Archived",
+    "UNREAD": "New",
+    "READ": "Read"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "yesterday": "yesterday",
+    "daysAgo": "{{count}} days ago"
+  }
+}
