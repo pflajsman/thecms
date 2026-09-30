@@ -1,16 +1,12 @@
+import { i18n } from '@/i18n'
 import type { ContentType, Field, FieldType, ValidationRules } from '@/types'
 import { apiKeyError, toApiKey, toSlug, uniqueKey } from '@/features/builder/api-key'
 import type { ModelTemplate } from './templates'
 import type { ModelPayload } from './models-api'
 
-export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
-  TEXT: 'Text',
-  RICH_TEXT: 'Rich text',
-  NUMBER: 'Number',
-  DATE: 'Date',
-  BOOLEAN: 'Yes / No',
-  MEDIA: 'Media',
-  RELATION: 'Reference',
+/** Palette and inspector name of a field type, in the current language. */
+export function fieldTypeLabel(type: FieldType): string {
+  return i18n.t(`models:palette.${type}`)
 }
 
 export type DraftField = Field & { cid: string; originalName?: string; keyTouched: boolean }
@@ -69,19 +65,11 @@ export function setSlug(d: ModelDraft, slug: string): ModelDraft {
   return { ...d, slug, slugTouched: true }
 }
 
-const DEFAULT_LABELS: Record<FieldType, string> = {
-  TEXT: 'Text',
-  RICH_TEXT: 'Rich text',
-  NUMBER: 'Number',
-  DATE: 'Date',
-  BOOLEAN: 'Yes or no',
-  MEDIA: 'Media',
-  RELATION: 'Reference',
-}
 
 export function addField(d: ModelDraft, type: FieldType): { draft: ModelDraft; cid: string } {
   const cid = nextCid()
-  const label = DEFAULT_LABELS[type]
+  // The new field's label (and the key derived from it) follows the admin language.
+  const label = i18n.t(`models:types.${type}`)
   const name = uniqueKey(toApiKey(label), d.fields.map((f) => f.name))
   const field: DraftField = { cid, name, label, type, required: false, keyTouched: false }
   const titleCid = d.titleCid ?? (type === 'TEXT' && !d.fields.some((f) => f.type === 'TEXT') ? cid : undefined)
@@ -125,13 +113,13 @@ export function setTitleField(d: ModelDraft, cid: string): ModelDraft {
 export function validateModel(d: ModelDraft): ModelErrors {
   const errors: ModelErrors = {}
   const name = d.name.trim()
-  if (name.length < 2) errors.name = 'Name must be at least 2 characters'
-  else if (name.length > 100) errors.name = 'Name must be at most 100 characters'
-  if (!/^[a-z0-9-]{2,100}$/.test(d.slug)) errors.slug = 'Use lowercase letters, numbers and hyphens'
-  if (d.fields.length === 0) errors.fields = 'Add at least one field'
+  if (name.length < 2) errors.name = i18n.t('models:validation.nameMin')
+  else if (name.length > 100) errors.name = i18n.t('models:validation.nameMax')
+  if (!/^[a-z0-9-]{2,100}$/.test(d.slug)) errors.slug = i18n.t('models:validation.slug')
+  if (d.fields.length === 0) errors.fields = i18n.t('models:validation.noFields')
   for (const f of d.fields) {
-    if (!f.label.trim()) errors[`label:${f.cid}`] = 'Label is required'
-    else if (f.label.trim().length > 100) errors[`label:${f.cid}`] = 'Label must be at most 100 characters'
+    if (!f.label.trim()) errors[`label:${f.cid}`] = i18n.t('models:validation.labelRequired')
+    else if (f.label.trim().length > 100) errors[`label:${f.cid}`] = i18n.t('models:validation.labelMax')
     const others = d.fields.filter((o) => o.cid !== f.cid).map((o) => o.name)
     const keyError = apiKeyError(f.name, others)
     if (keyError) errors[`key:${f.cid}`] = keyError
@@ -146,11 +134,11 @@ const isCount = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && 
 /** Mirrors the backend field schema so saving never fails with a vague server error. */
 function fieldRuleError(f: DraftField): string | null {
   const v = f.validation ?? {}
-  if (v.minLength !== undefined && !isCount(v.minLength)) return 'Min length must be a whole number of at least 1'
-  if (v.maxLength !== undefined && !isCount(v.maxLength)) return 'Max length must be a whole number of at least 1'
-  if (v.minLength !== undefined && v.maxLength !== undefined && v.maxLength < v.minLength) return 'Max length must be at least the min length'
-  if (v.min !== undefined && v.max !== undefined && v.max < v.min) return 'Maximum must be at least the minimum'
-  if ((f.description ?? '').trim().length > 500) return 'Help text must be at most 500 characters'
+  if (v.minLength !== undefined && !isCount(v.minLength)) return i18n.t('models:validation.minLength')
+  if (v.maxLength !== undefined && !isCount(v.maxLength)) return i18n.t('models:validation.maxLength')
+  if (v.minLength !== undefined && v.maxLength !== undefined && v.maxLength < v.minLength) return i18n.t('models:validation.maxBelowMin')
+  if (v.min !== undefined && v.max !== undefined && v.max < v.min) return i18n.t('models:validation.maxBelowMinNumber')
+  if ((f.description ?? '').trim().length > 500) return i18n.t('models:validation.helpMax')
   return null
 }
 

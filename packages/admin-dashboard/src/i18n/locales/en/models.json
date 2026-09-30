@@ -1,1 +1,151 @@
-{}
+{
+  "palette": {
+    "TEXT": "Text",
+    "RICH_TEXT": "Rich text",
+    "NUMBER": "Number",
+    "DATE": "Date",
+    "BOOLEAN": "Yes / No",
+    "MEDIA": "Media",
+    "RELATION": "Reference"
+  },
+  "types": {
+    "TEXT": "Text",
+    "RICH_TEXT": "Rich text",
+    "NUMBER": "Number",
+    "DATE": "Date",
+    "BOOLEAN": "Yes or no",
+    "MEDIA": "Media",
+    "RELATION": "Reference"
+  },
+  "list": {
+    "title": "Content models",
+    "description": "The shapes of your content: which fields each kind of entry has.",
+    "new": "New model",
+    "loadError": "Could not load content models.",
+    "emptyTitle": "No content models yet",
+    "emptyText": "A model defines the fields of your content. Start from a template.",
+    "edited": "Edited {{when}}"
+  },
+  "count": {
+    "fields_one": "{{count}} field",
+    "fields_other": "{{count}} fields",
+    "entries_one": "{{count}} entry",
+    "entries_other": "{{count}} entries"
+  },
+  "chooser": {
+    "scratch": "Start from scratch",
+    "scratchText": "Add your own fields."
+  },
+  "templates": {
+    "blogPost": {
+      "name": "Blog post",
+      "description": "Title, excerpt, cover image and body.",
+      "fields": {
+        "title": "Title",
+        "excerpt": "Excerpt",
+        "coverImage": "Cover image",
+        "body": "Body"
+      },
+      "help": {
+        "excerpt": "Short summary for lists and previews."
+      }
+    },
+    "page": {
+      "name": "Page",
+      "description": "A standalone page such as About or Contact.",
+      "fields": {
+        "title": "Title",
+        "key": "Page key",
+        "subtitle": "Subtitle",
+        "body": "Body"
+      },
+      "help": {
+        "key": "Used by your site to find this page, for example \"about\"."
+      }
+    },
+    "event": {
+      "name": "Event",
+      "description": "Date, location, image and description.",
+      "fields": {
+        "title": "Title",
+        "date": "Date",
+        "location": "Location",
+        "image": "Image",
+        "description": "Description"
+      }
+    }
+  },
+  "validation": {
+    "nameMin": "Name must be at least 2 characters",
+    "nameMax": "Name must be at most 100 characters",
+    "slug": "Use lowercase letters, numbers and hyphens",
+    "noFields": "Add at least one field",
+    "labelRequired": "Label is required",
+    "labelMax": "Label must be at most 100 characters",
+    "minLength": "Min length must be a whole number of at least 1",
+    "maxLength": "Max length must be a whole number of at least 1",
+    "maxBelowMin": "Max length must be at least the min length",
+    "maxBelowMinNumber": "Maximum must be at least the minimum",
+    "helpMax": "Help text must be at most 500 characters"
+  },
+  "builder": {
+    "newTitle": "New content model",
+    "newText": "Start from a template or from scratch. You can change everything later.",
+    "loadError": "Could not load this content model.",
+    "saved": "Model saved",
+    "created": "Model created",
+    "fixFields": "Fix the highlighted fields before saving",
+    "deleted": "Deleted {{name}}",
+    "deleteModel": "Delete model",
+    "saving": "Saving…",
+    "save": "Save model",
+    "name": "Name",
+    "slug": "Slug",
+    "description": "Description",
+    "fields": "Fields",
+    "addFieldHeading": "Add field",
+    "addField": "Add {{type}} field",
+    "fieldOfType": "{{type}} field",
+    "fieldSettings": "Field settings",
+    "renameTitle": "Change API keys?",
+    "usedBy_one": "{{count}} entry uses this model.",
+    "usedBy_other": "{{count}} entries use this model.",
+    "mayHaveEntries": "This model may have entries.",
+    "renameConsequence": "Sites reading these keys stop receiving their values:",
+    "removedKey": "{{key}} (removed)",
+    "saveChanges": "Save changes",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteWithEntries_one": "This also deletes its {{count}} entry. This cannot be undone.",
+    "deleteWithEntries_other": "This also deletes its {{count}} entries. This cannot be undone.",
+    "cannotUndo": "This cannot be undone.",
+    "slugHint": "Your site loads entries at /content/{{slug}}."
+  },
+  "inspector": {
+    "label": "Label",
+    "apiKey": "API key",
+    "lockedHint": "Sites reading this key stop receiving it if you rename it.",
+    "keyHint": "Created from the label. Your site reads the value by this key.",
+    "helpText": "Help text",
+    "required": "Required",
+    "minLength": "Min length",
+    "maxLength": "Max length",
+    "pattern": "Pattern (regular expression)",
+    "isTitle": "This is the title",
+    "useAsTitle": "Use as title",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "integer": "Whole numbers only",
+    "multiple": "Allow several",
+    "allowedFiles": "Allowed files",
+    "files": {
+      "images": "Images",
+      "video": "Video",
+      "gpx": "GPX",
+      "pdf": "PDF"
+    },
+    "anyFile": "None selected means any supported file.",
+    "entriesFrom": "Entries from",
+    "anyModel": "Any content model",
+    "remove": "Remove field"
+  }
+}

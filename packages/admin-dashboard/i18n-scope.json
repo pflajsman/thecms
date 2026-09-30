@@ -56,6 +56,15 @@
     "src/features/media/components/MediaTile.tsx",
     "src/features/inbox/pages/InboxPage.tsx",
     "src/features/inbox/components/MessageView.tsx",
-    "src/features/inbox/inbox-utils.ts"
+    "src/features/inbox/inbox-utils.ts",
+    "src/features/models/templates.ts",
+    "src/features/models/model-draft.ts",
+    "src/features/builder/api-key.ts",
+    "src/features/models/components/TemplateChooser.tsx",
+    "src/features/models/pages/ModelsListPage.tsx",
+    "src/features/models/pages/ModelBuilderPage.tsx",
+    "src/features/models/components/ModelFieldInspector.tsx",
+    "src/features/builder/FieldList.tsx",
+    "src/features/builder/InspectorPanel.tsx"
   ]
 }

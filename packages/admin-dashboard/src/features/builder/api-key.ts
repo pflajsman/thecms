@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n'
 export const API_KEY_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]*$/
 const MAX_KEY = 50
 
@@ -34,8 +35,8 @@ export function toSlug(name: string): string {
 }
 
 export function apiKeyError(key: string, otherKeys: string[]): string | null {
-  if (!key) return 'API key is required'
-  if (key.length > MAX_KEY || !API_KEY_PATTERN.test(key)) return 'Start with a letter; use only letters, numbers and underscores'
-  if (otherKeys.includes(key)) return 'Another field already uses this key'
+  if (!key) return i18n.t('builder:key.required')
+  if (key.length > MAX_KEY || !API_KEY_PATTERN.test(key)) return i18n.t('builder:key.pattern')
+  if (otherKeys.includes(key)) return i18n.t('builder:key.taken')
   return null
 }

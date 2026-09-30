@@ -1,4 +1,5 @@
 import { apiKeyError, toApiKey, toSlug, uniqueKey } from './api-key'
+import { i18n } from '@/i18n'
 
 describe('toApiKey', () => {
   it.each([
@@ -31,4 +32,10 @@ describe('uniqueKey, toSlug, apiKeyError', () => {
     expect(apiKeyError('title', ['title'])).toBe('Another field already uses this key')
     expect(apiKeyError('gpxurl', ['title'])).toBeNull()
   })
+})
+
+it('explains key problems in Czech', async () => {
+  await i18n.changeLanguage('cs')
+  expect(apiKeyError('1abc', [])).toBe('Začněte písmenem a používejte jen písmena, číslice a podtržítka')
+  expect(apiKeyError('title', ['title'])).toBe('Tento klíč už používá jiné pole')
 })

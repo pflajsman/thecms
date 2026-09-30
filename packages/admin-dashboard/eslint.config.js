@@ -50,8 +50,8 @@ export default defineConfig([
           },
           words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS', '⌘[A-Z]', 'https?://\\S*', '\\s*px'] },
           // Editor and state APIs take identifiers, not copy.
-          callees: { exclude: ['i18n(ext)?', 't', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'setParam', 'setParams', 'includes', 'startsWith', 'endsWith'] },
-          'object-properties': { exclude: ['[A-Z_-]+', 'textAlign', 'float'] },
+          callees: { exclude: ['i18n(ext)?', 't', 'tr', 'numberInput', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'setParam', 'setParams', 'includes', 'startsWith', 'endsWith'] },
+          'object-properties': { exclude: ['[A-Z_-]+', 'textAlign', 'float', 'ns'] },
         },
       ],
     },
@@ -67,8 +67,8 @@ export default defineConfig([
           mode: 'all',
           // Single lowercase words here are identifiers (categories, statuses), not copy.
           words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'https?://\\S*', '[a-z][a-zA-Z0-9]*'] },
-          callees: { exclude: ['i18n(ext)?', 't', 'useTranslation', 'includes', 'startsWith', 'endsWith', 'RegExp', 'test', 'split', 'join', 'replace'] },
-          'object-properties': { exclude: ['[A-Z_-]+', 'action', 'status', 'type', 'queryKey', 'labelKey', 'id', 'to'] },
+          callees: { exclude: ['i18n(ext)?', 't', 'tr', 'useTranslation', 'includes', 'startsWith', 'endsWith', 'RegExp', 'test', 'split', 'join', 'replace'] },
+          'object-properties': { exclude: ['[A-Z_-]+', 'action', 'status', 'type', 'queryKey', 'labelKey', 'id', 'to', 'ns', 'pattern', 'allowedMimeTypes', 'titleField'] },
         },
       ],
     },

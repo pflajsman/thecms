@@ -16,7 +16,8 @@ import {
   updateField,
   validateModel,
 } from './model-draft'
-import { MODEL_TEMPLATES } from './templates'
+import { getModelTemplates } from './templates'
+import { i18n } from '@/i18n'
 
 const trip: ContentType = {
   id: 't1',
@@ -134,7 +135,7 @@ describe('payload and diff', () => {
 
 describe('templates', () => {
   it('each template is a valid model with its title field', () => {
-    for (const t of MODEL_TEMPLATES) {
+    for (const t of getModelTemplates()) {
       const d = draftFromTemplate(t)
       expect(validateModel(d)).toEqual({})
       expect(toModelPayload(d).titleField).toBe(t.titleField)
@@ -158,4 +159,12 @@ describe('rule validation', () => {
     d = updateField(d, a.cid, { label: 'Ok', description: 'x'.repeat(501) })
     expect(validateModel(d)[`rules:${a.cid}`]).toBe('Help text must be at most 500 characters')
   })
+})
+
+it('explains model errors in Czech', async () => {
+  await i18n.changeLanguage('cs')
+  const errors = validateModel({ ...emptyDraft(), name: 'A', slug: 'A!' })
+  expect(errors.name).toBe('Název musí mít alespoň 2 znaky')
+  expect(errors.slug).toBe('Použijte malá písmena, číslice a pomlčky')
+  expect(errors.fields).toBe('Přidejte alespoň jedno pole')
 })

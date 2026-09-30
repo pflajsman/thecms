@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import { setViewport } from '@/test/viewport'
 import type { ContentType } from '@/types'
 import * as contentApi from '@/features/content/content-api'
@@ -133,4 +133,29 @@ it('still confirms key renames when the entry count cannot be loaded', async () 
   await userEvent.click(screen.getByRole('button', { name: 'Save model' }))
   expect(await screen.findByRole('alertdialog')).toHaveTextContent('This model may have entries')
   expect(modelsApi.updateModel).not.toHaveBeenCalled()
+})
+
+describe('in Czech', () => {
+  it('creates a model from a template with Czech labels and English keys', async () => {
+    await setTestLanguage('cs')
+    vi.mocked(modelsApi.createModel).mockImplementation(async (body) => ({ ...trip, ...body, id: 'new1' }) as ContentType)
+    renderRoutes(routes, { route: '/models/new' })
+    await userEvent.click(await screen.findByRole('button', { name: /Článek blogu/ }))
+    expect(screen.getByLabelText('Název')).toHaveValue('Článek blogu')
+    const fields = within(screen.getByRole('list', { name: 'Pole' }))
+    expect(fields.getByText('Titulní obrázek')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Uložit model' }))
+    await waitFor(() => expect(modelsApi.createModel).toHaveBeenCalledWith(expect.objectContaining({ name: 'Článek blogu', slug: 'clanek-blogu', titleField: 'title' })))
+    const sent = vi.mocked(modelsApi.createModel).mock.calls[0][0]
+    expect(sent.fields.map((f: { name: string }) => f.name)).toEqual(['title', 'excerpt', 'coverImage', 'body'])
+    expect(sent.fields[2].label).toBe('Titulní obrázek')
+  })
+
+  it('shows the field palette in Czech after switching language', async () => {
+    renderRoutes(routes, { route: '/models/new?template=scratch' })
+    await screen.findByRole('button', { name: 'Add Text field' })
+    await setTestLanguage('cs')
+    expect(screen.getByRole('button', { name: 'Přidat pole Formátovaný text' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Přidat pole Ano, nebo ne' })).toBeInTheDocument()
+  })
 })

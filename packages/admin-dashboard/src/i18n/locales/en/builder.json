@@ -1,1 +1,18 @@
-{}
+{
+  "key": {
+    "required": "API key is required",
+    "pattern": "Start with a letter; use only letters, numbers and underscores",
+    "taken": "Another field already uses this key"
+  },
+  "list": {
+    "untitled": "Untitled field",
+    "titleField": "Title field",
+    "hasErrors": "Has errors",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "noKey": "no key"
+  },
+  "inspector": {
+    "close": "Close field settings"
+  }
+}

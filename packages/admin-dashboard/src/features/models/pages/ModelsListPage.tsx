@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Boxes, Plus } from 'lucide-react'
 import { useContentTypes } from '@/features/content/queries'
@@ -11,21 +12,22 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export function ModelsListPage() {
   const types = useContentTypes()
+  const { t: tr } = useTranslation('models')
   const stats = useStats()
   const action = (
     <Button asChild>
       <Link to="/models/new">
         <Plus aria-hidden />
-        New model
+        {tr('list.new')}
       </Link>
     </Button>
   )
 
   let body: React.ReactNode
   if (types.isPending) body = <Skeleton className="h-32 w-full" />
-  else if (types.isError) body = <ErrorState message="Could not load content models." onRetry={() => void types.refetch()} />
+  else if (types.isError) body = <ErrorState message={tr('list.loadError')} onRetry={() => void types.refetch()} />
   else if (types.data.length === 0)
-    body = <EmptyState icon={Boxes} title="No content models yet" description="A model defines the fields of your content. Start from a template." action={action} />
+    body = <EmptyState icon={Boxes} title={tr('list.emptyTitle')} description={tr('list.emptyText')} action={action} />
   else
     body = (
       <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -37,9 +39,9 @@ export function ModelsListPage() {
                 <span className="block font-serif text-lg font-semibold">{t.name}</span>
                 <span className="block font-mono text-xs text-muted-foreground">{t.slug}</span>
                 <span className="mt-2 block text-sm text-muted-foreground">
-                  {t.fields.length} {t.fields.length === 1 ? 'field' : 'fields'} · {entries} {entries === 1 ? 'entry' : 'entries'}
+                  {tr('count.fields', { count: t.fields.length })} · {tr('count.entries', { count: entries })}
                 </span>
-                <span className="block text-xs text-muted-foreground">Edited {formatRelative(t.updatedAt)}</span>
+                <span className="block text-xs text-muted-foreground">{tr('list.edited', { when: formatRelative(t.updatedAt) })}</span>
               </Link>
             </li>
           )
@@ -49,7 +51,7 @@ export function ModelsListPage() {
 
   return (
     <>
-      <PageHeader title="Content models" description="The shapes of your content: which fields each kind of entry has." actions={action} />
+      <PageHeader title={tr('list.title')} description={tr('list.description')} actions={action} />
       {body}
     </>
   )

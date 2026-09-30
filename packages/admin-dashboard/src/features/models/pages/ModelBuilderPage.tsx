@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -19,7 +20,7 @@ import { FieldList } from '@/features/builder/FieldList'
 import { InspectorPanel } from '@/features/builder/InspectorPanel'
 import { useEntryCount, useModelWrites } from '../models-queries'
 import {
-  FIELD_TYPE_LABELS,
+  fieldTypeLabel,
   addField,
   diffKeys,
   draftFromTemplate,
@@ -37,7 +38,7 @@ import {
   validateModel,
   type ModelDraft,
 } from '../model-draft'
-import { MODEL_TEMPLATES } from '../templates'
+import { getModelTemplates } from '../templates'
 import { TemplateChooser } from '../components/TemplateChooser'
 import { ModelFieldInspector } from '../components/ModelFieldInspector'
 
@@ -45,6 +46,7 @@ const PALETTE: FieldType[] = ['TEXT', 'RICH_TEXT', 'NUMBER', 'DATE', 'BOOLEAN', 
 
 export function ModelBuilderPage() {
   const { id = 'new' } = useParams()
+  const { t: tr } = useTranslation('models')
   const [params, setParams] = useSearchParams()
   const isNew = id === 'new'
   const typeQuery = useContentType(isNew ? undefined : id)
@@ -54,22 +56,23 @@ export function ModelBuilderPage() {
     if (!templateId) {
       return (
         <>
-          <PageHeader title="New content model" description="Start from a template or from scratch. You can change everything later." breadcrumb={<Link to="/models">Content models</Link>} />
+          <PageHeader title={tr('builder.newTitle')} description={tr('builder.newText')} breadcrumb={<Link to="/models">{tr('list.title')}</Link>} />
           <TemplateChooser onChoose={(t) => setParams({ template: t ? t.id : 'scratch' }, { replace: true })} />
         </>
       )
     }
-    const template = MODEL_TEMPLATES.find((t) => t.id === templateId)
+    const template = getModelTemplates().find((t) => t.id === templateId)
     return <ModelBuilder key={`new:${templateId}`} initial={template ? draftFromTemplate(template) : emptyDraft()} />
   }
 
-  if (typeQuery.isError) return <ErrorState message="Could not load this content model." onRetry={() => void typeQuery.refetch()} />
+  if (typeQuery.isError) return <ErrorState message={tr('builder.loadError')} onRetry={() => void typeQuery.refetch()} />
   if (!typeQuery.data) return <Skeleton className="h-64 w-full" />
   return <ModelBuilder key={typeQuery.data.id} model={typeQuery.data} initial={draftFromType(typeQuery.data)} />
 }
 
 function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelDraft }) {
   const navigate = useNavigate()
+  const { t: tr } = useTranslation('models')
   const writes = useModelWrites()
   const models = useContentTypes()
   const entryCount = useEntryCount(model?.id)
@@ -97,7 +100,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
       const payload = toModelPayload(draft)
       const saved = model ? await writes.update(model.id, payload) : await writes.create(payload)
       setBaseline(stableStringify(payload))
-      toast.success(model ? 'Model saved' : 'Model created')
+      toast.success(model ? tr('builder.saved') : tr('builder.created'))
       if (!model) navigate(`/models/${saved.id}`, { replace: true, state: { skipGuard: true } })
       else {
         setDraft(draftFromType(saved))
@@ -116,7 +119,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
     if (keys.length) {
       const fieldKey = keys.find((k) => k.includes(':'))
       if (fieldKey) setSelected(fieldKey.split(':')[1])
-      toast.error('Fix the highlighted fields before saving')
+      toast.error(tr('builder.fixFields'))
       return
     }
     if (model && (!countKnown || count > 0) && (diff.renamed.length || diff.removed.length)) {
@@ -130,7 +133,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
     setConfirm(null)
     try {
       await writes.remove(model!.id, count > 0)
-      toast.success(`Deleted ${model!.name}`)
+      toast.success(tr('builder.deleted', { name: model!.name }))
       navigate('/models', { state: { skipGuard: true } })
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -142,18 +145,18 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
   return (
     <>
       <PageHeader
-        title={draft.name.trim() || 'New content model'}
-        breadcrumb={<Link to="/models">Content models</Link>}
-        description={model ? `${draft.fields.length} fields · ${count} ${count === 1 ? 'entry' : 'entries'}` : undefined}
+        title={draft.name.trim() || tr('builder.newTitle')}
+        breadcrumb={<Link to="/models">{tr('list.title')}</Link>}
+        description={model ? `${tr('count.fields', { count: draft.fields.length })} · ${tr('count.entries', { count })}` : undefined}
         actions={
           <>
             {model && (
               <Button variant="outline" onClick={() => setConfirm('delete')}>
-                Delete model
+                {tr('builder.deleteModel')}
               </Button>
             )}
             <Button onClick={requestSave} disabled={saving || (!!model && !dirty)}>
-              {saving ? 'Saving…' : 'Save model'}
+              {saving ? tr('builder.saving') : tr('builder.save')}
             </Button>
           </>
         }
@@ -161,32 +164,32 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
 
       <section className="mb-6 grid gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="model-name">Name</Label>
+          <Label htmlFor="model-name">{tr('builder.name')}</Label>
           <Input id="model-name" value={draft.name} onChange={(e) => setDraft(setModelName(draft, e.target.value))} aria-invalid={visible.name ? true : undefined} />
           {visible.name && <p className="text-sm text-destructive">{visible.name}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="model-slug">Slug</Label>
+          <Label htmlFor="model-slug">{tr('builder.slug')}</Label>
           <Input id="model-slug" className="font-mono" value={draft.slug} onChange={(e) => setDraft(setSlug(draft, e.target.value))} aria-invalid={visible.slug ? true : undefined} />
-          {visible.slug ? <p className="text-sm text-destructive">{visible.slug}</p> : <p className="text-sm text-muted-foreground">Your site loads entries at /content/{draft.slug || 'slug'}.</p>}
+          {visible.slug ? <p className="text-sm text-destructive">{visible.slug}</p> : <p className="text-sm text-muted-foreground">{tr('builder.slugHint', { slug: draft.slug || 'slug' })}</p>}
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="model-description">Description</Label>
+          <Label htmlFor="model-description">{tr('builder.description')}</Label>
           <Textarea id="model-description" rows={2} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
         </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section>
-          <h2 className="mb-2 font-serif text-lg font-semibold">Fields</h2>
+          <h2 className="mb-2 font-serif text-lg font-semibold">{tr('builder.fields')}</h2>
           {visible.fields && <p className="mb-2 text-sm text-destructive">{visible.fields}</p>}
           <FieldList
-            label="Fields"
+            label={tr('builder.fields')}
             items={draft.fields.map((f) => ({
               id: f.cid,
               label: f.label,
               apiKey: f.name,
-              typeLabel: FIELD_TYPE_LABELS[f.type],
+              typeLabel: fieldTypeLabel(f.type),
               isTitle: f.cid === draft.titleCid && f.type === 'TEXT',
               hasError: !!(visible[`label:${f.cid}`] || visible[`key:${f.cid}`] || visible[`rules:${f.cid}`]),
             }))}
@@ -195,7 +198,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
             onReorder={(cids) => setDraft(reorderFields(draft, cids))}
           />
           <div className="mt-4">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Add field</p>
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr('builder.addFieldHeading')}</p>
             <div className="flex flex-wrap gap-2">
               {PALETTE.map((type) => (
                 <Button
@@ -203,20 +206,20 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
                   type="button"
                   variant="outline"
                   size="sm"
-                  aria-label={`Add ${FIELD_TYPE_LABELS[type]} field`}
+                  aria-label={tr('builder.addField', { type: fieldTypeLabel(type) })}
                   onClick={() => {
                     const { draft: next, cid } = addField(draft, type)
                     setDraft(next)
                     setSelected(cid)
                   }}
                 >
-                  + {FIELD_TYPE_LABELS[type]}
+                  + {fieldTypeLabel(type)}
                 </Button>
               ))}
             </div>
           </div>
         </section>
-        <InspectorPanel title="Field settings" open={!!selectedField} onClose={() => setSelected(undefined)}>
+        <InspectorPanel title={tr('builder.fieldSettings')} open={!!selectedField} onClose={() => setSelected(undefined)}>
           {selectedField && (
             <ModelFieldInspector
               key={selectedField.cid}
@@ -242,28 +245,28 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
       <ConfirmDialog
         open={confirm === 'save'}
         onOpenChange={(o) => !o && setConfirm(null)}
-        title="Change API keys?"
+        title={tr('builder.renameTitle')}
         description={
           <span className="block space-y-2">
             <span className="block">
-              {countKnown ? `${count} ${count === 1 ? 'entry uses' : 'entries use'} this model.` : 'This model may have entries.'} Sites reading these keys stop receiving their values:
+              {countKnown ? tr('builder.usedBy', { count }) : tr('builder.mayHaveEntries')} {tr('builder.renameConsequence')}
             </span>
             <span className="block font-mono text-xs">
-              {[...diff.renamed.map((r) => `${r.from} → ${r.to}`), ...diff.removed.map((r) => `${r} (removed)`)].join(', ')}
+              {[...diff.renamed.map((r) => `${r.from} → ${r.to}`), ...diff.removed.map((r) => tr('builder.removedKey', { key: r }))].join(', ')}
             </span>
           </span>
         }
-        confirmLabel="Save changes"
+        confirmLabel={tr('builder.saveChanges')}
         onConfirm={() => void save()}
       />
       {model && (
         <ConfirmDialog
           open={confirm === 'delete'}
           onOpenChange={(o) => !o && setConfirm(null)}
-          title={`Delete ${model.name}?`}
-          description={count > 0 ? `This also deletes its ${count} ${count === 1 ? 'entry' : 'entries'}. This cannot be undone.` : 'This cannot be undone.'}
+          title={tr('builder.deleteTitle', { name: model.name })}
+          description={count > 0 ? tr('builder.deleteWithEntries', { count }) : tr('builder.cannotUndo')}
           confirmText={count > 0 ? model.name : undefined}
-          confirmLabel="Delete"
+          confirmLabel={tr('actions.delete', { ns: 'common' })}
           destructive
           onConfirm={() => void remove()}
         />

@@ -1,1 +1,155 @@
-{}
+{
+  "palette": {
+    "TEXT": "Text",
+    "RICH_TEXT": "Formátovaný text",
+    "NUMBER": "Číslo",
+    "DATE": "Datum",
+    "BOOLEAN": "Ano, nebo ne",
+    "MEDIA": "Média",
+    "RELATION": "Odkaz na položku"
+  },
+  "types": {
+    "TEXT": "Text",
+    "RICH_TEXT": "Formátovaný text",
+    "NUMBER": "Číslo",
+    "DATE": "Datum",
+    "BOOLEAN": "Ano, nebo ne",
+    "MEDIA": "Média",
+    "RELATION": "Odkaz na položku"
+  },
+  "list": {
+    "title": "Modely obsahu",
+    "description": "Podoba vašeho obsahu: jaká pole má každý druh položky.",
+    "new": "Nový model",
+    "loadError": "Modely obsahu se nepodařilo načíst.",
+    "emptyTitle": "Zatím žádné modely obsahu",
+    "emptyText": "Model určuje pole vašeho obsahu. Začněte šablonou.",
+    "edited": "Upraveno {{when}}"
+  },
+  "count": {
+    "fields_one": "{{count}} pole",
+    "fields_few": "{{count}} pole",
+    "fields_other": "{{count}} polí",
+    "entries_one": "{{count}} položka",
+    "entries_few": "{{count}} položky",
+    "entries_other": "{{count}} položek"
+  },
+  "chooser": {
+    "scratch": "Začít od nuly",
+    "scratchText": "Přidejte vlastní pole."
+  },
+  "templates": {
+    "blogPost": {
+      "name": "Článek blogu",
+      "description": "Název, perex, titulní obrázek a obsah.",
+      "fields": {
+        "title": "Název",
+        "excerpt": "Perex",
+        "coverImage": "Titulní obrázek",
+        "body": "Obsah"
+      },
+      "help": {
+        "excerpt": "Krátké shrnutí pro výpisy a náhledy."
+      }
+    },
+    "page": {
+      "name": "Stránka",
+      "description": "Samostatná stránka, například O nás nebo Kontakt.",
+      "fields": {
+        "title": "Název",
+        "key": "Klíč stránky",
+        "subtitle": "Podnadpis",
+        "body": "Obsah"
+      },
+      "help": {
+        "key": "Podle něj web stránku najde, například „o-nas“."
+      }
+    },
+    "event": {
+      "name": "Událost",
+      "description": "Datum, místo, obrázek a popis.",
+      "fields": {
+        "title": "Název",
+        "date": "Datum",
+        "location": "Místo",
+        "image": "Obrázek",
+        "description": "Popis"
+      }
+    }
+  },
+  "validation": {
+    "nameMin": "Název musí mít alespoň 2 znaky",
+    "nameMax": "Název může mít nejvýše 100 znaků",
+    "slug": "Použijte malá písmena, číslice a pomlčky",
+    "noFields": "Přidejte alespoň jedno pole",
+    "labelRequired": "Popisek je povinný",
+    "labelMax": "Popisek může mít nejvýše 100 znaků",
+    "minLength": "Minimální délka musí být celé číslo alespoň 1",
+    "maxLength": "Maximální délka musí být celé číslo alespoň 1",
+    "maxBelowMin": "Maximální délka musí být alespoň minimální délka",
+    "maxBelowMinNumber": "Maximum musí být alespoň minimum",
+    "helpMax": "Nápověda může mít nejvýše 500 znaků"
+  },
+  "builder": {
+    "newTitle": "Nový model obsahu",
+    "newText": "Začněte šablonou nebo od nuly. Všechno můžete později změnit.",
+    "loadError": "Model obsahu se nepodařilo načíst.",
+    "saved": "Model uložen",
+    "created": "Model vytvořen",
+    "fixFields": "Před uložením opravte zvýrazněná pole",
+    "deleted": "Model {{name}} smazán",
+    "deleteModel": "Smazat model",
+    "saving": "Ukládání…",
+    "save": "Uložit model",
+    "name": "Název",
+    "slug": "Slug",
+    "description": "Popis",
+    "fields": "Pole",
+    "addFieldHeading": "Přidat pole",
+    "addField": "Přidat pole {{type}}",
+    "fieldOfType": "Pole typu {{type}}",
+    "fieldSettings": "Nastavení pole",
+    "renameTitle": "Změnit klíče API?",
+    "usedBy_one": "Tento model používá {{count}} položka.",
+    "usedBy_few": "Tento model používají {{count}} položky.",
+    "usedBy_other": "Tento model používá {{count}} položek.",
+    "mayHaveEntries": "Tento model může mít položky.",
+    "renameConsequence": "Weby, které čtou tyto klíče, přestanou dostávat jejich hodnoty:",
+    "removedKey": "{{key}} (odebráno)",
+    "saveChanges": "Uložit změny",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteWithEntries_one": "Smaže se také jeho {{count}} položka. Nelze to vrátit.",
+    "deleteWithEntries_few": "Smažou se také jeho {{count}} položky. Nelze to vrátit.",
+    "deleteWithEntries_other": "Smaže se také jeho {{count}} položek. Nelze to vrátit.",
+    "cannotUndo": "Nelze to vrátit.",
+    "slugHint": "Web načítá položky z adresy /content/{{slug}}."
+  },
+  "inspector": {
+    "label": "Popisek",
+    "apiKey": "Klíč API",
+    "lockedHint": "Pokud klíč přejmenujete, weby, které ho čtou, přestanou hodnotu dostávat.",
+    "keyHint": "Vytvořen z popisku. Web čte hodnotu podle tohoto klíče.",
+    "helpText": "Nápověda",
+    "required": "Povinné",
+    "minLength": "Minimální délka",
+    "maxLength": "Maximální délka",
+    "pattern": "Vzor (regulární výraz)",
+    "isTitle": "Toto je název",
+    "useAsTitle": "Použít jako název",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "integer": "Jen celá čísla",
+    "multiple": "Povolit více",
+    "allowedFiles": "Povolené soubory",
+    "files": {
+      "images": "Obrázky",
+      "video": "Video",
+      "gpx": "GPX",
+      "pdf": "PDF"
+    },
+    "anyFile": "Když nic nevyberete, povolí se jakýkoli podporovaný soubor.",
+    "entriesFrom": "Položky z modelu",
+    "anyModel": "Jakýkoli model obsahu",
+    "remove": "Odebrat pole"
+  }
+}

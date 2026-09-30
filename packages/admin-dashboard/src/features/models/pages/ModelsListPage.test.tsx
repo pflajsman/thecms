@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import * as contentApi from '@/features/content/content-api'
 import { tripType } from '@/features/content/test-fixtures'
 import { ModelsListPage } from './ModelsListPage'
@@ -26,4 +26,12 @@ it('shows an empty state that starts from templates', async () => {
   vi.mocked(contentApi.listContentTypes).mockResolvedValue([])
   renderRoutes([{ path: '/models', element: <ModelsListPage /> }], { route: '/models' })
   expect(await screen.findByText('No content models yet')).toBeInTheDocument()
+})
+
+it('counts fields and entries with Czech plurals', async () => {
+  await setTestLanguage('cs')
+  vi.mocked(contentApi.listContentTypes).mockResolvedValue([tripType])
+  renderRoutes([{ path: '/models', element: <ModelsListPage /> }], { route: '/models' })
+  expect(await screen.findByText('3 pole · 8 položek')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Nový model' })).toHaveAttribute('href', '/models/new')
 })

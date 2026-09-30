@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -13,6 +14,7 @@ interface InspectorPanelProps {
 
 /** Field settings: a side panel on desktop, a bottom sheet on smaller screens. */
 export function InspectorPanel({ title, open, onClose, children }: InspectorPanelProps) {
+  const { t } = useTranslation('builder')
   const desktop = useIsDesktop()
   if (!open) return null
   if (desktop) {
@@ -20,7 +22,7 @@ export function InspectorPanel({ title, open, onClose, children }: InspectorPane
       <aside aria-label={title} className="rounded-xl border bg-card p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-serif text-lg font-semibold">{title}</h2>
-          <Button variant="ghost" size="icon" aria-label="Close field settings" onClick={onClose}>
+          <Button variant="ghost" size="icon" aria-label={t('inspector.close')} onClick={onClose}>
             <X aria-hidden />
           </Button>
         </div>

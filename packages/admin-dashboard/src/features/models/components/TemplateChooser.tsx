@@ -1,12 +1,14 @@
+import { useTranslation } from 'react-i18next'
 import { FileText, LayoutTemplate, CalendarDays, Plus } from 'lucide-react'
-import { MODEL_TEMPLATES, type ModelTemplate } from '../templates'
+import { getModelTemplates, type ModelTemplate } from '../templates'
 
 const ICONS = { 'blog-post': FileText, page: LayoutTemplate, event: CalendarDays } as const
 
 export function TemplateChooser({ onChoose }: { onChoose: (t: ModelTemplate | null) => void }) {
+  const { t: tr } = useTranslation('models')
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
-      {MODEL_TEMPLATES.map((t) => {
+      {getModelTemplates().map((t) => {
         const Icon = ICONS[t.id]
         return (
           <li key={t.id}>
@@ -24,8 +26,8 @@ export function TemplateChooser({ onChoose }: { onChoose: (t: ModelTemplate | nu
         <button type="button" onClick={() => onChoose(null)} className="flex w-full items-start gap-3 rounded-xl border border-dashed bg-card p-4 text-left hover:bg-accent">
           <Plus aria-hidden className="mt-0.5 size-5 text-muted-foreground" />
           <span>
-            <span className="block font-serif text-lg font-semibold">Start from scratch</span>
-            <span className="block text-sm text-muted-foreground">Add your own fields.</span>
+            <span className="block font-serif text-lg font-semibold">{tr('chooser.scratch')}</span>
+            <span className="block text-sm text-muted-foreground">{tr('chooser.scratchText')}</span>
           </span>
         </button>
       </li>
