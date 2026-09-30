@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/format'
 import type { Field } from '@/types'
 
 export type EntryValues = Record<string, unknown>
@@ -30,10 +30,6 @@ function safeRegExp(pattern: string): RegExp | null {
   }
 }
 
-function formatDay(iso: string): string {
-  return format(new Date(iso), 'd MMM yyyy')
-}
-
 function fieldError(field: Field, value: unknown): string | null {
   const label = field.label || field.name
   const rules = field.validation ?? {}
@@ -62,8 +58,8 @@ function fieldError(field: Field, value: unknown): string | null {
     case 'DATE': {
       const time = typeof value === 'string' ? new Date(value).getTime() : Number.NaN
       if (Number.isNaN(time)) return `${label} must be a valid date`
-      if (rules.minDate && time < new Date(rules.minDate).getTime()) return `${label} must be on or after ${formatDay(rules.minDate)}`
-      if (rules.maxDate && time > new Date(rules.maxDate).getTime()) return `${label} must be on or before ${formatDay(rules.maxDate)}`
+      if (rules.minDate && time < new Date(rules.minDate).getTime()) return `${label} must be on or after ${formatDate(rules.minDate)}`
+      if (rules.maxDate && time > new Date(rules.maxDate).getTime()) return `${label} must be on or before ${formatDate(rules.maxDate)}`
       return null
     }
     case 'BOOLEAN':
