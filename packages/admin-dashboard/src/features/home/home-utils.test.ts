@@ -1,5 +1,6 @@
 import { getSetupSteps, greeting, publicApiBase, readSetupDismissed, writeSetupDismissed } from './home-utils'
 import type { DashboardStats } from '@/types'
+import { i18n } from '@/i18n'
 
 const stats = (over: Partial<DashboardStats> = {}): DashboardStats => ({
   entries: { total: 0, draft: 0, published: 0, archived: 0, byType: {} },
@@ -51,4 +52,11 @@ describe('setup dismissal', () => {
 
 it('publicApiBase ends with /public', () => {
   expect(publicApiBase()).toMatch(/\/api\/v1\/public$/)
+})
+
+it('greets in Czech', async () => {
+  await i18n.changeLanguage('cs')
+  expect(greeting(new Date(2026, 8, 29, 9), 'Pavel Flajsman')).toBe('Dobré ráno, Pavel')
+  expect(greeting(new Date(2026, 8, 29, 15))).toBe('Dobré odpoledne')
+  expect(greeting(new Date(2026, 8, 29, 20), 'Pavel')).toBe('Dobrý večer, Pavel')
 })

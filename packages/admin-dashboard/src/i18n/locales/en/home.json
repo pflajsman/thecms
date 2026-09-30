@@ -1,1 +1,68 @@
-{}
+{
+  "welcome": "Welcome to TheCMS",
+  "loading": "Loading home",
+  "setup": {
+    "intro": "Four steps to your first published content. About 5 minutes.",
+    "hide": "Hide setup guide",
+    "stepsLabel": "Setup steps",
+    "done": " (done)",
+    "signin": {
+      "title": "Sign in",
+      "description": "You are in."
+    },
+    "model": {
+      "title": "Create a content model",
+      "description": "Define the fields your content has, for example a blog post.",
+      "cta": "Create a model"
+    },
+    "entry": {
+      "title": "Write your first entry",
+      "description": "Add content using your model.",
+      "cta": "Write an entry"
+    },
+    "site": {
+      "title": "Connect a site",
+      "description": "Get an API key so your website can read published content.",
+      "cta": "Connect a site"
+    }
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "withName": "{{greeting}}, {{name}}"
+  },
+  "connected": {
+    "title": "Your site is connected",
+    "text": "Paste this into {{site}} to load your published {{model}} entries."
+  },
+  "tiles": {
+    "entries_one": "entry",
+    "entries_other": "entries",
+    "drafts_one": "draft",
+    "drafts_other": "drafts",
+    "unread_one": "unread message",
+    "unread_other": "unread messages",
+    "media_one": "media file",
+    "media_other": "media files"
+  },
+  "continue": {
+    "title": "Continue editing",
+    "empty": "No drafts waiting. Nice."
+  },
+  "inbox": {
+    "title": "Inbox",
+    "empty": "You are all caught up.",
+    "open": "Open inbox"
+  },
+  "create": {
+    "title": "Create",
+    "newOfType": "+ {{model}}",
+    "uploadMedia": "Upload media"
+  },
+  "snippet": {
+    "language": "JavaScript",
+    "copied": "Snippet copied",
+    "fetchExample": "Fetch example"
+  }
+}

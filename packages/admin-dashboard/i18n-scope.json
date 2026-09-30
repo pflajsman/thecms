@@ -17,6 +17,10 @@
     "src/components/common/Pager.tsx",
     "src/components/common/StatusPill.tsx",
     "src/components/common/DataList.tsx",
-    "src/components/common/PageHeader.tsx"
+    "src/components/common/PageHeader.tsx",
+    "src/features/home/pages/HomePage.tsx",
+    "src/features/home/components/SetupChecklist.tsx",
+    "src/features/home/components/ConnectSnippet.tsx",
+    "src/features/home/home-utils.ts"
   ]
 }

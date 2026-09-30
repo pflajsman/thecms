@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import type { DashboardStats } from '@/types'
 import * as contentApi from '@/features/content/content-api'
 import { makeListItem, page, tripType } from '@/features/content/test-fixtures'
@@ -86,5 +86,28 @@ describe('HomePage', () => {
     expect(screen.getByRole('link', { name: '+ Trip' })).toHaveAttribute('href', `/content/new?type=${tripType.id}`)
     expect(contentApi.listEntries).toHaveBeenCalledWith(expect.objectContaining({ status: 'DRAFT', sortBy: 'updatedAt', limit: 5 }))
     expect(await screen.findByRole('link', { name: /jana@x\.test/ })).toHaveAttribute('href', '/inbox/s1')
+  })
+})
+
+describe('HomePage in Czech', () => {
+  it('shows the setup guide in Czech', async () => {
+    await setTestLanguage('cs')
+    statsState.value = base
+    renderRoutes(routes)
+    expect(await screen.findByRole('heading', { name: 'Vítejte v TheCMS' })).toBeInTheDocument()
+    const steps = screen.getByRole('list', { name: 'Kroky nastavení' })
+    expect(within(steps).getByRole('link', { name: 'Vytvořit model' })).toHaveAttribute('href', '/models/new')
+    expect(within(steps).getByText('Přihlásit se')).toBeInTheDocument()
+  })
+
+  it('agrees tile labels with the count in Czech', async () => {
+    await setTestLanguage('cs')
+    statsState.value = { ...base, contentTypes: 1, sites: 1, media: 5, entries: { total: 1, draft: 3, published: 1, archived: 0, byType: {} }, submissions: { unread: 2 } }
+    localStorage.setItem('thecms-setup-dismissed', '1')
+    renderRoutes(routes)
+    expect(await screen.findByRole('link', { name: /1\s*položka/ })).toHaveAttribute('href', '/content')
+    expect(screen.getByRole('link', { name: /3\s*koncepty/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /2\s*nepřečtené zprávy/ })).toHaveAttribute('href', '/inbox')
+    expect(screen.getByRole('link', { name: /5\s*mediálních souborů/ })).toBeInTheDocument()
   })
 })

@@ -1,1 +1,72 @@
-{}
+{
+  "welcome": "Vítejte v TheCMS",
+  "loading": "Načítání přehledu",
+  "setup": {
+    "intro": "Čtyři kroky k prvnímu publikovanému obsahu. Zhruba 5 minut.",
+    "hide": "Skrýt průvodce nastavením",
+    "stepsLabel": "Kroky nastavení",
+    "done": " (hotovo)",
+    "signin": {
+      "title": "Přihlásit se",
+      "description": "Jste přihlášeni."
+    },
+    "model": {
+      "title": "Vytvořte model obsahu",
+      "description": "Určete pole, která bude váš obsah mít, například článek blogu.",
+      "cta": "Vytvořit model"
+    },
+    "entry": {
+      "title": "Napište první položku",
+      "description": "Přidejte obsah podle svého modelu.",
+      "cta": "Napsat položku"
+    },
+    "site": {
+      "title": "Připojte web",
+      "description": "Získejte API klíč, aby váš web mohl číst publikovaný obsah.",
+      "cta": "Připojit web"
+    }
+  },
+  "greeting": {
+    "morning": "Dobré ráno",
+    "afternoon": "Dobré odpoledne",
+    "evening": "Dobrý večer",
+    "withName": "{{greeting}}, {{name}}"
+  },
+  "connected": {
+    "title": "Váš web je připojen",
+    "text": "Vložte tento kód do webu {{site}} a načtete publikované položky modelu {{model}}."
+  },
+  "tiles": {
+    "entries_one": "položka",
+    "entries_few": "položky",
+    "entries_other": "položek",
+    "drafts_one": "koncept",
+    "drafts_few": "koncepty",
+    "drafts_other": "konceptů",
+    "unread_one": "nepřečtená zpráva",
+    "unread_few": "nepřečtené zprávy",
+    "unread_other": "nepřečtených zpráv",
+    "media_one": "mediální soubor",
+    "media_few": "mediální soubory",
+    "media_other": "mediálních souborů"
+  },
+  "continue": {
+    "title": "Pokračovat v úpravách",
+    "empty": "Žádné rozpracované koncepty. Výborně."
+  },
+  "inbox": {
+    "title": "Zprávy",
+    "empty": "Všechno máte přečtené.",
+    "open": "Otevřít zprávy"
+  },
+  "create": {
+    "title": "Vytvořit",
+    "newOfType": "+ {{model}}",
+    "uploadMedia": "Nahrát média"
+  },
+  "snippet": {
+    "language": "JavaScript",
+    "copied": "Ukázka zkopírována",
+    "fetchExample": "Ukázka načtení"
+  }
+}
