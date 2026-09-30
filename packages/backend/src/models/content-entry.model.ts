@@ -14,6 +14,8 @@ export enum ContentStatus {
  */
 export interface IContentEntry extends Document {
   contentTypeId: mongoose.Types.ObjectId;
+  language: string;
+  itemId: mongoose.Types.ObjectId;
   data: Record<string, any>;
   title: string;
   status: ContentStatus;
@@ -35,6 +37,10 @@ const ContentEntrySchema = new Schema<IContentEntry>(
       required: [true, 'Content type is required'],
       index: true,
     },
+    // Content language of this version (see models/language.model.ts).
+    language: { type: String, index: true, trim: true, lowercase: true },
+    // Groups the language versions of one entry. Existing entries use their own _id.
+    itemId: { type: Schema.Types.ObjectId, index: true },
     data: {
       type: Schema.Types.Mixed,
       required: [true, 'Content data is required'],
