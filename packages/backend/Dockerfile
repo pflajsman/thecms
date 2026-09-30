@@ -3,14 +3,15 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm, pinned to the repo's packageManager version (newer pnpm fails on unapproved build scripts)
+RUN npm install -g pnpm@9.15.9
 
 # Copy package files
 COPY package.json ./
 
-# Install dependencies (lockfile integrity verified in CI build-and-test job)
-RUN pnpm install --no-frozen-lockfile
+# Install dependencies (lockfile integrity verified in CI build-and-test job).
+# mongodb-memory-server is test-only; skip its MongoDB binary download.
+RUN MONGOMS_DISABLE_POSTINSTALL=1 pnpm install --no-frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -23,8 +24,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm, pinned to the repo's packageManager version (newer pnpm fails on unapproved build scripts)
+RUN npm install -g pnpm@9.15.9
 
 # Copy package files
 COPY package.json ./
