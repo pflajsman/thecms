@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState, type KeyboardEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { X } from 'lucide-react'
@@ -23,10 +24,11 @@ import { ConnectSnippets } from '../components/ConnectSnippets'
 const EMPTY: SitePayload = { name: '', domain: '', description: '', allowedOrigins: [], isActive: true }
 
 export function SiteFormPage() {
+  const { t } = useTranslation('sites')
   const { id = 'new' } = useParams()
   const siteQuery = useSite(id === 'new' ? undefined : id)
   if (id === 'new') return <SiteForm key="new" initial={EMPTY} />
-  if (siteQuery.isError) return <ErrorState message="Could not load this site." onRetry={() => void siteQuery.refetch()} />
+  if (siteQuery.isError) return <ErrorState message={t('form.loadError')} onRetry={() => void siteQuery.refetch()} />
   if (!siteQuery.data) return <Skeleton className="h-64 w-full" />
   const s = siteQuery.data
   return (
@@ -39,6 +41,7 @@ export function SiteFormPage() {
 }
 
 function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
+  const { t } = useTranslation('sites')
   const navigate = useNavigate()
   const writes = useSiteWrites()
   const types = useContentTypes()
@@ -76,13 +79,13 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
       const message = originError(origin, allowedOrigins)
       setOriginMessage(message)
       if (message) {
-        toast.error('Fix the highlighted fields before saving')
+        toast.error(t('form.fixFields'))
         return
       }
       allowedOrigins = [...allowedOrigins, normalizeOrigin(origin)]
     }
     if (Object.keys(errors).length) {
-      toast.error('Fix the highlighted fields before saving')
+      toast.error(t('form.fixFields'))
       return
     }
     const next = { ...draft, allowedOrigins }
@@ -92,7 +95,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
       setDraft(next)
       setOrigin('')
       setBaseline(stableStringify(next))
-      toast.success(site ? 'Site saved' : 'Site created')
+      toast.success(site ? t('form.saved') : t('form.created'))
       if (!site) navigate(`/sites/${saved.id}`, { replace: true, state: { skipGuard: true } })
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -103,7 +106,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
     setConfirmDelete(false)
     try {
       await writes.remove(site!.id)
-      toast.success(`Deleted ${site!.name}`)
+      toast.success(t('form.deleted', { name: site!.name }))
       navigate('/sites', { state: { skipGuard: true } })
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -113,17 +116,17 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
   return (
     <>
       <PageHeader
-        title={draft.name.trim() || 'New site'}
-        breadcrumb={<Link to="/sites">Sites & API keys</Link>}
+        title={draft.name.trim() || t('form.newTitle')}
+        breadcrumb={<Link to="/sites">{t('list.title')}</Link>}
         actions={
           <>
             {site && (
               <Button variant="outline" onClick={() => setConfirmDelete(true)}>
-                Delete site
+                {t('form.delete')}
               </Button>
             )}
             <Button onClick={() => void save()} disabled={!!site && !dirty}>
-              Save site
+              {t('form.save')}
             </Button>
           </>
         }
@@ -131,7 +134,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <section className="flex min-w-0 flex-col gap-4 rounded-xl border bg-card p-4">
           <div className="space-y-1.5">
-            <Label htmlFor="site-name">Name</Label>
+            <Label htmlFor="site-name">{t('form.name')}</Label>
             <Input
               id="site-name"
               value={draft.name}
@@ -141,22 +144,22 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
             {visible.name && <p className="text-sm text-destructive">{visible.name}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="site-domain">Domain</Label>
+            <Label htmlFor="site-domain">{t('form.domain')}</Label>
             <Input
               id="site-domain"
               value={draft.domain}
-              placeholder="example.com"
+              placeholder={t('form.domainPlaceholder')}
               onChange={(e) => setDraft({ ...draft, domain: e.target.value })}
               aria-invalid={visible.domain ? true : undefined}
             />
             {visible.domain && <p className="text-sm text-destructive">{visible.domain}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="site-description">Description</Label>
+            <Label htmlFor="site-description">{t('form.description')}</Label>
             <Textarea id="site-description" rows={2} value={draft.description ?? ''} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="site-origin">Add allowed origin</Label>
+            <Label htmlFor="site-origin">{t('form.addOrigin')}</Label>
             <div className="flex gap-2">
               <Input
                 id="site-origin"
@@ -167,11 +170,11 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
                 aria-invalid={originMessage ? true : undefined}
               />
               <Button type="button" variant="outline" onClick={addOrigin}>
-                Add
+                {t('form.add')}
               </Button>
             </div>
             {(originMessage || visible.allowedOrigins) && <p className="text-sm text-destructive">{originMessage ?? visible.allowedOrigins}</p>}
-            <p className="text-xs text-muted-foreground">Browsers on these origins may call the API with this key. Leave empty to allow any.</p>
+            <p className="text-xs text-muted-foreground">{t('form.originHelp')}</p>
             {draft.allowedOrigins.length > 0 && (
               <ul className="flex flex-wrap gap-1.5">
                 {draft.allowedOrigins.map((o) => (
@@ -179,7 +182,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
                     <span className="break-all">{o}</span>
                     <button
                       type="button"
-                      aria-label={`Remove ${o}`}
+                      aria-label={t('form.removeOrigin', { origin: o })}
                       className="rounded-full p-1 hover:bg-accent"
                       onClick={() => setDraft({ ...draft, allowedOrigins: draft.allowedOrigins.filter((x) => x !== o) })}
                     >
@@ -193,7 +196,7 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
           {/* New sites are always created active (the create endpoint has no isActive). */}
           {site && (
             <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="site-active">Active</Label>
+              <Label htmlFor="site-active">{t('form.active')}</Label>
               <Switch id="site-active" checked={draft.isActive !== false} onCheckedChange={(checked) => setDraft({ ...draft, isActive: checked })} />
             </div>
           )}
@@ -205,10 +208,10 @@ function SiteForm({ site, initial }: { site?: Site; initial: SitePayload }) {
         <ConfirmDialog
           open={confirmDelete}
           onOpenChange={setConfirmDelete}
-          title={`Delete ${site.name}?`}
-          description="Its API key stops working immediately."
+          title={t('form.deleteTitle', { name: site.name })}
+          description={t('form.deleteText')}
           confirmText={site.name}
-          confirmLabel="Delete"
+          confirmLabel={t('actions.delete', { ns: 'common' })}
           destructive
           onConfirm={() => void remove()}
         />

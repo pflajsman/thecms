@@ -1,11 +1,12 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import { sitesService, type Site } from '@/services/sites'
 import * as contentApi from '@/features/content/content-api'
 import { tripType } from '@/features/content/test-fixtures'
 import { SitesListPage } from './SitesListPage'
 import { SiteFormPage } from './SiteFormPage'
+import { AxiosError } from 'axios'
 
 vi.mock('@/services/sites', () => ({
   sitesService: { list: vi.fn(), getById: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), rotateApiKey: vi.fn() },
@@ -111,5 +112,27 @@ describe('SiteFormPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save site' }))
     expect(screen.getByText('Enter a full URL, for example https://example.com')).toBeInTheDocument()
     expect(sitesService.update).not.toHaveBeenCalled()
+  })
+})
+
+describe('in Czech', () => {
+  it('shows the card with Czech counts and guards rotation in Czech', async () => {
+    await setTestLanguage('cs')
+    renderRoutes(routes, { route: '/sites' })
+    const card = await screen.findByRole('article', { name: 'Blog' })
+    expect(within(card).getByText(/42 požadavků/)).toBeInTheDocument()
+    await userEvent.click(within(card).getByRole('button', { name: 'Vyměnit klíč' }))
+    const dialog = await screen.findByRole('alertdialog')
+    expect(dialog).toHaveTextContent('přestane okamžitě fungovat')
+  })
+
+  it('keeps a server validation message as sent', async () => {
+    await setTestLanguage('cs')
+    const error = new AxiosError('x', '400', undefined, undefined, { status: 400, data: { error: 'Validation failed', details: [{ message: 'Invalid url' }] } } as never)
+    vi.mocked(sitesService.update).mockRejectedValue(error)
+    renderRoutes(routes, { route: '/sites/s1' })
+    await userEvent.type(await screen.findByLabelText('Přidat povolený původ'), 'https://x.test{Enter}')
+    await userEvent.click(screen.getByRole('button', { name: 'Uložit web' }))
+    expect(await screen.findByText('Validation failed: Invalid url')).toBeInTheDocument()
   })
 })

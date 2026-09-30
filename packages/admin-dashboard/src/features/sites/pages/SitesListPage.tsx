@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Copy, Eye, EyeOff, KeyRound, Plus, RefreshCw } from 'lucide-react'
@@ -15,24 +16,25 @@ import { useSites, useSiteWrites, type Site } from '../sites-api'
 import { maskKey } from '../sites-utils'
 
 export function SitesListPage() {
+  const { t } = useTranslation('sites')
   const sites = useSites()
   const action = (
     <Button asChild>
       <Link to="/sites/new">
         <Plus aria-hidden />
-        New site
+        {t('list.new')}
       </Link>
     </Button>
   )
   let body: React.ReactNode
   if (sites.isPending) body = <Skeleton className="h-32 w-full" />
-  else if (sites.isError) body = <ErrorState message="Could not load sites." onRetry={() => void sites.refetch()} />
+  else if (sites.isError) body = <ErrorState message={t('list.loadError')} onRetry={() => void sites.refetch()} />
   else if (sites.data.length === 0)
     body = (
       <EmptyState
         icon={KeyRound}
-        title="No sites yet"
-        description="A site gets an API key your website uses to read published content."
+        title={t('list.emptyTitle')}
+        description={t('list.emptyText')}
         action={action}
       />
     )
@@ -46,13 +48,14 @@ export function SitesListPage() {
     )
   return (
     <>
-      <PageHeader title="Sites & API keys" description="Each website that reads your content has its own key." actions={action} />
+      <PageHeader title={t('list.title')} description={t('list.description')} actions={action} />
       {body}
     </>
   )
 }
 
 function SiteCard({ site }: { site: Site }) {
+  const { t } = useTranslation('sites')
   const writes = useSiteWrites()
   const [revealed, setRevealed] = useState(false)
   const [confirmRotate, setConfirmRotate] = useState(false)
@@ -60,13 +63,13 @@ function SiteCard({ site }: { site: Site }) {
     setConfirmRotate(false)
     try {
       await writes.rotate(site.id)
-      toast.success('New key created. Update your site with it.')
+      toast.success(t('card.rotated'))
       setRevealed(true)
     } catch (error) {
       toast.error(apiErrorMessage(error))
     }
   }
-  const copy = () => void navigator.clipboard?.writeText(site.apiKey).then(() => toast.success('API key copied'))
+  const copy = () => void navigator.clipboard?.writeText(site.apiKey).then(() => toast.success(t('card.copied')))
   return (
     <article aria-label={site.name} className="flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4">
       <header className="flex items-start justify-between gap-2">
@@ -82,34 +85,34 @@ function SiteCard({ site }: { site: Site }) {
             site.isActive ? 'bg-status-published-bg text-status-published-fg' : 'bg-status-archived-bg text-status-archived-fg',
           )}
         >
-          {site.isActive ? 'Active' : 'Disabled'}
+          {site.isActive ? t('card.active') : t('card.disabled')}
         </span>
       </header>
       <p className="text-sm text-muted-foreground">
-        {site.requestCount} requests · {site.lastRequestAt ? `last ${formatRelative(site.lastRequestAt)}` : 'no requests yet'}
+        {t('card.requests', { count: site.requestCount })} · {site.lastRequestAt ? t('card.last', { when: formatRelative(site.lastRequestAt) }) : t('card.noRequests')}
       </p>
       <div className="flex items-center gap-1 rounded-lg bg-muted/60 py-1 pr-1 pl-3">
         <code className="min-w-0 flex-1 font-mono text-xs break-all">{revealed ? site.apiKey : maskKey(site.apiKey)}</code>
-        <Button variant="ghost" size="icon" aria-label={revealed ? 'Hide API key' : 'Reveal API key'} onClick={() => setRevealed(!revealed)}>
+        <Button variant="ghost" size="icon" aria-label={revealed ? t('card.hide') : t('card.reveal')} onClick={() => setRevealed(!revealed)}>
           {revealed ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
         </Button>
-        <Button variant="ghost" size="icon" aria-label="Copy API key" onClick={copy}>
+        <Button variant="ghost" size="icon" aria-label={t('card.copy')} onClick={copy}>
           <Copy aria-hidden />
         </Button>
       </div>
       <div>
         <Button variant="outline" size="sm" onClick={() => setConfirmRotate(true)}>
           <RefreshCw aria-hidden />
-          Rotate key
+          {t('card.rotate')}
         </Button>
       </div>
       <ConfirmDialog
         open={confirmRotate}
         onOpenChange={setConfirmRotate}
-        title={`Rotate the key for ${site.name}?`}
-        description="The current key stops working immediately. Update your site with the new key right away."
+        title={t('rotate.title', { name: site.name })}
+        description={t('rotate.description')}
         confirmText={site.name}
-        confirmLabel="Rotate key"
+        confirmLabel={t('card.rotate')}
         destructive
         onConfirm={() => void rotate()}
       />

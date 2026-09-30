@@ -1,1 +1,65 @@
-{}
+{
+  "list": {
+    "title": "Weby a API klíče",
+    "description": "Každý web, který čte váš obsah, má vlastní klíč.",
+    "new": "Nový web",
+    "emptyTitle": "Zatím žádné weby",
+    "emptyText": "Web dostane API klíč, kterým čte publikovaný obsah.",
+    "loadError": "Weby se nepodařilo načíst."
+  },
+  "card": {
+    "rotated": "Nový klíč vytvořen. Nastavte ho na webu.",
+    "copied": "API klíč zkopírován",
+    "active": "Aktivní",
+    "disabled": "Vypnuto",
+    "requests_one": "{{count}} požadavek",
+    "requests_few": "{{count}} požadavky",
+    "requests_other": "{{count}} požadavků",
+    "last": "naposledy {{when}}",
+    "noRequests": "zatím žádné požadavky",
+    "hide": "Skrýt API klíč",
+    "reveal": "Zobrazit API klíč",
+    "copy": "Kopírovat API klíč",
+    "rotate": "Vyměnit klíč"
+  },
+  "rotate": {
+    "title": "Vyměnit klíč pro {{name}}?",
+    "description": "Současný klíč přestane okamžitě fungovat. Hned na webu nastavte nový klíč."
+  },
+  "form": {
+    "fixFields": "Před uložením opravte zvýrazněná pole",
+    "saved": "Web uložen",
+    "created": "Web vytvořen",
+    "deleted": "Web {{name}} smazán",
+    "newTitle": "Nový web",
+    "delete": "Smazat web",
+    "save": "Uložit web",
+    "name": "Název",
+    "domain": "Doména",
+    "description": "Popis",
+    "addOrigin": "Přidat povolený původ",
+    "add": "Přidat",
+    "originHelp": "Prohlížeče na těchto adresách mohou s tímto klíčem volat API. Když necháte prázdné, povolí se jakákoli.",
+    "removeOrigin": "Odebrat {{origin}}",
+    "active": "Aktivní",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteText": "Jeho API klíč přestane okamžitě fungovat.",
+    "loadError": "Web se nepodařilo načíst.",
+    "domainPlaceholder": "example.com"
+  },
+  "connect": {
+    "copied": "Ukázka {{label}} zkopírována",
+    "copyExample": "Kopírovat ukázku {{label}}",
+    "example": "Ukázka {{label}}",
+    "title": "Připojte svůj web",
+    "text": "Načítejte publikované položky pomocí API klíče tohoto webu.",
+    "langJs": "JavaScript",
+    "langCurl": "curl"
+  },
+  "validation": {
+    "origin": "Zadejte celou adresu URL, například https://example.com",
+    "originDuplicate": "Tento původ už je v seznamu",
+    "nameRequired": "Název je povinný",
+    "domainRequired": "Doména je povinná"
+  }
+}

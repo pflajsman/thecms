@@ -1,1 +1,64 @@
-{}
+{
+  "list": {
+    "title": "Sites & API keys",
+    "description": "Each website that reads your content has its own key.",
+    "new": "New site",
+    "emptyTitle": "No sites yet",
+    "emptyText": "A site gets an API key your website uses to read published content.",
+    "loadError": "Could not load sites."
+  },
+  "card": {
+    "rotated": "New key created. Update your site with it.",
+    "copied": "API key copied",
+    "active": "Active",
+    "disabled": "Disabled",
+    "requests_one": "{{count}} request",
+    "requests_other": "{{count}} requests",
+    "last": "last {{when}}",
+    "noRequests": "no requests yet",
+    "hide": "Hide API key",
+    "reveal": "Reveal API key",
+    "copy": "Copy API key",
+    "rotate": "Rotate key"
+  },
+  "rotate": {
+    "title": "Rotate the key for {{name}}?",
+    "description": "The current key stops working immediately. Update your site with the new key right away."
+  },
+  "form": {
+    "fixFields": "Fix the highlighted fields before saving",
+    "saved": "Site saved",
+    "created": "Site created",
+    "deleted": "Deleted {{name}}",
+    "newTitle": "New site",
+    "delete": "Delete site",
+    "save": "Save site",
+    "name": "Name",
+    "domain": "Domain",
+    "description": "Description",
+    "addOrigin": "Add allowed origin",
+    "add": "Add",
+    "originHelp": "Browsers on these origins may call the API with this key. Leave empty to allow any.",
+    "removeOrigin": "Remove {{origin}}",
+    "active": "Active",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "Its API key stops working immediately.",
+    "loadError": "Could not load this site.",
+    "domainPlaceholder": "example.com"
+  },
+  "connect": {
+    "copied": "{{label}} example copied",
+    "copyExample": "Copy {{label}} example",
+    "example": "{{label}} example",
+    "title": "Connect your site",
+    "text": "Load published entries with this site's API key.",
+    "langJs": "JavaScript",
+    "langCurl": "curl"
+  },
+  "validation": {
+    "origin": "Enter a full URL, for example https://example.com",
+    "originDuplicate": "This origin is already in the list",
+    "nameRequired": "Name is required",
+    "domainRequired": "Domain is required"
+  }
+}

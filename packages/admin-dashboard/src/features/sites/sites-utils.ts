@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n'
 export interface SitePayload {
   name: string
   domain: string
@@ -6,7 +7,6 @@ export interface SitePayload {
   isActive?: boolean
 }
 
-const ORIGIN_HINT = 'Enter a full URL, for example https://example.com'
 
 export function maskKey(key: string): string {
   if (key.length <= 12) return '•'.repeat(key.length)
@@ -29,15 +29,15 @@ function isHttpUrl(value: string): boolean {
 
 export function originError(value: string, existing: string[]): string | null {
   const v = normalizeOrigin(value)
-  if (!isHttpUrl(v)) return ORIGIN_HINT
-  if (existing.map(normalizeOrigin).includes(v)) return 'This origin is already in the list'
+  if (!isHttpUrl(v)) return i18n.t('sites:validation.origin')
+  if (existing.map(normalizeOrigin).includes(v)) return i18n.t('sites:validation.originDuplicate')
   return null
 }
 
 export function validateSite(d: SitePayload): Record<string, string> {
   const errors: Record<string, string> = {}
-  if (!d.name.trim()) errors.name = 'Name is required'
-  if (!d.domain.trim()) errors.domain = 'Domain is required'
-  if (d.allowedOrigins.some((o) => !isHttpUrl(normalizeOrigin(o)))) errors.allowedOrigins = ORIGIN_HINT
+  if (!d.name.trim()) errors.name = i18n.t('sites:validation.nameRequired')
+  if (!d.domain.trim()) errors.domain = i18n.t('sites:validation.domainRequired')
+  if (d.allowedOrigins.some((o) => !isHttpUrl(normalizeOrigin(o)))) errors.allowedOrigins = i18n.t('sites:validation.origin')
   return errors
 }
