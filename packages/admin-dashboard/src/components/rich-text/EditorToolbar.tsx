@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState, type ReactNode } from 'react'
 import type { Editor } from '@tiptap/react'
 import {
@@ -30,20 +31,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { safeHref } from './link-utils'
 
 const BLOCKS = [
-  { value: '0', label: 'Paragraph' },
-  { value: '1', label: 'Heading 1' },
-  { value: '2', label: 'Heading 2' },
-  { value: '3', label: 'Heading 3' },
-]
+  { value: '0', labelKey: 'toolbar.paragraph' },
+  { value: '1', labelKey: 'toolbar.heading1' },
+  { value: '2', labelKey: 'toolbar.heading2' },
+  { value: '3', labelKey: 'toolbar.heading3' },
+] as const
 const SIZES = [
-  { value: '13px', label: 'Small' },
-  { value: '', label: 'Normal' },
-  { value: '20px', label: 'Large' },
-  { value: '28px', label: 'Huge' },
-]
+  { value: '13px', labelKey: 'toolbar.sizeSmall' },
+  { value: '', labelKey: 'toolbar.sizeNormal' },
+  { value: '20px', labelKey: 'toolbar.sizeLarge' },
+  { value: '28px', labelKey: 'toolbar.sizeHuge' },
+] as const
 // Highlighter swatch stored in the document HTML (content, not a UI color).
 const HIGHLIGHT = '#fff59d'
-const LINK_HINT = 'Use a web address (https://…), an email (mailto:…) or a page path (/about)'
 const toolClass = 'grid size-8 shrink-0 place-items-center rounded-md text-foreground hover:bg-accent disabled:opacity-40'
 
 function Tool({ label, active, onClick, children }: { label: string; active?: boolean; onClick: () => void; children: ReactNode }) {
@@ -74,6 +74,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
   const [imageUrl, setImageUrl] = useState('')
   const [imageError, setImageError] = useState(false)
 
+  const { t } = useTranslation('editor')
   const chain = () => editor.chain().focus()
   const heading = [1, 2, 3].find((level) => editor.isActive('heading', { level })) ?? 0
   const size = SIZES.find((s) => s.value && editor.isActive('textStyle', { fontSize: s.value }))?.value ?? ''
@@ -83,7 +84,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
   const applyLink = () => {
     const href = safeHref(linkValue)
     if (!href) {
-      setLinkError(LINK_HINT)
+      setLinkError(t('toolbar.linkHint'))
       return
     }
     chain().extendMarkRange('link').setLink({ href }).run()
@@ -103,9 +104,9 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
   }
 
   return (
-    <div role="toolbar" aria-label="Formatting" className="flex flex-wrap items-center gap-0.5 border-b bg-muted/40 p-1.5">
+    <div role="toolbar" aria-label={t('toolbar.label')} className="flex flex-wrap items-center gap-0.5 border-b bg-muted/40 p-1.5">
       <label className="sr-only" htmlFor="rte-block">
-        Text style
+        {t('toolbar.textStyle')}
       </label>
       <select
         id="rte-block"
@@ -119,12 +120,12 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
       >
         {BLOCKS.map((b) => (
           <option key={b.value} value={b.value}>
-            {b.label}
+            {t(b.labelKey)}
           </option>
         ))}
       </select>
       <label className="sr-only" htmlFor="rte-size">
-        Text size
+        {t('toolbar.textSize')}
       </label>
       <select
         id="rte-size"
@@ -133,26 +134,26 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
         className="h-8 rounded-md border bg-background px-2 text-sm"
       >
         {SIZES.map((s) => (
-          <option key={s.label} value={s.value}>
-            {s.label}
+          <option key={s.value || 'normal'} value={s.value}>
+            {t(s.labelKey)}
           </option>
         ))}
       </select>
       <Divider />
-      <Tool label="Bold" active={editor.isActive('bold')} onClick={() => chain().toggleBold().run()}>
+      <Tool label={t('toolbar.bold')} active={editor.isActive('bold')} onClick={() => chain().toggleBold().run()}>
         <Bold aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Italic" active={editor.isActive('italic')} onClick={() => chain().toggleItalic().run()}>
+      <Tool label={t('toolbar.italic')} active={editor.isActive('italic')} onClick={() => chain().toggleItalic().run()}>
         <Italic aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Underline" active={editor.isActive('underline')} onClick={() => chain().toggleUnderline().run()}>
+      <Tool label={t('toolbar.underline')} active={editor.isActive('underline')} onClick={() => chain().toggleUnderline().run()}>
         <UnderlineIcon aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Strikethrough" active={editor.isActive('strike')} onClick={() => chain().toggleStrike().run()}>
+      <Tool label={t('toolbar.strike')} active={editor.isActive('strike')} onClick={() => chain().toggleStrike().run()}>
         <Strikethrough aria-hidden className="size-4" />
       </Tool>
-      <label className={cn(toolClass, 'relative cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring')} title="Text color">
-        <span className="sr-only">Text color</span>
+      <label className={cn(toolClass, 'relative cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring')} title={t('toolbar.textColor')}>
+        <span className="sr-only">{t('toolbar.textColor')}</span>
         <span aria-hidden className="font-serif text-sm font-semibold underline decoration-2">
           A
         </span>
@@ -162,33 +163,33 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
           onChange={(e) => chain().setColor(e.target.value).run()}
         />
       </label>
-      <Tool label="Highlight" active={editor.isActive('highlight')} onClick={() => chain().toggleHighlight({ color: HIGHLIGHT }).run()}>
+      <Tool label={t('toolbar.highlight')} active={editor.isActive('highlight')} onClick={() => chain().toggleHighlight({ color: HIGHLIGHT }).run()}>
         <Highlighter aria-hidden className="size-4" />
       </Tool>
       <Divider />
-      <Tool label="Align left" active={editor.isActive({ textAlign: 'left' })} onClick={() => chain().setTextAlign('left').run()}>
+      <Tool label={t('toolbar.alignLeft')} active={editor.isActive({ textAlign: 'left' })} onClick={() => chain().setTextAlign('left').run()}>
         <AlignLeft aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Align center" active={editor.isActive({ textAlign: 'center' })} onClick={() => chain().setTextAlign('center').run()}>
+      <Tool label={t('toolbar.alignCenter')} active={editor.isActive({ textAlign: 'center' })} onClick={() => chain().setTextAlign('center').run()}>
         <AlignCenter aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Align right" active={editor.isActive({ textAlign: 'right' })} onClick={() => chain().setTextAlign('right').run()}>
+      <Tool label={t('toolbar.alignRight')} active={editor.isActive({ textAlign: 'right' })} onClick={() => chain().setTextAlign('right').run()}>
         <AlignRight aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Justify" active={editor.isActive({ textAlign: 'justify' })} onClick={() => chain().setTextAlign('justify').run()}>
+      <Tool label={t('toolbar.justify')} active={editor.isActive({ textAlign: 'justify' })} onClick={() => chain().setTextAlign('justify').run()}>
         <AlignJustify aria-hidden className="size-4" />
       </Tool>
       <Divider />
-      <Tool label="Bullet list" active={editor.isActive('bulletList')} onClick={() => chain().toggleBulletList().run()}>
+      <Tool label={t('toolbar.bulletList')} active={editor.isActive('bulletList')} onClick={() => chain().toggleBulletList().run()}>
         <List aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Numbered list" active={editor.isActive('orderedList')} onClick={() => chain().toggleOrderedList().run()}>
+      <Tool label={t('toolbar.numberedList')} active={editor.isActive('orderedList')} onClick={() => chain().toggleOrderedList().run()}>
         <ListOrdered aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Quote" active={editor.isActive('blockquote')} onClick={() => chain().toggleBlockquote().run()}>
+      <Tool label={t('toolbar.quote')} active={editor.isActive('blockquote')} onClick={() => chain().toggleBlockquote().run()}>
         <Quote aria-hidden className="size-4" />
       </Tool>
-      <Tool label="Code block" active={editor.isActive('codeBlock')} onClick={() => chain().toggleCodeBlock().run()}>
+      <Tool label={t('toolbar.codeBlock')} active={editor.isActive('codeBlock')} onClick={() => chain().toggleCodeBlock().run()}>
         <Code2 aria-hidden className="size-4" />
       </Tool>
       <Divider />
@@ -203,7 +204,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
         }}
       >
         <PopoverTrigger asChild>
-          <button type="button" aria-label="Link" title="Link" aria-pressed={linkActive} className={cn(toolClass, linkActive && 'bg-secondary text-primary')}>
+          <button type="button" aria-label={t('toolbar.link')} title={t('toolbar.link')} aria-pressed={linkActive} className={cn(toolClass, linkActive && 'bg-secondary text-primary')}>
             <LinkIcon aria-hidden className="size-4" />
           </button>
         </PopoverTrigger>
@@ -217,7 +218,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
               applyLink()
             }}
           >
-            <Label htmlFor="rte-link">Link URL</Label>
+            <Label htmlFor="rte-link">{t('toolbar.linkUrl')}</Label>
             <Input
               id="rte-link"
               value={linkValue}
@@ -243,11 +244,11 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
                   }}
                 >
                   <Unlink aria-hidden />
-                  Remove link
+                  {t('toolbar.removeLink')}
                 </Button>
               )}
               <Button type="submit" size="sm">
-                Apply link
+                {t('toolbar.applyLink')}
               </Button>
             </div>
           </form>
@@ -255,25 +256,25 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
       </Popover>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" aria-label="Insert image" title="Insert image" className={toolClass}>
+          <button type="button" aria-label={t('toolbar.insertImage')} title={t('toolbar.insertImage')} className={toolClass}>
             <ImageIcon aria-hidden className="size-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onSelect={onPickImage}>From media library</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setUrlImageOpen(true)}>By URL</DropdownMenuItem>
+          <DropdownMenuItem onSelect={onPickImage}>{t('toolbar.fromLibrary')}</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setUrlImageOpen(true)}>{t('toolbar.byUrl')}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       {imageSelected && (
         <>
           <Divider />
-          <Tool label="Wrap text on the right" active={editor.isActive('image', { float: 'left' })} onClick={() => chain().updateAttributes('image', { float: 'left' }).run()}>
+          <Tool label={t('toolbar.wrapRight')} active={editor.isActive('image', { float: 'left' })} onClick={() => chain().updateAttributes('image', { float: 'left' }).run()}>
             <PanelLeft aria-hidden className="size-4" />
           </Tool>
-          <Tool label="No text wrap" active={editor.isActive('image', { float: 'none' })} onClick={() => chain().updateAttributes('image', { float: 'none' }).run()}>
+          <Tool label={t('toolbar.noWrap')} active={editor.isActive('image', { float: 'none' })} onClick={() => chain().updateAttributes('image', { float: 'none' }).run()}>
             <RectangleHorizontal aria-hidden className="size-4" />
           </Tool>
-          <Tool label="Wrap text on the left" active={editor.isActive('image', { float: 'right' })} onClick={() => chain().updateAttributes('image', { float: 'right' }).run()}>
+          <Tool label={t('toolbar.wrapLeft')} active={editor.isActive('image', { float: 'right' })} onClick={() => chain().updateAttributes('image', { float: 'right' }).run()}>
             <PanelRight aria-hidden className="size-4" />
           </Tool>
         </>
@@ -282,7 +283,7 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
         // Not a <form>: the editor usually sits inside the entry form, and nested forms submit the outer one.
         <div className="flex w-full flex-wrap items-center gap-1 pt-1">
           <label className="sr-only" htmlFor="rte-image-url">
-            Image URL
+            {t('toolbar.imageUrl')}
           </label>
           <Input
             id="rte-image-url"
@@ -302,12 +303,12 @@ export function EditorToolbar({ editor, onPickImage }: { editor: Editor; onPickI
             aria-invalid={imageError ? true : undefined}
           />
           <Button type="button" size="sm" onClick={applyImageUrl}>
-            Insert
+            {t('toolbar.insert')}
           </Button>
           <Button type="button" size="sm" variant="ghost" onClick={() => setUrlImageOpen(false)}>
-            Cancel
+            {t('toolbar.cancel')}
           </Button>
-          {imageError && <p className="w-full text-xs text-destructive">Enter an image address starting with https://</p>}
+          {imageError && <p className="w-full text-xs text-destructive">{t('toolbar.imageUrlHint')}</p>}
         </div>
       )}
     </div>

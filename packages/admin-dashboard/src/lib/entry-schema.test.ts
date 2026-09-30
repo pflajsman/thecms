@@ -7,6 +7,7 @@ import {
   toEntryPayload,
   validateEntry,
 } from './entry-schema'
+import { i18n } from '@/i18n'
 
 const f = (over: Partial<Field> & Pick<Field, 'name' | 'type'>): Field => ({ label: over.name, required: false, ...over })
 
@@ -120,5 +121,27 @@ describe('createInitialValues and duplicateData', () => {
   it('suffixes the title of a copy', () => {
     expect(duplicateData({ title: 'Trip', featured: true }, fields)).toEqual({ title: 'Trip (copy)', featured: true })
     expect(duplicateData({ featured: true }, fields)).toEqual({ featured: true })
+  })
+})
+
+describe('messages in Czech', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('cs')
+  })
+
+  it('translates required, length plurals and date limits', () => {
+    const fields: Field[] = [
+      { name: 'title', label: 'Název', type: 'TEXT', required: true },
+      { name: 'slug', label: 'Slug', type: 'TEXT', required: false, validation: { minLength: 3 } },
+      { name: 'intro', label: 'Úvod', type: 'TEXT', required: false, validation: { minLength: 10 } },
+      { name: 'code', label: 'Kód', type: 'TEXT', required: false, validation: { maxLength: 1 } },
+      { name: 'day', label: 'Den', type: 'DATE', required: false, validation: { minDate: '2026-08-01' } },
+    ]
+    const errors = validateEntry(fields, { slug: 'ab', intro: 'short', code: 'ab', day: '2026-07-01' })
+    expect(errors.title).toBe('Název je povinné pole')
+    expect(errors.slug).toBe('Slug musí mít alespoň 3 znaky')
+    expect(errors.intro).toBe('Úvod musí mít alespoň 10 znaků')
+    expect(errors.code).toBe('Kód může mít nejvýše 1 znak')
+    expect(errors.day).toBe('Den musí být 1. srpna 2026 nebo později')
   })
 })

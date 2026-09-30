@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderWithProviders } from '@/test/render'
+import { renderWithProviders, setTestLanguage } from '@/test/render'
 import { RichTextEditor } from './RichTextEditor'
 
 vi.mock('@/features/media/components/MediaPickerDialog', () => ({ MediaPickerDialog: () => null }))
@@ -61,4 +61,15 @@ it('applies a link without submitting a surrounding form', async () => {
   await userEvent.type(await screen.findByLabelText('Link URL'), 'https://example.com{Enter}')
   await waitFor(() => expect(screen.queryByLabelText('Link URL')).not.toBeInTheDocument())
   expect(onSubmit).not.toHaveBeenCalled()
+})
+
+it('labels the toolbar in Czech and refuses a javascript: link with a Czech hint', async () => {
+  await setTestLanguage('cs')
+  renderWithProviders(<RichTextEditor value="<p>Hi</p>" onChange={() => {}} />)
+  const toolbar = await screen.findByRole('toolbar', { name: 'Formátování' })
+  expect(within(toolbar).getByRole('button', { name: 'Tučně' })).toBeInTheDocument()
+  await userEvent.click(within(toolbar).getByRole('button', { name: 'Odkaz' }))
+  await userEvent.type(await screen.findByLabelText('Adresa odkazu'), 'javascript:alert(1)')
+  await userEvent.click(screen.getByRole('button', { name: 'Použít odkaz' }))
+  expect(screen.getByText('Zadejte webovou adresu (https://…), e-mail (mailto:…) nebo cestu ke stránce (/o-nas)')).toBeInTheDocument()
 })

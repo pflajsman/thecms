@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { ArrowLeft, ArrowRight, GripVertical, ImagePlus, Upload, X } from 'lucide-react'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
@@ -15,6 +16,7 @@ import { FieldShell } from './FieldShell'
 import { describedBy, type FieldControlProps } from './field-aria'
 
 export function MediaField({ field, id, value, onChange, onBlur, error, disabled }: FieldControlProps) {
+  const { t } = useTranslation('editor')
   const multiple = !!field.validation?.multiple
   const accept = field.validation?.allowedMimeTypes
   const ids = multiple ? (Array.isArray(value) ? (value as string[]) : []) : typeof value === 'string' && value ? [value] : []
@@ -54,7 +56,7 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
   const upload = (files: File[]) => {
     const label = field.label || field.name
     const rejected = files.filter((f) => !matchesAccept({ mimeType: f.type, originalName: f.name }, accept))
-    setDropError(rejected.length ? rejected.map((f) => `${f.name} is not allowed in ${label}.`).join(' ') : null)
+    setDropError(rejected.length ? rejected.map((f) => t('fields.notAllowed', { name: f.name, label })).join(' ') : null)
     const ok = files.filter((f) => !rejected.includes(f))
     uploads.add(multiple ? ok : ok.slice(0, 1))
   }
@@ -84,14 +86,14 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
       >
         {ids.length > 0 && isError && (
           <p className="mb-3 flex items-center gap-2 text-sm text-destructive" role="alert">
-            Could not load files.
-            <Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>Retry</Button>
+            {t('fields.loadFilesError')}
+            <Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>{t('fields.retry')}</Button>
           </p>
         )}
         {ids.length > 0 && !isError && (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={ids} strategy={rectSortingStrategy}>
-              <ul aria-label={`${field.label || field.name} files`} className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <ul aria-label={t('fields.filesLabel', { label: field.label || field.name })} className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {ids.map((mediaId, index) => (
                   <MediaItem
                     key={mediaId}
@@ -113,18 +115,18 @@ export function MediaField({ field, id, value, onChange, onBlur, error, disabled
           <div className="flex flex-wrap items-center gap-2">
             <Button id={id} type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)} {...describedBy(id, field, error)}>
               <ImagePlus aria-hidden />
-              {ids.length && !multiple ? 'Replace' : 'Choose from library'}
+              {ids.length && !multiple ? t('fields.replace') : t('fields.chooseFromLibrary')}
             </Button>
             <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-sm hover:bg-accent">
               <Upload aria-hidden className="size-4" />
-              Upload
-              <input type="file" multiple={multiple} className="sr-only" aria-label={`Upload to ${field.label || field.name}`} onChange={(e) => { upload(Array.from(e.target.files ?? [])); e.target.value = '' }} />
+              {t('fields.upload')}
+              <input type="file" multiple={multiple} className="sr-only" aria-label={t('fields.uploadTo', { label: field.label || field.name })} onChange={(e) => { upload(Array.from(e.target.files ?? [])); e.target.value = '' }} />
             </label>
-            <span className="text-xs text-muted-foreground">or drop files here</span>
+            <span className="text-xs text-muted-foreground">{t('fields.dropHint')}</span>
           </div>
         )}
         {uploads.items.some((u) => u.status === 'uploading' || u.status === 'queued') && (
-          <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">Uploading…</p>
+          <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">{t('fields.uploading')}</p>
         )}
       </div>
       <MediaPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} onSelect={add} multiple={multiple} accept={accept} />
@@ -144,26 +146,27 @@ interface MediaItemProps {
 }
 
 function MediaItem({ mediaId, media, loading, sortable, first, last, onMove, onRemove }: MediaItemProps) {
+  const { t } = useTranslation('editor')
   const { listeners, setNodeRef, transform, transition } = useSortable({ id: mediaId, disabled: !sortable })
-  const name = media?.originalName ?? (loading ? 'Loading' : 'Missing file')
+  const name = media?.originalName ?? (loading ? t('fields.loadingFile') : t('fields.missingFile'))
   return (
     <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="group relative overflow-hidden rounded-md border bg-background">
       <div className="aspect-square">
         {media ? <MediaThumb media={media} size="thumbnail" /> : (
-          <div className="grid h-full place-items-center p-2 text-center text-xs text-muted-foreground">{loading ? '' : 'Missing file'}</div>
+          <div className="grid h-full place-items-center p-2 text-center text-xs text-muted-foreground">{loading ? '' : t('fields.missingFile')}</div>
         )}
       </div>
       <p className="truncate px-1.5 py-1 text-[11px]">{media?.originalName ?? (loading ? '…' : '')}</p>
       <div className="absolute inset-x-0 top-0 flex justify-between p-1 opacity-100 transition-opacity md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
         {sortable ? (
           <span className="flex gap-0.5">
-            <span {...listeners} aria-hidden title="Drag to reorder" className="cursor-grab rounded bg-background/90 p-0.5"><GripVertical className="size-3.5" /></span>
-            {!first && <button type="button" onClick={() => onMove(-1)} aria-label={`Move ${name} earlier`} className="rounded bg-background/90 p-0.5"><ArrowLeft aria-hidden className="size-3.5" /></button>}
-            {!last && <button type="button" onClick={() => onMove(1)} aria-label={`Move ${name} later`} className="rounded bg-background/90 p-0.5"><ArrowRight aria-hidden className="size-3.5" /></button>}
+            <span {...listeners} aria-hidden title={t('fields.dragToReorder')} className="cursor-grab rounded bg-background/90 p-0.5"><GripVertical className="size-3.5" /></span>
+            {!first && <button type="button" onClick={() => onMove(-1)} aria-label={t('fields.moveEarlier', { name })} className="rounded bg-background/90 p-0.5"><ArrowLeft aria-hidden className="size-3.5" /></button>}
+            {!last && <button type="button" onClick={() => onMove(1)} aria-label={t('fields.moveLater', { name })} className="rounded bg-background/90 p-0.5"><ArrowRight aria-hidden className="size-3.5" /></button>}
           </span>
         ) : <span />}
         {onRemove && (
-          <button type="button" onClick={onRemove} aria-label={`Remove ${media ? media.originalName : 'missing file'}`} className="rounded bg-background/90 p-0.5">
+          <button type="button" onClick={onRemove} aria-label={t('fields.remove', { name: media ? media.originalName : t('fields.missingFileLower') })} className="rounded bg-background/90 p-0.5">
             <X aria-hidden className="size-3.5" />
           </button>
         )}

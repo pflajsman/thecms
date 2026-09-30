@@ -1,10 +1,11 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Link } from 'react-router-dom'
-import { renderRoutes } from '@/test/render'
+import { renderRoutes, setTestLanguage } from '@/test/render'
 import * as api from '../content-api'
 import { EntryEditorPage } from './EntryEditorPage'
 import { makeEntry, tripType } from '../test-fixtures'
+import { i18n } from '@/i18n'
 
 vi.mock('../content-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../content-api')>()
@@ -131,5 +132,37 @@ describe('existing entries', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Restore to draft' }))
     expect(api.updateEntry).toHaveBeenCalledWith('e1', { status: 'DRAFT' })
     await waitFor(() => expect(screen.getByLabelText('Title')).toBeEnabled())
+  })
+})
+
+describe('in Czech', () => {
+  it('shows editor actions and validation in Czech', async () => {
+    await setTestLanguage('cs')
+    renderRoutes(routes, { route: `/content/new?type=${tripType.id}` })
+    const title = await screen.findByLabelText('Title')
+    await userEvent.click(title)
+    await userEvent.tab()
+    expect(await screen.findByText('Title je povinné pole')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Uložit koncept' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Publikovat' })).toBeInTheDocument()
+  })
+
+  it('keeps unsaved values when the language changes', async () => {
+    renderRoutes(routes, { route: `/content/new?type=${tripType.id}` })
+    const title = await screen.findByLabelText('Title')
+    await userEvent.type(title, 'Přes Šumavu')
+    await setTestLanguage('cs')
+    expect(screen.getByLabelText('Title')).toHaveValue('Přes Šumavu')
+    expect(screen.getByRole('button', { name: 'Uložit koncept' })).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Neuložené změny')
+  })
+
+  it.each([
+    [1, 'Opravte 1 pole před uložením'],
+    [2, 'Opravte 2 pole před uložením'],
+    [5, 'Opravte 5 polí před uložením'],
+  ])('asks to fix %i field(s) with the right Czech plural', async (count, message) => {
+    await setTestLanguage('cs')
+    expect(i18n.t('editor:fixFieldsToast', { count })).toBe(message)
   })
 })

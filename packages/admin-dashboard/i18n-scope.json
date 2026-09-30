@@ -27,6 +27,23 @@
     "src/features/content/components/EntryRowMenu.tsx",
     "src/features/content/components/NewEntryButton.tsx",
     "src/features/content/components/TypeChooser.tsx",
-    "src/features/content/useEntryActions.ts"
+    "src/features/content/useEntryActions.ts",
+    "src/features/content/pages/EntryEditorPage.tsx",
+    "src/features/content/editor/EntryEditor.tsx",
+    "src/features/content/editor/EditorTopBar.tsx",
+    "src/features/content/editor/EditorSidePanel.tsx",
+    "src/features/content/editor/UnsavedChangesDialog.tsx",
+    "src/features/content/editor/editor-actions.ts",
+    "src/features/content/editor/fields/BasicFields.tsx",
+    "src/features/content/editor/fields/DateField.tsx",
+    "src/features/content/editor/fields/FieldShell.tsx",
+    "src/features/content/editor/fields/FieldControl.tsx",
+    "src/features/content/editor/fields/LegacyFields.tsx",
+    "src/features/content/editor/fields/MediaField.tsx",
+    "src/features/content/editor/fields/RelationField.tsx",
+    "src/lib/entry-schema.ts",
+    "src/components/RichTextEditor.tsx",
+    "src/components/rich-text/EditorToolbar.tsx",
+    "src/components/ResizableImage.tsx"
   ]
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { formatDate } from '@/lib/format'
+import { formatDate, formatNumber } from '@/lib/format'
+import { i18n } from '@/i18n'
 import type { Field } from '@/types'
 
 export type EntryValues = Record<string, unknown>
@@ -36,40 +37,40 @@ function fieldError(field: Field, value: unknown): string | null {
 
   switch (field.type) {
     case 'TEXT': {
-      if (typeof value !== 'string') return `${label} must be text`
-      if (rules.minLength !== undefined && value.length < rules.minLength) return `${label} must be at least ${rules.minLength} characters`
-      if (rules.maxLength !== undefined && value.length > rules.maxLength) return `${label} must be at most ${rules.maxLength} characters`
+      if (typeof value !== 'string') return i18n.t('editor:validation.text', { label })
+      if (rules.minLength !== undefined && value.length < rules.minLength) return i18n.t('editor:validation.minLength', { label, count: rules.minLength })
+      if (rules.maxLength !== undefined && value.length > rules.maxLength) return i18n.t('editor:validation.maxLength', { label, count: rules.maxLength })
       const re = rules.pattern ? safeRegExp(rules.pattern) : null
-      if (re && !re.test(value)) return `${label} does not match the required pattern`
+      if (re && !re.test(value)) return i18n.t('editor:validation.pattern', { label })
       return null
     }
     case 'RICH_TEXT': {
-      if (typeof value !== 'string') return `${label} must be text`
-      if (rules.maxLength !== undefined && value.length > rules.maxLength) return `${label} must be at most ${rules.maxLength} characters`
+      if (typeof value !== 'string') return i18n.t('editor:validation.text', { label })
+      if (rules.maxLength !== undefined && value.length > rules.maxLength) return i18n.t('editor:validation.maxLength', { label, count: rules.maxLength })
       return null
     }
     case 'NUMBER': {
-      if (typeof value !== 'number' || !Number.isFinite(value)) return `${label} must be a number`
-      if (rules.integer && !Number.isInteger(value)) return `${label} must be a whole number`
-      if (rules.min !== undefined && value < rules.min) return `${label} must be at least ${rules.min}`
-      if (rules.max !== undefined && value > rules.max) return `${label} must be at most ${rules.max}`
+      if (typeof value !== 'number' || !Number.isFinite(value)) return i18n.t('editor:validation.number', { label })
+      if (rules.integer && !Number.isInteger(value)) return i18n.t('editor:validation.integer', { label })
+      if (rules.min !== undefined && value < rules.min) return i18n.t('editor:validation.min', { label, min: formatNumber(rules.min) })
+      if (rules.max !== undefined && value > rules.max) return i18n.t('editor:validation.max', { label, max: formatNumber(rules.max) })
       return null
     }
     case 'DATE': {
       const time = typeof value === 'string' ? new Date(value).getTime() : Number.NaN
-      if (Number.isNaN(time)) return `${label} must be a valid date`
-      if (rules.minDate && time < new Date(rules.minDate).getTime()) return `${label} must be on or after ${formatDate(rules.minDate)}`
-      if (rules.maxDate && time > new Date(rules.maxDate).getTime()) return `${label} must be on or before ${formatDate(rules.maxDate)}`
+      if (Number.isNaN(time)) return i18n.t('editor:validation.date', { label })
+      if (rules.minDate && time < new Date(rules.minDate).getTime()) return i18n.t('editor:validation.minDate', { label, date: formatDate(rules.minDate) })
+      if (rules.maxDate && time > new Date(rules.maxDate).getTime()) return i18n.t('editor:validation.maxDate', { label, date: formatDate(rules.maxDate) })
       return null
     }
     case 'BOOLEAN':
-      return typeof value === 'boolean' ? null : `${label} must be yes or no`
+      return typeof value === 'boolean' ? null : i18n.t('editor:validation.boolean', { label })
     case 'MEDIA':
     case 'RELATION': {
       if (rules.multiple) {
-        return Array.isArray(value) && value.every((v) => typeof v === 'string') ? null : `${label} must be a list`
+        return Array.isArray(value) && value.every((v) => typeof v === 'string') ? null : i18n.t('editor:validation.list', { label })
       }
-      return typeof value === 'string' ? null : `${label} must be a single item`
+      return typeof value === 'string' ? null : i18n.t('editor:validation.single', { label })
     }
     default:
       return null
@@ -82,7 +83,7 @@ export function validateEntry(fields: Field[], values: EntryValues): Record<stri
   for (const field of fields) {
     const value = values[field.name]
     if (isEmptyValue(field, value)) {
-      if (field.required) errors[field.name] = `${field.label || field.name} is required`
+      if (field.required) errors[field.name] = i18n.t('editor:validation.required', { label: field.label || field.name })
       continue
     }
     const error = fieldError(field, value)
@@ -125,6 +126,6 @@ export function createInitialValues(fields: Field[], data?: EntryValues): EntryV
 export function duplicateData(data: EntryValues, fields: Field[], titleField?: string): EntryValues {
   const copy = { ...data }
   const key = resolveTitleField(fields, titleField)
-  if (key && typeof copy[key] === 'string' && (copy[key] as string).trim()) copy[key] = `${copy[key]} (copy)`
+  if (key && typeof copy[key] === 'string' && (copy[key] as string).trim()) copy[key] = i18n.t('editor:copySuffix', { title: copy[key] as string })
   return copy
 }

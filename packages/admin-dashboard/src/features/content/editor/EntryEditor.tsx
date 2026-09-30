@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -27,6 +28,7 @@ interface EntryEditorProps {
 
 export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation('editor')
   const writes = useEntryWrites()
   const fields = contentType.fields
   const titleKey = resolveTitleField(fields, contentType.titleField)
@@ -108,7 +110,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     if (form.isValid) return true
     form.showAllErrors()
     const count = Object.keys(form.errors).length
-    toast.error(`Fix ${count} field${count === 1 ? '' : 's'} before saving`)
+    toast.error(t('fixFieldsToast', { count }))
     const first = Object.keys(form.errors)[0]
     if (first === coverField?.name && !window.matchMedia('(min-width: 1024px)').matches) {
       setDetailsOpen(true)
@@ -118,7 +120,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     el?.focus()
     el?.scrollIntoView?.({ block: 'center' })
     return false
-  }, [form, coverField?.name])
+  }, [form, coverField?.name, t])
 
   const act = useCallback(
     async (action: EditorAction) => {
@@ -129,7 +131,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
           case 'saveDraft':
             if (!requireValid()) return
             await persist()
-            toast.success('Draft saved')
+            toast.success(t('toast.draftSaved'))
             break
           case 'publish':
             if (!requireValid()) return
@@ -143,12 +145,12 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
                 setStatus('PUBLISHED')
               }
             }
-            toast.success('Published')
+            toast.success(t('toast.published'))
             break
           case 'publishChanges':
             if (!requireValid()) return
             await persist()
-            toast.success('Changes published')
+            toast.success(t('toast.changesPublished'))
             break
           case 'discard':
             form.reset(form.baseline)
@@ -159,7 +161,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
             const saved = await writes.unpublish(id!)
             setEntry(saved)
             setStatus('DRAFT')
-            toast.success('Unpublished. The entry is a draft again.')
+            toast.success(t('toast.unpublished'))
             break
           }
           case 'archive':
@@ -169,7 +171,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
             const saved = await writes.update({ id: id!, body: { status: 'DRAFT' } })
             setEntry(saved)
             setStatus('DRAFT')
-            toast.success('Restored to draft')
+            toast.success(t('toast.restored'))
             break
           }
           case 'delete':
@@ -180,7 +182,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
               typeId: contentType.id,
               body: { data: duplicateData(toEntryPayload(fields, form.values), fields, contentType.titleField), status: 'DRAFT' },
             })
-            toast.success('Duplicated. You are editing the copy.')
+            toast.success(t('toast.duplicated'))
             navigate(`/content/${copy.id}`)
             break
           }
@@ -191,7 +193,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         setBusy(false)
       }
     },
-    [contentType, fields, form, navigate, persist, requireValid, writes],
+    [contentType, fields, form, navigate, persist, requireValid, writes, t],
   )
 
   const confirmArchive = async () => {
@@ -200,7 +202,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       const saved = await writes.archive(entryIdRef.current!)
       setEntry(saved)
       setStatus('ARCHIVED')
-      toast.success('Archived')
+      toast.success(t('toast.archived'))
     } catch (error) {
       toast.error(apiErrorMessage(error))
     }
@@ -210,7 +212,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     setConfirm(null)
     try {
       await writes.remove(entryIdRef.current!)
-      toast.success('Entry deleted')
+      toast.success(t('toast.deleted'))
       navigate('/content', { state: { skipGuard: true } })
     } catch (error) {
       toast.error(apiErrorMessage(error))
@@ -232,13 +234,13 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
   const errorCount = Object.keys(form.errors).length
 
   const saveLabel = useMemo(() => {
-    if (saveState === 'saving') return 'Saving…'
-    if (saveState === 'error') return 'Save failed'
-    if (form.isDirty && !form.isValid && status === 'DRAFT') return `Fix ${errorCount} field${errorCount === 1 ? '' : 's'} to save`
-    if (form.isDirty) return 'Unsaved changes'
-    if (isNew) return 'Not saved yet'
-    return 'Saved'
-  }, [saveState, form.isDirty, form.isValid, status, errorCount, isNew])
+    if (saveState === 'saving') return t('save.saving')
+    if (saveState === 'error') return t('save.failed')
+    if (form.isDirty && !form.isValid && status === 'DRAFT') return t('fixFieldsStatus', { count: errorCount })
+    if (form.isDirty) return t('save.unsaved')
+    if (isNew) return t('save.notSaved')
+    return t('save.saved')
+  }, [saveState, form.isDirty, form.isValid, status, errorCount, isNew, t])
 
   const renderField = (fieldName: string, className?: string) => {
     const field = fields.find((f) => f.name === fieldName)!
@@ -296,13 +298,13 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         <form
           className="flex min-w-0 flex-col gap-6"
           onSubmit={(e) => e.preventDefault()}
-          aria-label={`${contentType.name} fields`}
+          aria-label={t('fieldsLabel', { model: contentType.name })}
         >
           <fieldset key={resetCount} disabled={readOnly} className="contents">
             {titleKey && (
               <div>
                 <label htmlFor={`field-${titleKey}`} className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {fields.find((f) => f.name === titleKey)?.label ?? 'Title'}
+                  {fields.find((f) => f.name === titleKey)?.label ?? t('titleFallback')}
                 </label>
                 <input
                   id={`field-${titleKey}`}
@@ -312,7 +314,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
                     form.touch(titleKey)
                     autosave.flush()
                   }}
-                  placeholder="Untitled"
+                  placeholder={t('titlePlaceholder')}
                   aria-invalid={titleError ? true : undefined}
                   aria-describedby={titleError ? `field-${titleKey}-error` : undefined}
                   className={cn(
@@ -330,14 +332,14 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
             </div>
           </fieldset>
         </form>
-        <aside className="hidden lg:block" aria-label="Entry details">
+        <aside className="hidden lg:block" aria-label={t('entryDetails')}>
           {panel}
         </aside>
       </div>
       <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Details</SheetTitle>
+            <SheetTitle>{t('details')}</SheetTitle>
           </SheetHeader>
           <div className="px-4 pb-6">{panel}</div>
         </SheetContent>
@@ -346,17 +348,17 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       <ConfirmDialog
         open={confirm === 'archive'}
         onOpenChange={(o) => !o && setConfirm(null)}
-        title="Archive this entry?"
-        description="Sites stop receiving it. You can restore it to draft later."
-        confirmLabel="Archive"
+        title={t('confirm.archiveTitle')}
+        description={t('confirm.archiveText')}
+        confirmLabel={t('actions.archive')}
         onConfirm={() => void confirmArchive()}
       />
       <ConfirmDialog
         open={confirm === 'delete'}
         onOpenChange={(o) => !o && setConfirm(null)}
-        title="Delete this entry?"
-        description="This permanently removes the entry and cannot be undone."
-        confirmLabel="Delete"
+        title={t('confirm.deleteTitle')}
+        description={t('confirm.deleteText')}
+        confirmLabel={t('actions.delete')}
         destructive
         onConfirm={() => void confirmDelete()}
       />

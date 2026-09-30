@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, MoreHorizontal, PanelRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ interface EditorTopBarProps {
 }
 
 export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, busy, onAction, onOpenDetails }: EditorTopBarProps) {
+  const { t } = useTranslation('editor')
   const safeMenu = actions.menu.filter((m) => !m.destructive)
   const dangerMenu = actions.menu.filter((m) => m.destructive)
   return (
@@ -29,7 +31,7 @@ export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, 
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link to="/content">
           <ArrowLeft aria-hidden />
-          Content
+          {t('topBar.back')}
         </Link>
       </Button>
       <span className="hidden text-sm text-muted-foreground sm:inline">/ {typeName}</span>
@@ -38,36 +40,36 @@ export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, 
         {saveLabel}
         {onRetry && (
           <button type="button" onClick={onRetry} className="ml-2 underline">
-            Retry
+            {t('save.retry')}
           </button>
         )}
       </span>
-      <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Details" onClick={onOpenDetails}>
+      <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t('topBar.details')} onClick={onOpenDetails}>
         <PanelRight aria-hidden />
       </Button>
       {actions.secondary && (
         <Button variant="outline" size="sm" disabled={busy} onClick={() => onAction(actions.secondary!.action)}>
-          {actions.secondary.label}
+          {t(actions.secondary.labelKey)}
         </Button>
       )}
       <Button size="sm" disabled={busy || actions.primary.disabled} onClick={() => onAction(actions.primary.action)}>
-        {actions.primary.label}
+        {t(actions.primary.labelKey)}
       </Button>
       {actions.menu.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="More actions">
+            <Button variant="ghost" size="icon" aria-label={t('topBar.moreActions')}>
               <MoreHorizontal aria-hidden />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {safeMenu.map((m) => (
-              <DropdownMenuItem key={m.action} onSelect={() => onAction(m.action)}>{m.label}</DropdownMenuItem>
+              <DropdownMenuItem key={m.action} onSelect={() => onAction(m.action)}>{t(m.labelKey)}</DropdownMenuItem>
             ))}
             {dangerMenu.length > 0 && <DropdownMenuSeparator />}
             {dangerMenu.map((m) => (
               <DropdownMenuItem key={m.action} className="text-destructive focus:text-destructive" onSelect={() => onAction(m.action)}>
-                {m.label}
+                {t(m.labelKey)}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, X } from 'lucide-react'
@@ -14,6 +15,7 @@ const OBJECT_ID = /^[a-f0-9]{24}$/i
 
 export function RelationField(props: FieldControlProps) {
   const { field, id, value, onChange, onBlur, error, disabled } = props
+  const { t } = useTranslation('editor')
   const multiple = !!field.validation?.multiple
   const selected = Array.isArray(value) ? (value as string[]) : typeof value === 'string' && value ? [value] : []
   const [open, setOpen] = useState(false)
@@ -46,20 +48,20 @@ export function RelationField(props: FieldControlProps) {
             <PopoverTrigger asChild>
               <Button id={id} variant="outline" size="sm" {...describedBy(id, field, error)}>
                 <Plus aria-hidden />
-                {selected.length ? 'Add entry' : 'Choose entry'}
+                {selected.length ? t('fields.addEntry') : t('fields.chooseEntry')}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="start">
               <Command shouldFilter={false}>
-                <CommandInput placeholder="Search entries…" value={search} onValueChange={setSearch} />
+                <CommandInput placeholder={t('fields.searchEntries')} value={search} onValueChange={setSearch} />
                 <CommandList>
-                  <CommandEmpty>{results.isFetching ? 'Searching…' : 'No entries found.'}</CommandEmpty>
+                  <CommandEmpty>{results.isFetching ? t('fields.searching') : t('fields.noEntries')}</CommandEmpty>
                   <CommandGroup>
                     {(results.data?.data ?? []).map((entry) => (
                       <CommandItem key={entry.id} value={entry.id} onSelect={() => choose(entry.id)}>
                         <span className="flex-1 truncate">{entry.title}</span>
                         <span className="text-xs text-muted-foreground">{entry.contentType?.name}</span>
-                        {selected.includes(entry.id) && <span className="sr-only">(selected)</span>}
+                        {selected.includes(entry.id) && <span className="sr-only">{t('fields.selected')}</span>}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -74,14 +76,15 @@ export function RelationField(props: FieldControlProps) {
 }
 
 function RelationChip({ id, onRemove }: { id: string; onRemove?: () => void }) {
+  const { t } = useTranslation('editor')
   const entry = useEntry(id)
-  const title = entry.data?.title ?? (entry.isError ? 'Missing entry' : 'Loading…')
+  const title = entry.data?.title ?? (entry.isError ? t('fields.missingEntry') : t('fields.loading'))
   return (
     <span className="inline-flex items-center gap-2 rounded-full border bg-card py-1 pr-1 pl-3 text-sm">
       <Link to={`/content/${id}`} className="max-w-48 truncate hover:underline">{title}</Link>
       {entry.data && <StatusPill status={entry.data.status} />}
       {onRemove && (
-        <button type="button" onClick={onRemove} aria-label={`Remove ${title}`} className="rounded-full p-1 hover:bg-accent">
+        <button type="button" onClick={onRemove} aria-label={t('fields.remove', { name: title })} className="rounded-full p-1 hover:bg-accent">
           <X aria-hidden className="size-3.5" />
         </button>
       )}

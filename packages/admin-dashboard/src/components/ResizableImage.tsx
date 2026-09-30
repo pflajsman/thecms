@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useRef, useState, useCallback, useEffect } from 'react';
 import Image from '@tiptap/extension-image';
 import {
@@ -24,6 +25,7 @@ export type ImageFloat = 'left' | 'right' | 'none';
  * avoid upscaling blur.
  */
 function ResizableImageView({ node, updateAttributes, selected, editor }: NodeViewProps) {
+  const { t } = useTranslation('editor')
   const { src, alt, title, width, float } = node.attrs as {
     src: string;
     alt?: string;
@@ -118,7 +120,7 @@ function ResizableImageView({ node, updateAttributes, selected, editor }: NodeVi
       {isEditable && selected && (
         <span
           onMouseDown={startResize}
-          title="Drag to resize"
+          title={t('fields.dragToResize')}
           style={{
             position: 'absolute',
             right: -5,
