@@ -372,7 +372,7 @@ Environment: local mongod and Azurite, backend and admin dev servers from the lo
 
 | Check | Result |
 |---|---|
-| Admin tests (426), `pnpm lint` (0 errors, 0 warnings), build | Pass |
+| Admin tests (424), `pnpm lint` (0 errors, 0 warnings), build | Pass |
 | First visit with an English browser and nothing saved: English, `<html lang="en">` | Pass |
 | First visit with a Czech browser language | Covered by unit tests only (the browser language cannot be changed from the tooling) |
 | Account menu, Language, Čeština: sidebar, groups, Home and headings switch at once; `thecms.language` = `cs`; `<html lang="cs">` | Pass |
