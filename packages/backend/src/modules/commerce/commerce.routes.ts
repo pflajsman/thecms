@@ -5,7 +5,7 @@ import { AppError } from '../../middleware/error.middleware';
 import { authMiddleware } from '../../middleware/auth.middleware';
 import { validate } from '../../middleware/validation.middleware';
 import { commerceController } from './commerce.controller';
-import { createProductSchema, listProductsSchema, methodSchema, methodUpdateSchema, settingsSchema, updateProductSchema, variantsSchema, zoneSchema, zoneUpdateSchema } from './commerce.schema';
+import { cancelSchema, noteSchema, resendSchema, shippedSchema, listOrdersSchema, createProductSchema, listProductsSchema, methodSchema, methodUpdateSchema, settingsSchema, updateProductSchema, variantsSchema, zoneSchema, zoneUpdateSchema } from './commerce.schema';
 
 const router: IRouter = Router();
 
@@ -39,5 +39,14 @@ router.get('/shipping/methods', (req, res, next) => commerceController.listMetho
 router.post('/shipping/methods', validate(methodSchema), (req, res, next) => commerceController.createMethod(req, res, next));
 router.put('/shipping/methods/:id', validate(methodUpdateSchema), (req, res, next) => commerceController.updateMethod(req, res, next));
 router.delete('/shipping/methods/:id', (req, res, next) => commerceController.deleteMethod(req, res, next));
+
+router.get('/orders', validate(listOrdersSchema), (req, res, next) => commerceController.listOrders(req, res, next));
+router.get('/orders/needs-action', (req, res, next) => commerceController.ordersNeedingAction(req, res, next));
+router.get('/orders/:id', (req, res, next) => commerceController.getOrder(req, res, next));
+router.post('/orders/:id/paid', (req, res, next) => commerceController.markOrderPaid(req, res, next));
+router.post('/orders/:id/shipped', validate(shippedSchema), (req, res, next) => commerceController.markOrderShipped(req, res, next));
+router.post('/orders/:id/cancel', validate(cancelSchema), (req, res, next) => commerceController.cancelOrder(req, res, next));
+router.post('/orders/:id/resend', validate(resendSchema), (req, res, next) => commerceController.resendOrderEmail(req, res, next));
+router.put('/orders/:id/note', validate(noteSchema), (req, res, next) => commerceController.setOrderNote(req, res, next));
 
 export default router;

@@ -10,6 +10,7 @@ import { SettingsService } from '../commerce/settings.service';
 import { quote } from '../commerce/pricing-context';
 import { orderBody, quoteBody } from '../commerce/checkout.schema';
 import { findOrderForCustomer, placeOrder, publicOrderView } from '../commerce/orders.service';
+import { redeem } from '../commerce/downloads.service';
 import { ShippingZoneModel } from '../../models/shipping.model';
 
 /**
@@ -408,6 +409,18 @@ export class PublicController {
         return;
       }
       res.status(200).json({ success: true, data: publicOrderView(order, await SettingsService.get()) });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Download a purchased file
+   * GET /api/v1/public/shop/downloads/:token
+   */
+  async download(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      res.redirect(302, await redeem(req.params.token));
     } catch (error) {
       next(error);
     }

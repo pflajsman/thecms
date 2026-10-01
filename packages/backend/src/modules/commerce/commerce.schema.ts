@@ -117,3 +117,23 @@ export const methodSchema = z.object({ body: methodBody });
 export const methodUpdateSchema = z.object({ params: z.object({ id: objectIdString }), body: methodBody });
 export type ZoneInput = z.infer<typeof zoneBody>;
 export type MethodInput = z.infer<typeof methodBody>;
+
+
+const ORDER_STATUSES = ['PLACED', 'COMPLETED', 'CANCELLED'] as const;
+export const listOrdersSchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+    search: z.string().trim().max(100).optional(),
+    status: z.enum(ORDER_STATUSES).optional(),
+    paymentStatus: z.enum(['UNPAID', 'PAID', 'REFUNDED']).optional(),
+    fulfilmentStatus: z.enum(['UNFULFILLED', 'SHIPPED']).optional(),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  }),
+});
+export const shippedSchema = z.object({
+  body: z.object({ trackingNumber: z.string().trim().max(100).optional(), trackingUrl: z.string().trim().url().optional() }),
+});
+export const cancelSchema = z.object({ body: z.object({ refunded: z.boolean().optional() }) });
+export const resendSchema = z.object({ body: z.object({ what: z.enum(['confirmation', 'downloads']) }) });
+export const noteSchema = z.object({ body: z.object({ note: z.string().max(2000) }) });

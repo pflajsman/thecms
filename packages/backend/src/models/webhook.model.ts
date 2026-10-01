@@ -25,6 +25,12 @@ export enum WebhookEvent {
   PRODUCT_UPDATED = 'product.updated',
   PRODUCT_DELETED = 'product.deleted',
   STOCK_CHANGED = 'stock.changed',
+
+  // Order Events
+  ORDER_PLACED = 'order.placed',
+  ORDER_PAID = 'order.paid',
+  ORDER_SHIPPED = 'order.shipped',
+  ORDER_CANCELLED = 'order.cancelled',
 }
 
 /**

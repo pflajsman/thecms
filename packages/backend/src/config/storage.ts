@@ -1,4 +1,4 @@
-import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
+import { BlobSASPermissions, BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 
 /**
  * Storage configuration
@@ -95,6 +95,12 @@ class StorageService {
       throw new Error('Storage service not initialized. Call initialize() first.');
     }
     return this.privateContainerClient;
+  }
+
+  /** A read-only link to a private file, valid for a few minutes (needs the account key in the connection string). */
+  async privateFileSasUrl(blobName: string, minutes: number): Promise<string> {
+    const blob = this.getPrivateContainerClient().getBlobClient(blobName);
+    return blob.generateSasUrl({ permissions: BlobSASPermissions.parse('r'), expiresOn: new Date(Date.now() + minutes * 60_000) });
   }
 
   /** Stream a file from disk into the private container. */

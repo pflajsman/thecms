@@ -11,6 +11,8 @@ import type { Quote } from './pricing';
 import { providers, type PaymentInstructions } from './payments';
 import type { OrderInput } from './checkout.schema';
 import { resolveLanguage } from '../public/public-content.service';
+import { emitOrderEvent } from './order-events';
+import { WebhookEvent } from '../../models/webhook.model';
 
 export async function nextOrderNumber(date = new Date()): Promise<string> {
   const year = date.getUTCFullYear();
@@ -43,9 +45,9 @@ export async function releaseStock(lines: { variantId: string; quantity: number 
   }
 }
 
-/** Called after an order is saved; emails and webhooks hook in here. */
-export function onOrderPlaced(_order: IOrder): void {
-  return;
+/** Called after an order is saved: webhook now, emails in the order emails module. */
+export function onOrderPlaced(order: IOrder): void {
+  emitOrderEvent(WebhookEvent.ORDER_PLACED, order);
 }
 
 const STOCK_PROBLEMS = new Set(['OUT_OF_STOCK', 'NOT_ENOUGH_STOCK']);

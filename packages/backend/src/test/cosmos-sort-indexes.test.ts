@@ -16,6 +16,10 @@ import { ProductModel } from '../models/product.model';
 import { VariantModel } from '../models/variant.model';
 import { ProductsService } from '../modules/commerce/products.service';
 import { listShopProducts } from '../modules/commerce/public-shop.service';
+import { OrderModel } from '../models/order.model';
+import { OrdersAdminService } from '../modules/commerce/order-actions';
+import { ShippingMethodModel, ShippingZoneModel } from '../models/shipping.model';
+import { ShippingService } from '../modules/commerce/shipping.service';
 
 useTestDb();
 
@@ -102,4 +106,17 @@ it('variants of a product are listed by a declared index', async () => {
     listShopProducts({ currency: 'CZK', language: 'en', defaultLanguage: 'en', page: 1, limit: 20 }),
   );
   for (const sort of sorts) expect({ sort, served: servedByIndex(sort, VariantModel) }).toEqual({ sort, served: true });
+});
+
+it.each(['desc', 'asc'] as const)('admin orders list (%s) is served by a declared index', async (sortOrder) => {
+  const sorts = await captureSorts(OrderModel.collection.name, () => OrdersAdminService.list({ sortOrder }));
+  expect(sorts).toHaveLength(1);
+  expect({ sort: sorts[0], served: servedByIndex(sorts[0], OrderModel) }).toEqual({ sort: sorts[0], served: true });
+});
+
+it('shipping zones and methods lists are served by declared indexes', async () => {
+  const zones = await captureSorts(ShippingZoneModel.collection.name, () => ShippingService.listZones());
+  const methods = await captureSorts(ShippingMethodModel.collection.name, () => ShippingService.listMethods());
+  expect({ sort: zones[0], served: servedByIndex(zones[0], ShippingZoneModel) }).toEqual({ sort: zones[0], served: true });
+  expect({ sort: methods[0], served: servedByIndex(methods[0], ShippingMethodModel) }).toEqual({ sort: methods[0], served: true });
 });

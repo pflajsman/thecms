@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { SettingsService } from './settings.service';
 import { ShippingService } from './shipping.service';
+import { OrderActions, OrdersAdminService } from './order-actions';
+import { listOrdersSchema, shippedSchema } from './commerce.schema';
 import { ProductsService } from './products.service';
 import { VariantsService } from './variants.service';
 import { listProductsSchema, methodBody, zoneBody } from './commerce.schema';
@@ -147,6 +149,73 @@ export const commerceController = {
     try {
       await ShippingService.deleteMethod(req.params.id);
       res.json({ success: true, data: null });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async listOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { query } = listOrdersSchema.parse({ query: req.query });
+      const result = await OrdersAdminService.list(query);
+      res.json({ success: true, data: result.orders, pagination: result.pagination });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async ordersNeedingAction(_req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: { count: await OrdersAdminService.needsAction() } });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await OrdersAdminService.get(req.params.id) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async markOrderPaid(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await OrderActions.markPaid(req.params.id, userId(req)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async markOrderShipped(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { body } = shippedSchema.parse({ body: req.body ?? {} });
+      res.json({ success: true, data: await OrderActions.markShipped(req.params.id, body, userId(req)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async cancelOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await OrderActions.cancel(req.params.id, { refunded: req.body?.refunded }, userId(req)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async resendOrderEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await OrderActions.resend(req.params.id, req.body.what, userId(req)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async setOrderNote(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await OrderActions.setInternalNote(req.params.id, req.body.note) });
     } catch (error) {
       next(error);
     }

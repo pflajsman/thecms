@@ -82,3 +82,21 @@ export async function seedShop(): Promise<Shop> {
     guideProduct: guide.product.id,
   };
 }
+
+/** Place an order for one tee (S), plus the guide when digital; returns the saved order. */
+export async function placeTestOrder(
+  shop: Shop,
+  opts: { digital?: boolean; payment?: 'BANK_TRANSFER' | 'CASH_ON_DELIVERY'; language?: string } = {}
+) {
+  const { placeOrder } = await import('./orders.service');
+  const { quote } = await import('./pricing-context');
+  const items = [{ variantId: shop.teeS, quantity: 1 }, ...(opts.digital ? [{ variantId: shop.guide, quantity: 1 }] : [])];
+  const cart = { currency: 'CZK', language: opts.language ?? 'en', items, country: 'CZ', shippingMethodId: shop.courier, paymentMethod: opts.payment ?? 'BANK_TRANSFER' } as const;
+  const q = await quote({ ...cart, items: [...cart.items] });
+  const address = { name: 'Jana Nováková', street: 'Hlavní 1', city: 'Praha', postalCode: '11000', country: 'CZ' };
+  const { order } = await placeOrder(
+    { ...cart, items: [...cart.items], customer: { email: 'jana@example.test', name: 'Jana Nováková' }, billingAddress: address, shippingAddress: address, acceptTerms: true, expectedTotal: q.totals.total },
+    { skipHooks: true }
+  );
+  return order;
+}

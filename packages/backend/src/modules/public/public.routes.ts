@@ -15,6 +15,21 @@ const router: IRouter = Router();
 router.use(publicApiLimiter);
 
 // Apply API key middleware to all routes
+// Download links come from customers' emails, so they carry no site API key; the token is the credential.
+/**
+ * @swagger
+ * /api/v1/public/shop/downloads/{token}:
+ *   get:
+ *     summary: Download a purchased file (redirects to a link valid 5 minutes)
+ *     tags: [Public API]
+ *     responses:
+ *       302:
+ *         description: Redirect to the file
+ *       410:
+ *         description: Expired or used up
+ */
+router.get('/shop/downloads/:token', (req, res, next) => publicController.download(req, res, next));
+
 router.use(apiKeyMiddleware);
 
 /**
@@ -158,6 +173,8 @@ router.post('/shop/orders', orderLimiter, validate(orderSchema), (req, res, next
  *         description: Unknown order or wrong token
  */
 router.get('/shop/orders/:number', (req, res, next) => publicController.getCustomerOrder(req, res, next));
+
+
 
 /**
  * @swagger
