@@ -9,6 +9,7 @@ import { ContentEntryModel } from '../models/content-entry.model';
 export const TEXT_LANGUAGE_OVERRIDE = 'textSearchLanguage';
 
 const NAMESPACE_NOT_FOUND = 26;
+const DUPLICATE_KEY = 11000;
 
 async function rebuildTextIndexes(): Promise<void> {
   let indexes: Array<Record<string, any>>;
@@ -44,8 +45,13 @@ export async function migrateLanguages(): Promise<{ createdDefault: boolean; mig
 
   let createdDefault = false;
   if ((await LanguageModel.countDocuments()) === 0) {
-    await LanguageModel.create({ code: 'en', name: 'English', isDefault: true, order: 0 });
-    createdDefault = true;
+    try {
+      await LanguageModel.create({ code: 'en', name: 'English', isDefault: true, order: 0 });
+      createdDefault = true;
+    } catch (error) {
+      // Another instance starting at the same time created it first.
+      if ((error as { code?: number }).code !== DUPLICATE_KEY) throw error;
+    }
   }
   const defaultCode = (await LanguageModel.findOne({ isDefault: true }).select('code').lean())?.code ?? 'en';
 

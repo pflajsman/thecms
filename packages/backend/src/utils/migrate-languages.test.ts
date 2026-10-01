@@ -67,3 +67,9 @@ it('runs on a fresh database where no collections exist yet, and builds the lang
   const codeIndex = (await LanguageModel.collection.indexes()).find((i) => i.key.code === 1);
   expect(codeIndex?.unique).toBe(true);
 });
+
+it('two instances starting at once both finish and create one default language', async () => {
+  const results = await Promise.allSettled([migrateLanguages(), migrateLanguages(), migrateLanguages()]);
+  expect(results.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled', 'fulfilled']);
+  expect(await LanguageModel.countDocuments({ code: 'en', isDefault: true })).toBe(1);
+});
