@@ -129,3 +129,25 @@ it('works in Czech', async () => {
   expect(screen.getAllByText('Stejné ve všech jazycích').length).toBeGreaterThan(0)
   await expectNoA11yViolations(container)
 })
+
+it('shows a shared value saved in another language when switching back', async () => {
+  let enDistance = 10
+  vi.mocked(api.getEntry).mockImplementation(async (id) => (id === 'cs1' ? csEntry : { ...enEntry, data: { ...enEntry.data, distanceKm: enDistance } }))
+  vi.mocked(api.updateEntry).mockImplementation(async (_id, body) => {
+    enDistance = 99
+    return { ...csEntry, data: { ...csEntry.data, ...body.data } }
+  })
+  const { router } = renderRoutes(routes, { route: '/content/en1' })
+  expect(await screen.findByLabelText('Distance (km)')).toHaveValue(10)
+  await router.navigate('/content/cs1')
+  await waitFor(() => expect(screen.getByDisplayValue('Přes kopce')).toBeInTheDocument())
+  const distance = screen.getByLabelText('Distance (km)')
+  await userEvent.clear(distance)
+  await userEvent.type(distance, '99')
+  await userEvent.click(screen.getByRole('button', { name: 'Save draft' }))
+  await waitFor(() => expect(api.updateEntry).toHaveBeenCalled())
+  await screen.findByText('Draft saved')
+  await router.navigate('/content/en1')
+  await waitFor(() => expect(screen.getByDisplayValue('Over the hills')).toBeInTheDocument())
+  expect(screen.getByLabelText('Distance (km)')).toHaveValue(99)
+})

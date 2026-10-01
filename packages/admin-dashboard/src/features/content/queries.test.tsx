@@ -18,7 +18,7 @@ function setup() {
   return { queryClient, writes: result.current }
 }
 
-it('a save marks the other language versions stale, because shared fields changed on the server', async () => {
+it('a save drops the other cached language versions, because shared fields changed on the server', async () => {
   const { queryClient, writes } = setup()
   const cs = makeEntry({ id: 'cs1', itemId: 'en1', language: 'cs' })
   const en = makeEntry({ id: 'en1', itemId: 'en1', language: 'en' })
@@ -26,9 +26,9 @@ it('a save marks the other language versions stale, because shared fields change
   queryClient.setQueryData(contentKeys.versions('en1'), [])
   vi.mocked(api.updateEntry).mockResolvedValue({ ...cs, data: { ...cs.data, distanceKm: 99 } })
   await writes.update({ id: 'cs1', body: { data: { distanceKm: 99 } } })
-  await waitFor(() => expect(queryClient.getQueryState(contentKeys.entry('en1'))?.isInvalidated).toBe(true))
+  await waitFor(() => expect(queryClient.getQueryState(contentKeys.entry('en1'))).toBeUndefined())
   expect(queryClient.getQueryState(contentKeys.versions('en1'))?.isInvalidated).toBe(true)
-  expect(queryClient.getQueryState(contentKeys.entry('cs1'))?.isInvalidated).toBe(false)
+  expect(queryClient.getQueryData(contentKeys.entry('cs1'))).toBeDefined()
 })
 
 it('translate creates a version and caches it', async () => {

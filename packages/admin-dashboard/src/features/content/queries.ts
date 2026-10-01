@@ -78,8 +78,9 @@ export function useEntryWrites() {
       void queryClient.invalidateQueries({ queryKey: contentKeys.lists() })
       void queryClient.invalidateQueries({ queryKey: statsKeys.all })
       void queryClient.invalidateQueries({ queryKey: [...contentKeys.all, 'versions'] })
-      // Shared fields are copied to the other language versions on the server.
-      void queryClient.invalidateQueries({
+      // Shared fields are copied to the other language versions on the server. Drop those cached
+      // versions: the editor reads its values once on open, so a stale copy would stay on screen.
+      queryClient.removeQueries({
         predicate: (q) => q.queryKey[0] === contentKeys.all[0] && q.queryKey[1] === 'entry' && q.queryKey[2] !== savedId,
       })
     }
