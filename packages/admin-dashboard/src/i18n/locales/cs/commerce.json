@@ -26,7 +26,8 @@
     "save": "Uložit nastavení",
     "saved": "Nastavení uloženo",
     "empty": "Zatím žádné měny",
-    "emptyVat": "Zatím žádné sazby"
+    "emptyVat": "Zatím žádné sazby",
+    "vatRename": "Název sazby {{name}}"
   },
   "products": {
     "title": "Produkty",
@@ -110,7 +111,8 @@
     "removeText": "Tyto varianty už neodpovídají možnostem a budou smazány:",
     "labelRequired": "Vyplňte všechny názvy v jazyce {{language}}",
     "valueRequired": "Každá možnost potřebuje aspoň jednu hodnotu",
-    "max": "Nejvýše 3 možnosti"
+    "max": "Nejvýše 3 možnosti",
+    "saveVariantsFirst": "Nejdřív uložte varianty"
   },
   "variants": {
     "title": "Varianty",

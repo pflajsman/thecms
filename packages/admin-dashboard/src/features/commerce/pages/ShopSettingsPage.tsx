@@ -74,15 +74,23 @@ export function ShopSettingsPage() {
     const rate = toBasisPoints(vatRate, i18n.language)
     if (rate === null) return setVatError('rate')
     setVatError(null)
-    const base = toApiKey(name).toLowerCase().replace(/[^a-z0-9-]/g, '-') || 'rate'
+    // Backend rule: ^[a-z0-9-]{1,40}$, so shorten the base to leave room for a -n suffix.
+    const base = toApiKey(name).toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 40).replace(/-+$/, '') || 'rate'
     let id = base
-    for (let n = 2; draft.vatRates.some((r) => r.id === id); n++) id = `${base}-${n}`
+    for (let n = 2; draft.vatRates.some((r) => r.id === id); n++) {
+      const suffix = `-${n}`
+      id = `${base.slice(0, 40 - suffix.length).replace(/-+$/, '')}${suffix}`
+    }
     setVatName('')
     setVatRate('')
     setDraft({ ...draft, vatRates: [...draft.vatRates, { id, name, rate }] })
   }
 
   const save = async () => {
+    if (draft.vatRates.some((r) => !r.name.trim())) {
+      setVatError('name')
+      return
+    }
     setSaving(true)
     setServerError(null)
     try {
@@ -160,7 +168,13 @@ export function ShopSettingsPage() {
             <ul aria-label={t('settings.vatRates')} className="flex flex-col divide-y rounded-xl border bg-card">
               {draft.vatRates.map((r) => (
                 <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
-                  <span className="min-w-0 flex-1 truncate font-medium">{r.name}</span>
+                  <Input
+                    aria-label={t('settings.vatRename', { name: settings.data?.vatRates.find((s) => s.id === r.id)?.name ?? r.name })}
+                    value={r.name}
+                    maxLength={50}
+                    onChange={(e) => setDraft({ ...draft, vatRates: draft.vatRates.map((x) => (x.id === r.id ? { ...x, name: e.target.value } : x)) })}
+                    className="h-8 min-w-0 flex-1"
+                  />
                   <span className="text-sm text-muted-foreground">{t('settings.percent', { value: percent(r.rate) })}</span>
                   <Button variant="ghost" size="icon" aria-label={t('settings.removeVat', { name: r.name })} onClick={() => setDraft({ ...draft, vatRates: draft.vatRates.filter((x) => x.id !== r.id) })}>
                     <Trash2 aria-hidden />

@@ -20,9 +20,11 @@ interface OptionsEditorProps {
   variants: Variant[]
   languages: Language[]
   onDirty: (dirty: boolean) => void
+  /** True while the variants table has unsaved edits: applying options replaces its rows. */
+  variantsDirty?: boolean
 }
 
-export function OptionsEditor({ productId, options, variants, languages, onDirty }: OptionsEditorProps) {
+export function OptionsEditor({ productId, options, variants, languages, onDirty, variantsDirty = false }: OptionsEditorProps) {
   const { t } = useTranslation('commerce')
   const writes = useCommerceWrites()
   const [draft, setDraft] = useState<ProductOption[]>(options)
@@ -79,7 +81,7 @@ export function OptionsEditor({ productId, options, variants, languages, onDirty
   }
 
   const requestApply = () => {
-    const problem = validate()
+    const problem = variantsDirty ? t('options.saveVariantsFirst') : validate()
     setError(problem)
     if (problem) return
     const removed = removedByOptions(variants, withKeys(cleaned))

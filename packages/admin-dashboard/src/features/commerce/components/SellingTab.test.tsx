@@ -148,3 +148,30 @@ it('derives keys for new options and values from their labels when applied', asy
     }),
   )
 })
+
+it('asks to save variant edits before applying options', async () => {
+  renderRoutes(routes(), { route: '/commerce/products/p1' })
+  const czkS = await screen.findByRole('textbox', { name: 'CZK price, S' })
+  await userEvent.type(czkS, '1')
+  const options = screen.getByRole('region', { name: 'Options' })
+  await userEvent.click(within(options).getByRole('button', { name: 'Remove value M' }))
+  await userEvent.click(within(options).getByRole('button', { name: 'Apply options' }))
+  expect(await within(options).findByText('Save the variants first')).toBeInTheDocument()
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  expect(apiClient.put).not.toHaveBeenCalled()
+})
+
+it('marks only the row whose SKU the server names', async () => {
+  vi.mocked(apiClient.put).mockRejectedValue(Object.assign(new Error('409'), { isAxiosError: true, response: { status: 409, data: { success: false, error: 'SKU TEE-M2 is already used' } } }))
+  renderRoutes(routes(), { route: '/commerce/products/p1' })
+  const s = await screen.findByRole('textbox', { name: 'SKU, S' })
+  await userEvent.clear(s)
+  await userEvent.type(s, 'TEE-M')
+  const m = screen.getByRole('textbox', { name: 'SKU, M' })
+  await userEvent.clear(m)
+  await userEvent.type(m, 'TEE-M2')
+  await userEvent.click(screen.getByRole('button', { name: 'Save variants' }))
+  await screen.findByText('SKU TEE-M2 is already used')
+  expect(screen.getByRole('textbox', { name: 'SKU, M' })).toHaveAttribute('aria-invalid', 'true')
+  expect(screen.getByRole('textbox', { name: 'SKU, S' })).not.toHaveAttribute('aria-invalid')
+})

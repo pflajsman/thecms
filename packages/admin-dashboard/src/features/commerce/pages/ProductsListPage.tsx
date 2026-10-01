@@ -76,6 +76,7 @@ export function ProductsListPage() {
 
   let body: React.ReactNode
   if (settings.isPending) body = <Skeleton className="h-40 w-full" />
+  else if (settings.isError) body = <ErrorState message={t('settings.loadError')} onRetry={() => void settings.refetch()} />
   else if (!ready) body = <ShopSetupPrompt />
   else if (list.isPending) body = <Skeleton className="h-40 w-full" />
   else if (list.isError) body = <ErrorState message={t('products.loadError')} onRetry={() => void list.refetch()} />

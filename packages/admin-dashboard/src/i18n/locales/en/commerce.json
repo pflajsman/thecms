@@ -25,7 +25,8 @@
     "save": "Save settings",
     "saved": "Settings saved",
     "empty": "No currencies yet",
-    "emptyVat": "No VAT rates yet"
+    "emptyVat": "No VAT rates yet",
+    "vatRename": "Name of {{name}}"
   },
   "products": {
     "title": "Products",
@@ -109,7 +110,8 @@
     "removeText": "These variants no longer match the options and will be deleted:",
     "labelRequired": "Enter every name in {{language}}",
     "valueRequired": "Each option needs at least one value",
-    "max": "Up to 3 options"
+    "max": "Up to 3 options",
+    "saveVariantsFirst": "Save the variants first"
   },
   "variants": {
     "title": "Variants",

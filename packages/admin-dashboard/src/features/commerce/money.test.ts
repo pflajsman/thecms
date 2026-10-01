@@ -20,3 +20,12 @@ it('shows minor units in the admin language', () => {
   expect(formatMoney(149050, { code: 'CZK', decimals: 2 }, 'cs')).toMatch(/1\s490,50\sKč/)
   expect(formatMoney(2000, { code: 'EUR', decimals: 2 }, 'en')).toBe('€20.00')
 })
+
+it('does not read a decimal comma as a grouping separator in English', () => {
+  expect(toMinor('490,5', 2, 'en')).toBeNull()
+  expect(toMinor('1,49', 2, 'en')).toBeNull()
+  expect(toMinor('1,5', 0, 'en')).toBeNull()
+  expect(toMinor('1,490.50', 2, 'en')).toBe(149050)
+  expect(toMinor('12,345,678', 0, 'en')).toBe(12345678)
+  expect(toMinor('1 490,50', 2, 'cs')).toBe(149050)
+})

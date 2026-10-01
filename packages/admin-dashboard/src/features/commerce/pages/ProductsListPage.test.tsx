@@ -77,3 +77,13 @@ it('renders in Czech', async () => {
   expect(within(table).getByText('Dochází')).toBeInTheDocument()
   await expectNoA11yViolations(container)
 })
+
+it('shows an error, not the setup prompt, when settings fail to load', async () => {
+  vi.mocked(apiClient.get).mockImplementation(async (url: string) => {
+    if (url === '/commerce/settings') throw Object.assign(new Error('500'), { isAxiosError: true, response: { status: 500, data: {} } })
+    return { data: { success: true, data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 1 } } }
+  })
+  renderRoutes(routes, { route: '/commerce/products' })
+  expect(await screen.findByText('Could not load shop settings.')).toBeInTheDocument()
+  expect(screen.queryByText('Set up your shop first')).not.toBeInTheDocument()
+})

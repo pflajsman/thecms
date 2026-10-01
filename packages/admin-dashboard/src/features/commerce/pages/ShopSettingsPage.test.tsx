@@ -66,3 +66,19 @@ it('renders in Czech', async () => {
   expect(await screen.findByText('Výchozí')).toBeInTheDocument()
   await expectNoA11yViolations(container)
 })
+
+it('renames a VAT rate in place and keeps ids within 40 characters', async () => {
+  renderRoutes(routes, { route: '/commerce/settings' })
+  const name = await screen.findByRole('textbox', { name: 'Name of Standard' })
+  await userEvent.clear(name)
+  await userEvent.type(name, 'Basic')
+  await userEvent.type(screen.getByLabelText('VAT rate name'), 'Reduced rate for books newspapers and periodicals')
+  await userEvent.type(screen.getByLabelText('Rate (%)'), '10')
+  await userEvent.click(screen.getByRole('button', { name: 'Add VAT rate' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Save settings' }))
+  await waitFor(() => expect(apiClient.put).toHaveBeenCalled())
+  const body = vi.mocked(apiClient.put).mock.calls[0][1] as { vatRates: { id: string; name: string }[] }
+  expect(body.vatRates[0]).toEqual({ id: 'standard', name: 'Basic', rate: 2100 })
+  expect(body.vatRates[1].id.length).toBeLessThanOrEqual(40)
+  expect(body.vatRates[1].id).toMatch(/^[a-z0-9-]+$/)
+})

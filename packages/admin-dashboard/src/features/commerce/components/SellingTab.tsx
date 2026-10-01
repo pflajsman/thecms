@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/common/ErrorState'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { apiErrorMessage } from '@/lib/api-error'
 import { useUnsavedGuard } from '@/lib/hooks/useUnsavedGuard'
@@ -39,6 +40,7 @@ export function SellingTab({ detail }: { detail: ProductDetail }) {
   const percent = (rate: number) => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 }).format(rate / 100)
   const defaultLanguage = languages.find((l) => l.isDefault)?.code ?? 'en'
 
+  if (settings.isError) return <ErrorState message={t('settings.loadError')} onRetry={() => void settings.refetch()} />
   if (!settings.data) return <Skeleton className="h-40 w-full" />
 
   const saveGeneral = async () => {
@@ -86,7 +88,7 @@ export function SellingTab({ detail }: { detail: ProductDetail }) {
         </div>
         <Button onClick={() => void saveGeneral()} disabled={!generalDirty || saving}>{t('selling.saveGeneral')}</Button>
       </section>
-      <OptionsEditor productId={product.id} options={product.options} variants={variants} languages={languages} onDirty={onOptionsDirty} />
+      <OptionsEditor productId={product.id} options={product.options} variants={variants} languages={languages} onDirty={onOptionsDirty} variantsDirty={variantsDirty} />
       <VariantsTable
         productId={product.id}
         productName={entry.name}

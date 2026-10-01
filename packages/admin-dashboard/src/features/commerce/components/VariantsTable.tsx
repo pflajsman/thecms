@@ -110,8 +110,9 @@ export function VariantsTable({ productId, productName, type, options, variants,
     } catch (error) {
       const text = apiErrorMessage(error)
       setMessage(text)
-      // Mark rows whose SKU the server named.
-      setInvalid(new Set(rows.flatMap((r, i) => (r.sku.trim() && text.includes(r.sku.trim()) ? [`${i}:sku`] : []))))
+      // Mark the row whose SKU the server named ("SKU X is already used").
+      const named = /^SKU (.+) is already used$/.exec(text)?.[1]
+      setInvalid(new Set(named ? rows.flatMap((r, i) => (r.sku.trim() === named ? [`${i}:sku`] : [])) : []))
     } finally {
       setPending(false)
     }
