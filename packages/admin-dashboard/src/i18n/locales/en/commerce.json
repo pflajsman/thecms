@@ -27,5 +27,51 @@
     "saved": "Settings saved",
     "empty": "No currencies yet",
     "emptyVat": "No VAT rates yet"
+  },
+  "products": {
+    "title": "Products",
+    "description": "What you sell, with prices, stock and variants.",
+    "tableLabel": "Products",
+    "search": "Search products",
+    "searchPlaceholder": "Search by name or SKU…",
+    "type": "Type",
+    "anyType": "Any type",
+    "status": "Status",
+    "anyStatus": "Any status",
+    "columns": {
+      "name": "Name",
+      "variants": "Variants",
+      "price": "Price",
+      "stock": "Stock"
+    },
+    "outOfStock": "Out of stock",
+    "lowStock": "Low stock",
+    "active": "Active",
+    "inactive": "Inactive",
+    "unpublished": "Not published",
+    "emptyTitle": "No products yet",
+    "emptyText": "Create your first product to start selling.",
+    "loadError": "Could not load products."
+  },
+  "types": {
+    "PHYSICAL": "Physical",
+    "DIGITAL": "Digital",
+    "PHYSICAL_hint": "Shipped to the customer",
+    "DIGITAL_hint": "A file the customer downloads"
+  },
+  "newProduct": {
+    "button": "New product",
+    "title": "New product",
+    "name": "Name",
+    "create": "Create product",
+    "nameRequired": "Enter a name of up to 200 characters"
+  },
+  "setup": {
+    "title": "Set up your shop first",
+    "text": "Add a currency and a VAT rate before you create products.",
+    "action": "Open shop settings"
+  },
+  "product": {
+    "untitled": "Untitled product"
   }
 }

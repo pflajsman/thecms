@@ -28,5 +28,51 @@
     "saved": "Nastavení uloženo",
     "empty": "Zatím žádné měny",
     "emptyVat": "Zatím žádné sazby"
+  },
+  "products": {
+    "title": "Produkty",
+    "description": "Co prodáváte, s cenami, skladem a variantami.",
+    "tableLabel": "Produkty",
+    "search": "Hledat produkty",
+    "searchPlaceholder": "Hledat podle názvu nebo SKU…",
+    "type": "Typ",
+    "anyType": "Jakýkoli typ",
+    "status": "Stav",
+    "anyStatus": "Jakýkoli stav",
+    "columns": {
+      "name": "Název",
+      "variants": "Varianty",
+      "price": "Cena",
+      "stock": "Sklad"
+    },
+    "outOfStock": "Vyprodáno",
+    "lowStock": "Dochází",
+    "active": "Aktivní",
+    "inactive": "Neaktivní",
+    "unpublished": "Nepublikováno",
+    "emptyTitle": "Zatím žádné produkty",
+    "emptyText": "Vytvořte první produkt a začněte prodávat.",
+    "loadError": "Produkty se nepodařilo načíst."
+  },
+  "types": {
+    "PHYSICAL": "Fyzický",
+    "DIGITAL": "Digitální",
+    "PHYSICAL_hint": "Posílá se zákazníkovi",
+    "DIGITAL_hint": "Soubor, který si zákazník stáhne"
+  },
+  "newProduct": {
+    "button": "Nový produkt",
+    "title": "Nový produkt",
+    "name": "Název",
+    "create": "Vytvořit produkt",
+    "nameRequired": "Zadejte název o délce nejvýše 200 znaků"
+  },
+  "setup": {
+    "title": "Nejdřív nastavte obchod",
+    "text": "Než vytvoříte produkty, přidejte měnu a sazbu DPH.",
+    "action": "Otevřít nastavení obchodu"
+  },
+  "product": {
+    "untitled": "Produkt bez názvu"
   }
 }

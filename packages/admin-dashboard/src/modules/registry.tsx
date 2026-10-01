@@ -34,6 +34,7 @@ import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
 import { LanguagesPage } from '@/features/languages/pages/LanguagesPage'
 import { ComingSoon } from '@/features/commerce/ComingSoon'
 import { ShopSettingsPage } from '@/features/commerce/pages/ShopSettingsPage'
+import { ProductsListPage } from '@/features/commerce/pages/ProductsListPage'
 
 export const modules: AppModule[] = [
   {
@@ -90,7 +91,7 @@ export const modules: AppModule[] = [
     group: 'commerce',
     path: '/commerce/products',
     routes: [
-      { path: 'commerce/products', element: <ComingSoon /> },
+      { path: 'commerce/products', element: <ProductsListPage /> },
       { path: 'commerce/products/:id', element: <ComingSoon /> },
       { path: 'commerce/products/:id/content/:versionId', element: <ComingSoon /> },
     ],
