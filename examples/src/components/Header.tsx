@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { CartLink } from '../shop/components/CartLink';
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -40,9 +41,12 @@ export function Header() {
             psaní
           </NavLink>
           <NavLink to="/trips">na kole</NavLink>
+          <NavLink to="/obchod">obchod</NavLink>
           <NavLink to="/about">o mně</NavLink>
           <NavLink to="/contact">kontakt</NavLink>
         </nav>
+
+        <CartLink />
 
         <button
           type="button"

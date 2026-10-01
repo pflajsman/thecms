@@ -16,3 +16,10 @@ export function formatDate(iso: string): string {
 export function num(n: number): string {
   return String(n).padStart(2, '0');
 }
+
+/** Czech plural: 1 položka, 2 to 4 položky, 0 or 5 and more položek. */
+export function plural(n: number, one: string, few: string, many: string): string {
+  if (n === 1) return one;
+  if (n >= 2 && n <= 4) return few;
+  return many;
+}
