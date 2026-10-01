@@ -51,7 +51,8 @@ export class VariantsService {
       }
       for (const row of rows) {
         const current = row.id ? existing.find((v) => String(v._id) === row.id) : undefined;
-        const { baseQuantity, ...stock } = row.stock;
+        // The route does not apply schema defaults, so API clients may leave stock out.
+        const { baseQuantity, ...stock } = row.stock ?? { tracked: false, quantity: 0 };
         // Apply the admin's change on top of what orders took since the form loaded.
         if (current?.stock?.tracked && stock.tracked && baseQuantity !== undefined) {
           stock.quantity = Math.max(0, current.stock.quantity + stock.quantity - baseQuantity);

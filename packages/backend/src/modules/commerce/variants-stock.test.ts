@@ -26,3 +26,11 @@ it('keeps stock taken by orders when the admin saves the quantity it loaded earl
   expect((await VariantModel.findById(shop.teeS).lean())?.stock.quantity).toBe(2);
   expect((await VariantModel.findById(shop.teeM).lean())?.stock.quantity).toBe(10);
 });
+
+it('saves a digital variant sent without a stock field', async () => {
+  const shop = await seedShop();
+  const guide = await VariantModel.findById(shop.guide).lean();
+  const row = { id: String(guide!._id), sku: 'GUIDE', optionValues: {}, prices: { CZK: 31900 }, active: true };
+  await VariantsService.replaceAll(String(shop.guideProduct), [row] as never);
+  expect((await VariantModel.findById(shop.guide).lean())?.prices).toEqual({ CZK: 31900 });
+});
