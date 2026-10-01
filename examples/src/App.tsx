@@ -11,6 +11,7 @@ import { NotFound } from './pages/NotFound';
 import { isConfigured } from './config';
 import { ShopPage } from './shop/pages/ShopPage';
 import { ProductPage } from './shop/pages/ProductPage';
+import { CartPage } from './shop/pages/CartPage';
 
 export default function App() {
   if (!isConfigured) {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="trips/:id" element={<Trip />} />
           <Route path="obchod" element={<ShopPage />} />
           <Route path="obchod/:id" element={<ProductPage />} />
+          <Route path="kosik" element={<CartPage />} />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
