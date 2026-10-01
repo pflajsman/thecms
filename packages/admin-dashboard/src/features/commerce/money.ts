@@ -38,3 +38,8 @@ export function formatMoney(minor: number, currency: { code: string; decimals: n
     maximumFractionDigits: currency.decimals,
   }).format(minor / 10 ** currency.decimals)
 }
+
+/** The shop's currency for a code; an unknown code (removed since the order) shows with 2 decimals. */
+export function currencyFor(code: string, currencies: { code: string; decimals: number }[]): { code: string; decimals: number } {
+  return currencies.find((c) => c.code === code) ?? { code, decimals: 2 }
+}

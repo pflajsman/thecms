@@ -36,3 +36,14 @@ it('lists, searches and filters orders, counts those needing action, and runs ac
   expect((await request(app).put(`/commerce/orders/${order._id}/note`).send({ note: 'Gift wrap' })).body.data.internalNote).toBe('Gift wrap');
   expect((await request(app).post(`/commerce/orders/${order._id}/paid`)).status).toBe(409);
 });
+
+it('filters the list to orders that need action, together with a search', async () => {
+  const shop = await seedShop();
+  await placeTestOrder(shop);
+  const paid = await placeTestOrder(shop);
+  await request(app).post(`/commerce/orders/${paid._id}/paid`);
+  const res = await request(app).get('/commerce/orders').query({ needsAction: 'true', search: 'jana' });
+  expect(res.body.data.map((o: { number: string }) => o.number)).toEqual([paid.number]);
+  expect(res.body.pagination.total).toBe(1);
+  expect((await request(app).get('/commerce/orders').query({ needsAction: 'false' })).body.pagination.total).toBe(2);
+});

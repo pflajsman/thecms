@@ -13,10 +13,25 @@ export interface VatRate {
   rate: number
 }
 
+export interface BankAccount {
+  currency: string
+  accountNumber?: string
+  iban?: string
+  bic?: string
+  holder: string
+}
+
 export interface ShopSettings {
   currencies: ShopCurrency[]
   defaultCurrency?: string
   vatRates: VatRate[]
+  bankAccounts?: BankAccount[]
+  unpaidCancelDays?: number
+  downloadDays?: number
+  downloadLimit?: number
+  /** null removes the stored value. */
+  shopEmail?: string | null
+  termsUrl?: string | null
 }
 
 export type ProductType = 'PHYSICAL' | 'DIGITAL'
@@ -87,7 +102,7 @@ export interface ProductListParams {
   status?: ProductStatusFilter
 }
 
-function withoutEmpty<T extends object>(params: T): Partial<T> {
+export function withoutEmpty<T extends object>(params: T): Partial<T> {
   return Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== '')) as Partial<T>
 }
 

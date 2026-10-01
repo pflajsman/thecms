@@ -117,20 +117,30 @@ export interface OrderListOptions {
   status?: string;
   paymentStatus?: string;
   fulfilmentStatus?: string;
+  needsAction?: 'true' | 'false';
   sortOrder?: 'asc' | 'desc';
 }
 
+/** Paid and unshipped, or cash on delivery and unshipped: the shop has to send these. */
+const NEEDS_ACTION = {
+  status: 'PLACED',
+  fulfilmentStatus: 'UNFULFILLED',
+  $or: [{ paymentStatus: 'PAID' }, { 'payment.method': 'CASH_ON_DELIVERY' }],
+};
+
 export const OrdersAdminService = {
   async list(opts: OrderListOptions = {}) {
-    const { page = 1, limit = 20, search, status, paymentStatus, fulfilmentStatus, sortOrder = 'desc' } = opts;
-    const filter: Record<string, unknown> = {};
-    if (status) filter.status = status;
-    if (paymentStatus) filter.paymentStatus = paymentStatus;
-    if (fulfilmentStatus) filter.fulfilmentStatus = fulfilmentStatus;
+    const { page = 1, limit = 20, search, status, paymentStatus, fulfilmentStatus, needsAction, sortOrder = 'desc' } = opts;
+    const and: Record<string, unknown>[] = [];
+    if (status) and.push({ status });
+    if (paymentStatus) and.push({ paymentStatus });
+    if (fulfilmentStatus) and.push({ fulfilmentStatus });
     if (search) {
       const text = escapeRegex(search.trim());
-      filter.$or = [{ number: { $regex: `^${text}` } }, { 'customer.email': { $regex: text, $options: 'i' } }, { 'customer.name': { $regex: text, $options: 'i' } }];
+      and.push({ $or: [{ number: { $regex: `^${text}` } }, { 'customer.email': { $regex: text, $options: 'i' } }, { 'customer.name': { $regex: text, $options: 'i' } }] });
     }
+    if (needsAction === 'true') and.push(NEEDS_ACTION);
+    const filter = and.length ? { $and: and } : {};
     const [orders, total] = await Promise.all([
       OrderModel.find(filter).sort({ createdAt: sortOrder === 'asc' ? 1 : -1 }).skip((page - 1) * limit).limit(limit).lean(),
       OrderModel.countDocuments(filter),
@@ -161,10 +171,6 @@ export const OrdersAdminService = {
   },
 
   needsAction(): Promise<number> {
-    return OrderModel.countDocuments({
-      status: 'PLACED',
-      fulfilmentStatus: 'UNFULFILLED',
-      $or: [{ paymentStatus: 'PAID' }, { 'payment.method': 'CASH_ON_DELIVERY' }],
-    }).exec();
+    return OrderModel.countDocuments(NEEDS_ACTION).exec();
   },
 };

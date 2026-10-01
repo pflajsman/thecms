@@ -132,6 +132,7 @@ export const listOrdersSchema = z.object({
     status: z.enum(ORDER_STATUSES).optional(),
     paymentStatus: z.enum(['UNPAID', 'PAID', 'REFUNDED']).optional(),
     fulfilmentStatus: z.enum(['UNFULFILLED', 'SHIPPED']).optional(),
+    needsAction: z.enum(['true', 'false']).optional(),
     sortOrder: z.enum(['asc', 'desc']).default('desc'),
   }),
 });

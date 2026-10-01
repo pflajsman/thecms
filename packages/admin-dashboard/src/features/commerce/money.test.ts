@@ -1,4 +1,4 @@
-import { formatMoney, fromMinor, toMinor } from './money'
+import { currencyFor, formatMoney, fromMinor, toMinor } from './money'
 
 it('reads prices typed in English or Czech into minor units', () => {
   expect(toMinor('490', 2, 'en')).toBe(49000)
@@ -28,4 +28,10 @@ it('does not read a decimal comma as a grouping separator in English', () => {
   expect(toMinor('1,490.50', 2, 'en')).toBe(149050)
   expect(toMinor('12,345,678', 0, 'en')).toBe(12345678)
   expect(toMinor('1 490,50', 2, 'cs')).toBe(149050)
+})
+
+it('finds a currency by code and falls back to two decimals', () => {
+  const currencies = [{ code: 'CZK', decimals: 2 }, { code: 'JPY', decimals: 0 }]
+  expect(currencyFor('JPY', currencies)).toEqual({ code: 'JPY', decimals: 0 })
+  expect(currencyFor('EUR', currencies)).toEqual({ code: 'EUR', decimals: 2 })
 })

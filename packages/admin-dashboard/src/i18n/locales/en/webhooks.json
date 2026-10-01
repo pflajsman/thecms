@@ -19,7 +19,11 @@
     "media_deleted": "Media deleted",
     "product_updated": "Product updated",
     "product_deleted": "Product deleted",
-    "stock_changed": "Stock changed"
+    "stock_changed": "Stock changed",
+    "order_placed": "Order placed",
+    "order_paid": "Order paid",
+    "order_shipped": "Order shipped",
+    "order_cancelled": "Order cancelled"
   },
   "list": {
     "title": "Webhooks",
