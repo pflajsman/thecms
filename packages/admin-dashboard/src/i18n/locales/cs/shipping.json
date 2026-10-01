@@ -44,5 +44,46 @@
   "payment": {
     "BANK_TRANSFER": "Bankovní převod",
     "CASH_ON_DELIVERY": "Dobírka"
+  },
+  "method": {
+    "newTitle": "Nový způsob dopravy",
+    "notFound": "Tento způsob dopravy už neexistuje.",
+    "back": "Doprava",
+    "general": "Obecné",
+    "label": "Název ({{language}})",
+    "active": "Aktivní",
+    "activeHint": "Neaktivní způsoby se při objednávce nenabízejí",
+    "payment": "Platba",
+    "paymentHint": "Dobírka se nikdy nenabízí pro košíky s digitálními položkami.",
+    "codFeeLabel": "Poplatek za dobírku v {{code}}",
+    "freeOver": "Doprava zdarma",
+    "freeOverHint": "Doprava je zdarma, když zboží dosáhne této částky. Nechte prázdné, pokud dopravu zdarma nenabízíte.",
+    "freeOverLabel": "Zdarma od, {{code}}",
+    "rates": "Ceny",
+    "ratesHint": "Ceny podle hmotnosti zásilky pro každou zónu. Poslední limit nechte prázdný, pokud nemá horní hranici.",
+    "upToLabel": "Limit hmotnosti v gramech, pásmo {{n}}",
+    "priceLabel": "Cena v {{code}}, pásmo {{n}}",
+    "noLimitHint": "Prázdné znamená bez horní hranice",
+    "addBand": "Přidat pásmo",
+    "removeBand": "Odebrat pásmo {{n}}",
+    "removeZone": "Odebrat {{name}}",
+    "addZoneRates": "Přidat ceny pro {{name}}",
+    "unknownZone": "Smazaná zóna",
+    "save": "Uložit způsob",
+    "saved": "Způsob dopravy uložen",
+    "delete": "Smazat způsob",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteText": "Při objednávce se přestane nabízet. Už vytvořené objednávky si dopravu ponechají.",
+    "deleted": "Způsob dopravy smazán",
+    "fixErrors": "Opravte označená pole",
+    "errors": {
+      "labelRequired": "Zadejte název o délce nejvýše 100 znaků",
+      "paymentRequired": "Vyberte alespoň jeden způsob platby",
+      "ratesRequired": "Přidejte ceny alespoň pro jednu zónu",
+      "money": "Zadejte částku, například {{example}}",
+      "upTo": "Zadejte celé gramy od 1 do 1000000; prázdné může být jen poslední pásmo",
+      "upToOrder": "Každý limit musí být vyšší než předchozí",
+      "bandPrice": "Zadejte cenu alespoň v jedné měně"
+    }
   }
 }

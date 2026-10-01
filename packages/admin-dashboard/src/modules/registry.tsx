@@ -37,6 +37,7 @@ import { ShopSettingsPage } from '@/features/commerce/pages/ShopSettingsPage'
 import { ProductsListPage } from '@/features/commerce/pages/ProductsListPage'
 import { ProductPage } from '@/features/commerce/pages/ProductPage'
 import { ShippingPage } from '@/features/commerce/pages/ShippingPage'
+import { ShippingMethodPage } from '@/features/commerce/pages/ShippingMethodPage'
 
 export const modules: AppModule[] = [
   {
@@ -104,7 +105,10 @@ export const modules: AppModule[] = [
     icon: Truck,
     group: 'commerce',
     path: '/commerce/shipping',
-    routes: [{ path: 'commerce/shipping', element: <ShippingPage /> }],
+    routes: [
+      { path: 'commerce/shipping', element: <ShippingPage /> },
+      { path: 'commerce/shipping/methods/:id', element: <ShippingMethodPage /> },
+    ],
   },
   {
     id: 'shop-settings',

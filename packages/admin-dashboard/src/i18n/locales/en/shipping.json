@@ -44,5 +44,46 @@
   "payment": {
     "BANK_TRANSFER": "Bank transfer",
     "CASH_ON_DELIVERY": "Cash on delivery"
+  },
+  "method": {
+    "newTitle": "New shipping method",
+    "notFound": "This shipping method no longer exists.",
+    "back": "Shipping",
+    "general": "General",
+    "label": "Name ({{language}})",
+    "active": "Active",
+    "activeHint": "Inactive methods are not offered at checkout",
+    "payment": "Payment",
+    "paymentHint": "Cash on delivery is never offered for carts with digital items.",
+    "codFeeLabel": "Cash on delivery fee in {{code}}",
+    "freeOver": "Free shipping",
+    "freeOverHint": "Shipping is free when the items total reaches this amount. Leave empty for no free shipping.",
+    "freeOverLabel": "Free from, {{code}}",
+    "rates": "Rates",
+    "ratesHint": "Prices by parcel weight for each zone. Leave the last limit empty for no upper limit.",
+    "upToLabel": "Weight limit in grams, band {{n}}",
+    "priceLabel": "Price in {{code}}, band {{n}}",
+    "noLimitHint": "Empty means no upper limit",
+    "addBand": "Add band",
+    "removeBand": "Remove band {{n}}",
+    "removeZone": "Remove {{name}}",
+    "addZoneRates": "Add rates for {{name}}",
+    "unknownZone": "Deleted zone",
+    "save": "Save method",
+    "saved": "Shipping method saved",
+    "delete": "Delete method",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "Checkout stops offering it. Orders already placed keep their shipping.",
+    "deleted": "Shipping method deleted",
+    "fixErrors": "Fix the marked fields",
+    "errors": {
+      "labelRequired": "Enter a name of up to 100 characters",
+      "paymentRequired": "Choose at least one payment method",
+      "ratesRequired": "Add rates for at least one zone",
+      "money": "Enter an amount such as {{example}}",
+      "upTo": "Enter whole grams from 1 to 1000000; only the last band can be empty",
+      "upToOrder": "Each limit must be higher than the one before",
+      "bandPrice": "Enter a price in at least one currency"
+    }
   }
 }
