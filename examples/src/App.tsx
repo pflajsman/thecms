@@ -13,6 +13,8 @@ import { ShopPage } from './shop/pages/ShopPage';
 import { ProductPage } from './shop/pages/ProductPage';
 import { CartPage } from './shop/pages/CartPage';
 import { CheckoutPage } from './shop/pages/CheckoutPage';
+import { OrderPage } from './shop/pages/OrderPage';
+import { TermsPage } from './shop/pages/TermsPage';
 
 export default function App() {
   if (!isConfigured) {
@@ -31,6 +33,8 @@ export default function App() {
           <Route path="obchod/:id" element={<ProductPage />} />
           <Route path="kosik" element={<CartPage />} />
           <Route path="pokladna" element={<CheckoutPage />} />
+          <Route path="objednavka/:number" element={<OrderPage />} />
+          <Route path="obchodni-podminky" element={<TermsPage />} />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
