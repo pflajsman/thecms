@@ -5,7 +5,7 @@ import { AppError } from '../../middleware/error.middleware';
 import { authMiddleware } from '../../middleware/auth.middleware';
 import { validate } from '../../middleware/validation.middleware';
 import { commerceController } from './commerce.controller';
-import { createProductSchema, listProductsSchema, settingsSchema, updateProductSchema, variantsSchema } from './commerce.schema';
+import { createProductSchema, listProductsSchema, methodSchema, methodUpdateSchema, settingsSchema, updateProductSchema, variantsSchema, zoneSchema, zoneUpdateSchema } from './commerce.schema';
 
 const router: IRouter = Router();
 
@@ -30,5 +30,14 @@ router.post(
     }),
   (req, res, next) => commerceController.uploadFile(req, res, next)
 );
+
+router.get('/shipping/zones', (req, res, next) => commerceController.listZones(req, res, next));
+router.post('/shipping/zones', validate(zoneSchema), (req, res, next) => commerceController.createZone(req, res, next));
+router.put('/shipping/zones/:id', validate(zoneUpdateSchema), (req, res, next) => commerceController.updateZone(req, res, next));
+router.delete('/shipping/zones/:id', (req, res, next) => commerceController.deleteZone(req, res, next));
+router.get('/shipping/methods', (req, res, next) => commerceController.listMethods(req, res, next));
+router.post('/shipping/methods', validate(methodSchema), (req, res, next) => commerceController.createMethod(req, res, next));
+router.put('/shipping/methods/:id', validate(methodUpdateSchema), (req, res, next) => commerceController.updateMethod(req, res, next));
+router.delete('/shipping/methods/:id', (req, res, next) => commerceController.deleteMethod(req, res, next));
 
 export default router;

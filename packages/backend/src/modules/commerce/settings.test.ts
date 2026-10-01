@@ -26,7 +26,7 @@ const settings = {
 };
 
 it('starts empty and stores currencies and VAT rates', async () => {
-  expect((await request(app).get('/commerce/settings')).body.data).toEqual({ currencies: [], vatRates: [] });
+  expect((await request(app).get('/commerce/settings')).body.data).toMatchObject({ currencies: [], vatRates: [] });
   const saved = await request(app).put('/commerce/settings').send(settings);
   expect(saved.status).toBe(200);
   expect(saved.body.data).toMatchObject(settings);
@@ -72,4 +72,27 @@ it('refuses to change the decimals of a currency that has prices', async () => {
   const res = await request(app).put('/commerce/settings').send({ ...settings, currencies: [{ code: 'CZK', decimals: 0 }, settings.currencies[1]] });
   expect(res.status).toBe(409);
   expect(res.body.error).toContain('CZK');
+});
+
+it('stores bank accounts, days, limits, shop email and terms link with defaults', async () => {
+  const empty = (await request(app).get('/commerce/settings')).body.data;
+  expect(empty).toMatchObject({ unpaidCancelDays: 14, downloadDays: 30, downloadLimit: 5, bankAccounts: [] });
+  const body = {
+    ...settings,
+    bankAccounts: [{ currency: 'CZK', accountNumber: '123456789/0800', iban: 'CZ6508000000192000145399', holder: 'Pavel F.' }],
+    unpaidCancelDays: 10,
+    shopEmail: 'shop@example.test',
+    termsUrl: 'https://example.test/terms',
+  };
+  const saved = await request(app).put('/commerce/settings').send(body);
+  expect(saved.body.data).toMatchObject({ unpaidCancelDays: 10, downloadDays: 30, bankAccounts: [{ currency: 'CZK', holder: 'Pavel F.' }] });
+  expect((await request(app).put('/commerce/settings').send({ ...body, bankAccounts: [{ currency: 'USD', iban: 'X', holder: 'A' }] })).status).toBe(400);
+  expect((await request(app).put('/commerce/settings').send({ ...body, bankAccounts: [{ currency: 'CZK', holder: 'A' }] })).status).toBe(400);
+  expect((await request(app).put('/commerce/settings').send({ ...body, termsUrl: 'ftp://x' })).status).toBe(400);
+});
+
+it('keeps checkout fields when a save sends only currencies and VAT rates', async () => {
+  await request(app).put('/commerce/settings').send({ ...settings, unpaidCancelDays: 10, shopEmail: 'shop@example.test' });
+  const saved = await request(app).put('/commerce/settings').send(settings);
+  expect(saved.body.data).toMatchObject({ unpaidCancelDays: 10, shopEmail: 'shop@example.test' });
 });

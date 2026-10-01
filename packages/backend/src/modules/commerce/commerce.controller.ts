@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { SettingsService } from './settings.service';
+import { ShippingService } from './shipping.service';
 import { ProductsService } from './products.service';
 import { VariantsService } from './variants.service';
-import { listProductsSchema } from './commerce.schema';
+import { listProductsSchema, methodBody, zoneBody } from './commerce.schema';
 import { uploadDigitalFile } from './digital-files';
 import { AppError } from '../../middleware/error.middleware';
 
@@ -80,6 +81,72 @@ export const commerceController = {
     try {
       if (!req.file) throw new AppError('Choose a file to upload', 400);
       res.json({ success: true, data: await uploadDigitalFile(req.params.id, req.file) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async listZones(_req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await ShippingService.listZones() });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async createZone(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.status(201).json({ success: true, data: await ShippingService.createZone(zoneBody.parse(req.body)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async updateZone(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await ShippingService.updateZone(req.params.id, zoneBody.parse(req.body)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteZone(req: Request, res: Response, next: NextFunction) {
+    try {
+      await ShippingService.deleteZone(req.params.id);
+      res.json({ success: true, data: null });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async listMethods(_req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await ShippingService.listMethods() });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async createMethod(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.status(201).json({ success: true, data: await ShippingService.createMethod(methodBody.parse(req.body)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async updateMethod(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.json({ success: true, data: await ShippingService.updateMethod(req.params.id, methodBody.parse(req.body)) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteMethod(req: Request, res: Response, next: NextFunction) {
+    try {
+      await ShippingService.deleteMethod(req.params.id);
+      res.json({ success: true, data: null });
     } catch (error) {
       next(error);
     }
