@@ -1,8 +1,31 @@
 import { config } from '../config';
 import type { ContactForm, Entry, EntryList, Page, Post, Trip } from '../types';
 
+/** A non-2xx answer from the API, with the error body (for example `reason: 'PRICE_CHANGED'`). */
+export class ApiError extends Error {
+  status: number;
+  body: Record<string, unknown>;
+
+  constructor(message: string, status: number, body: Record<string, unknown>) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+
+  get reason(): string | undefined {
+    return typeof this.body.reason === 'string' ? this.body.reason : undefined;
+  }
+}
+
+export interface RequestOptions {
+  method?: 'GET' | 'POST';
+  body?: unknown;
+  headers?: Record<string, string>;
+}
+
 /** Low-level fetch against the TheCMS public API. */
-async function request<T>(endpoint: string, params: Record<string, unknown> = {}): Promise<T> {
+export async function request<T>(endpoint: string, params: Record<string, unknown> = {}, options: RequestOptions = {}): Promise<T> {
   const url = new URL(`${config.apiUrl}${endpoint}`);
   // Content requests ask for the configured language; the CMS falls back to its default language.
   const all = endpoint.startsWith('/content/') ? { language: config.contentLanguage, ...params } : params;
@@ -10,10 +33,16 @@ async function request<T>(endpoint: string, params: Record<string, unknown> = {}
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
   }
 
-  const res = await fetch(url, { headers: { 'X-API-Key': config.apiKey } });
+  const headers: Record<string, string> = { 'X-API-Key': config.apiKey, ...options.headers };
+  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+  const res = await fetch(url, {
+    method: options.method ?? 'GET',
+    headers,
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+  });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error((body as { error?: string }).error || `API error ${res.status}`);
+    const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    throw new ApiError(typeof body.error === 'string' ? body.error : `API error ${res.status}`, res.status, body);
   }
   return res.json() as Promise<T>;
 }
