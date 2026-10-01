@@ -2,6 +2,8 @@ import { Router, type IRouter } from 'express';
 import { publicController } from './public.controller';
 import { apiKeyMiddleware } from '../../middleware/apiKey.middleware';
 import { publicApiLimiter, formSubmitLimiter } from '../../middleware/rateLimit.middleware';
+import { validate } from '../../middleware/validation.middleware';
+import { quoteSchema } from '../commerce/checkout.schema';
 
 /**
  * Public API Routes
@@ -92,6 +94,36 @@ router.get('/shop/settings', (req, res, next) => publicController.getShopSetting
  *         description: Unknown currency or language
  */
 router.get('/shop/products', (req, res, next) => publicController.listShopProducts(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/public/shop/quote:
+ *   post:
+ *     summary: Price a cart (lines, shipping options, payment fees, totals)
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Quote
+ *       400:
+ *         description: Invalid cart, currency or language
+ */
+router.post('/shop/quote', validate(quoteSchema), (req, res, next) => publicController.quoteCart(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/public/shop/shipping-countries:
+ *   get:
+ *     summary: Countries the shop ships to
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: ISO country codes
+ */
+router.get('/shop/shipping-countries', (req, res, next) => publicController.shippingCountries(req, res, next));
 
 /**
  * @swagger

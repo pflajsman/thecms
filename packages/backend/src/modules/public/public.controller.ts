@@ -7,6 +7,9 @@ import { MediaService } from '../media/media.service';
 import { getPublished, listPublished, onePerItem, resolveLanguage } from './public-content.service';
 import { getShopProduct, listShopProducts, resolveCurrency } from '../commerce/public-shop.service';
 import { SettingsService } from '../commerce/settings.service';
+import { quote } from '../commerce/pricing-context';
+import { quoteBody } from '../commerce/checkout.schema';
+import { ShippingZoneModel } from '../../models/shipping.model';
 
 /**
  * Public API Controller
@@ -344,6 +347,31 @@ export class PublicController {
         return;
       }
       res.status(200).json({ success: true, data: product });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Price a cart
+   * POST /api/v1/public/shop/quote
+   */
+  async quoteCart(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      res.status(200).json({ success: true, data: await quote(quoteBody.parse(req.body)) });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Countries the shop ships to
+   * GET /api/v1/public/shop/shipping-countries
+   */
+  async shippingCountries(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const countries = await ShippingZoneModel.distinct('countries');
+      res.status(200).json({ success: true, data: (countries as string[]).sort() });
     } catch (error) {
       next(error);
     }

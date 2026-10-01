@@ -69,3 +69,18 @@ export const adminApiLimiter = rateLimit({
     return userId || req.ip || 'unknown';
   },
 });
+
+/**
+ * Rate limiter for placing shop orders
+ * 10 orders per minute per site key and IP
+ */
+export const orderLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `${(req.headers['x-api-key'] as string) || 'none'}:${req.ip || 'unknown'}`,
+  handler: (_req, res) => {
+    res.status(429).json({ success: false, error: 'Too many orders. Please try again in a minute.' });
+  },
+});

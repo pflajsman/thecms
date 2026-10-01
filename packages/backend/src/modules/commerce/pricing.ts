@@ -1,8 +1,9 @@
 import type { PaymentMethod } from '../../models/shipping.model';
 
 export interface CartInput {
-  currency: string
-  language: string
+  /** Missing means the shop's default currency and language (resolved when loading the context). */
+  currency?: string
+  language?: string
   items: { variantId: string; quantity: number }[]
   country?: string
   shippingMethodId?: string
