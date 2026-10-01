@@ -28,6 +28,8 @@ export function makeEntry(over: Partial<ContentEntry> = {}): ContentEntry {
     data: { title: 'Přes Šumavu', distanceKm: 142 },
     title: 'Přes Šumavu',
     status: 'DRAFT',
+    language: 'en',
+    itemId: 'e1',
     createdAt: '2026-09-20T10:00:00Z',
     updatedAt: '2026-09-29T10:00:00Z',
     ...over,

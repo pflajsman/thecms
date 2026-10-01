@@ -4,6 +4,9 @@ import { statsKeys } from '@/lib/queries/stats'
 import type { ContentEntry } from '@/types'
 import {
   archiveEntry,
+  changeLanguage as changeEntryLanguage,
+  createVersion,
+  listVersions,
   createEntry,
   deleteEntry,
   getContentType,
@@ -24,6 +27,7 @@ export const contentKeys = {
   entry: (id: string) => [...contentKeys.all, 'entry', id] as const,
   types: () => [...contentKeys.all, 'types'] as const,
   type: (id: string) => [...contentKeys.all, 'type', id] as const,
+  versions: (itemId: string) => [...contentKeys.all, 'versions', itemId] as const,
 }
 
 export function useEntryList(params: EntryListParams, options: { enabled?: boolean } = {}) {
@@ -56,18 +60,33 @@ export function useContentType(id?: string) {
   })
 }
 
+/** Every language version of the entry's item; keyed by item so all versions share one cache entry. */
+export function useVersions(entry?: ContentEntry, options: { enabled?: boolean } = {}) {
+  const itemId = entry?.itemId ?? entry?.id
+  return useQuery({
+    queryKey: contentKeys.versions(itemId ?? ''),
+    queryFn: () => listVersions(entry!.id),
+    enabled: !!entry && (options.enabled ?? true),
+  })
+}
+
 /** Write helpers: every write refreshes lists and stats, and seeds the entry cache. */
 export function useEntryWrites() {
   const queryClient = useQueryClient()
   return useMemo(() => {
-    const refresh = () => {
+    const refresh = (savedId?: string) => {
       void queryClient.invalidateQueries({ queryKey: contentKeys.lists() })
       void queryClient.invalidateQueries({ queryKey: statsKeys.all })
+      void queryClient.invalidateQueries({ queryKey: [...contentKeys.all, 'versions'] })
+      // Shared fields are copied to the other language versions on the server.
+      void queryClient.invalidateQueries({
+        predicate: (q) => q.queryKey[0] === contentKeys.all[0] && q.queryKey[1] === 'entry' && q.queryKey[2] !== savedId,
+      })
     }
     const done = async (promise: Promise<ContentEntry>) => {
       const entry = await promise
       queryClient.setQueryData(contentKeys.entry(entry.id), entry)
-      refresh()
+      refresh(entry.id)
       return entry
     }
     return {
@@ -76,6 +95,8 @@ export function useEntryWrites() {
       publish: (id: string) => done(publishEntry(id)),
       unpublish: (id: string) => done(unpublishEntry(id)),
       archive: (id: string) => done(archiveEntry(id)),
+      translate: (entryId: string, language: string) => done(createVersion(entryId, language)),
+      changeLanguage: (entryId: string, language: string) => done(changeEntryLanguage(entryId, language)),
       remove: async (id: string) => {
         await deleteEntry(id)
         queryClient.removeQueries({ queryKey: contentKeys.entry(id) })

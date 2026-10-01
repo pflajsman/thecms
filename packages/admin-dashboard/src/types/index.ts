@@ -28,6 +28,8 @@ export interface Field {
   // Free-form JSON chosen by content editors; narrowed where it is read.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any;
+  /** Translated per language version; absent means TEXT and RICH_TEXT are translated, the rest shared. */
+  localized?: boolean;
 }
 
 export interface ContentType {
@@ -63,12 +65,26 @@ export interface ContentEntry {
   updatedAt: string;
   createdBy?: string;
   updatedBy?: string;
+  /** Content language of this version. */
+  language?: string;
+  /** Shared by every language version of the same entry. */
+  itemId?: string;
 }
 
 export type EntryListItem = Omit<ContentEntry, 'contentType'> & {
   title: string;
   contentType: EntryContentTypeRef | null;
+  /** Language codes of every version of the item. */
+  languages?: string[];
 };
+
+export interface EntryVersion {
+  id: string;
+  language: string;
+  status: EntryStatus;
+  title: string;
+  updatedAt: string;
+}
 
 export interface MediaFile {
   id: string;

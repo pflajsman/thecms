@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api'
-import type { ApiResponse, ContentEntry, ContentType, EntryListItem, EntryStatus, PaginatedResponse } from '@/types'
+import type { ApiResponse, ContentEntry, ContentType, EntryListItem, EntryStatus, EntryVersion, PaginatedResponse } from '@/types'
 
 export interface EntryListParams {
   contentTypeId?: string
@@ -18,6 +18,8 @@ export interface EntryListParams {
 export interface EntryWriteBody {
   data: Record<string, unknown>
   status?: EntryStatus
+  /** Create only: the content language; the default language when absent. */
+  language?: string
 }
 
 function withoutEmpty<T extends object>(params: T): Partial<T> {
@@ -57,6 +59,18 @@ export async function archiveEntry(id: string): Promise<ContentEntry> {
 
 export async function deleteEntry(id: string): Promise<void> {
   await apiClient.delete(`/entries/${id}`)
+}
+
+export async function listVersions(entryId: string): Promise<EntryVersion[]> {
+  return (await apiClient.get<ApiResponse<EntryVersion[]>>(`/entries/${entryId}/versions`)).data.data
+}
+
+export async function createVersion(entryId: string, language: string): Promise<ContentEntry> {
+  return (await apiClient.post<ApiResponse<ContentEntry>>(`/entries/${entryId}/versions`, { language })).data.data
+}
+
+export async function changeLanguage(entryId: string, language: string): Promise<ContentEntry> {
+  return (await apiClient.put<ApiResponse<ContentEntry>>(`/entries/${entryId}/language`, { language })).data.data
 }
 
 export async function listContentTypes(): Promise<ContentType[]> {
