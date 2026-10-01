@@ -8,7 +8,8 @@ import { getPublished, listPublished, onePerItem, resolveLanguage } from './publ
 import { getShopProduct, listShopProducts, resolveCurrency } from '../commerce/public-shop.service';
 import { SettingsService } from '../commerce/settings.service';
 import { quote } from '../commerce/pricing-context';
-import { quoteBody } from '../commerce/checkout.schema';
+import { orderBody, quoteBody } from '../commerce/checkout.schema';
+import { findOrderForCustomer, placeOrder, publicOrderView } from '../commerce/orders.service';
 import { ShippingZoneModel } from '../../models/shipping.model';
 
 /**
@@ -372,6 +373,41 @@ export class PublicController {
     try {
       const countries = await ShippingZoneModel.distinct('countries');
       res.status(200).json({ success: true, data: (countries as string[]).sort() });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Place an order
+   * POST /api/v1/public/shop/orders
+   */
+  async placeOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const key = req.header('Idempotency-Key')?.trim().slice(0, 100) || undefined;
+      const site = (req as { site?: { _id?: unknown } }).site;
+      const { order, instructions, replay } = await placeOrder(orderBody.parse(req.body), { idempotencyKey: key, siteId: site?._id ? String(site._id) : undefined });
+      res.status(replay ? 200 : 201).json({
+        success: true,
+        data: { number: order.number, accessToken: order.accessToken, total: order.totals.total, currency: order.currency, payment: { method: order.payment.method, instructions } },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * An order for its customer (thank-you page)
+   * GET /api/v1/public/shop/orders/:number?token=
+   */
+  async getCustomerOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const order = await findOrderForCustomer(req.params.number, req.query.token);
+      if (!order) {
+        res.status(404).json({ success: false, error: 'Order not found' });
+        return;
+      }
+      res.status(200).json({ success: true, data: publicOrderView(order, await SettingsService.get()) });
     } catch (error) {
       next(error);
     }

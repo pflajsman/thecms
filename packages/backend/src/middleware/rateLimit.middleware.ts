@@ -80,6 +80,8 @@ export const orderLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `${(req.headers['x-api-key'] as string) || 'none'}:${req.ip || 'unknown'}`,
+  // Tests place many orders from one address in a few seconds.
+  skip: () => process.env.NODE_ENV === 'test',
   handler: (_req, res) => {
     res.status(429).json({ success: false, error: 'Too many orders. Please try again in a minute.' });
   },

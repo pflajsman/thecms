@@ -1,9 +1,9 @@
 import { Router, type IRouter } from 'express';
 import { publicController } from './public.controller';
 import { apiKeyMiddleware } from '../../middleware/apiKey.middleware';
-import { publicApiLimiter, formSubmitLimiter } from '../../middleware/rateLimit.middleware';
+import { publicApiLimiter, formSubmitLimiter, orderLimiter } from '../../middleware/rateLimit.middleware';
 import { validate } from '../../middleware/validation.middleware';
-import { quoteSchema } from '../commerce/checkout.schema';
+import { orderSchema, quoteSchema } from '../commerce/checkout.schema';
 
 /**
  * Public API Routes
@@ -124,6 +124,40 @@ router.post('/shop/quote', validate(quoteSchema), (req, res, next) => publicCont
  *         description: ISO country codes
  */
 router.get('/shop/shipping-countries', (req, res, next) => publicController.shippingCountries(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/public/shop/orders:
+ *   post:
+ *     summary: Place a guest order (re-prices the cart and reserves stock)
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     parameters:
+ *       - { in: header, name: Idempotency-Key, schema: { type: string } }
+ *     responses:
+ *       201:
+ *         description: Order placed
+ *       409:
+ *         description: PRICE_CHANGED (with a fresh quote) or OUT_OF_STOCK
+ */
+router.post('/shop/orders', orderLimiter, validate(orderSchema), (req, res, next) => publicController.placeOrder(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/public/shop/orders/{number}:
+ *   get:
+ *     summary: An order for its customer, with the access token from checkout
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Order status and payment instructions
+ *       404:
+ *         description: Unknown order or wrong token
+ */
+router.get('/shop/orders/:number', (req, res, next) => publicController.getCustomerOrder(req, res, next));
 
 /**
  * @swagger
