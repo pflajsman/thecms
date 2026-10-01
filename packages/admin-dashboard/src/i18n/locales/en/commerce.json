@@ -81,5 +81,63 @@
     "deleted": "Deleted {{name}}",
     "loadError": "Could not load the product.",
     "contentError": "Could not load the product's content."
+  },
+  "selling": {
+    "general": "General",
+    "type": "Type",
+    "vatRate": "VAT rate",
+    "vatOption": "{{name}} ({{rate}} %)",
+    "active": "Active",
+    "activeHint": "Active products are for sale once their content is published.",
+    "saveGeneral": "Save general",
+    "saved": "Saved"
+  },
+  "options": {
+    "title": "Options",
+    "hint": "For example Size or Colour. Each combination becomes a variant.",
+    "name": "Option name ({{language}})",
+    "value": "Value ({{language}})",
+    "addOption": "Add option",
+    "addValue": "Add value",
+    "newOption": "Option {{count}}",
+    "newValue": "Value {{count}}",
+    "removeOption": "Remove option {{name}}",
+    "removeValue": "Remove value {{value}}",
+    "apply": "Apply options",
+    "applied": "Options applied",
+    "removeTitle": "Remove variants?",
+    "removeText": "These variants no longer match the options and will be deleted:",
+    "labelRequired": "Enter every name in {{language}}",
+    "valueRequired": "Each option needs at least one value",
+    "max": "Up to 3 options"
+  },
+  "variants": {
+    "title": "Variants",
+    "variant": "Variant",
+    "sku": "SKU",
+    "skuLabel": "SKU, {{variant}}",
+    "price": "{{currency}} price",
+    "priceLabel": "{{currency}} price, {{variant}}",
+    "setAll": "Set {{currency}} for all",
+    "weight": "Weight (g)",
+    "weightLabel": "Weight, {{variant}}",
+    "stock": "Stock",
+    "tracked": "Track stock, {{variant}}",
+    "quantityLabel": "Quantity, {{variant}}",
+    "active": "Active",
+    "activeLabel": "Active, {{variant}}",
+    "save": "Save variants",
+    "saved": "Variants saved",
+    "priceInvalid": "Enter a price such as {{example}}",
+    "numberInvalid": "Enter a whole number"
+  },
+  "file": {
+    "title": "File",
+    "hint": "Customers get this file after paying. It is never public.",
+    "upload": "Upload file",
+    "replace": "Replace file",
+    "uploading": "Uploading…",
+    "none": "No file yet",
+    "uploaded": "File uploaded"
   }
 }

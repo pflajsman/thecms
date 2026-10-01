@@ -82,5 +82,63 @@
     "deleted": "Produkt {{name}} je smazaný",
     "loadError": "Produkt se nepodařilo načíst.",
     "contentError": "Obsah produktu se nepodařilo načíst."
+  },
+  "selling": {
+    "general": "Obecné",
+    "type": "Typ",
+    "vatRate": "Sazba DPH",
+    "vatOption": "{{name}} ({{rate}} %)",
+    "active": "Aktivní",
+    "activeHint": "Aktivní produkty jsou v prodeji, jakmile je jejich obsah publikovaný.",
+    "saveGeneral": "Uložit obecné",
+    "saved": "Uloženo"
+  },
+  "options": {
+    "title": "Možnosti",
+    "hint": "Například velikost nebo barva. Každá kombinace je jedna varianta.",
+    "name": "Název možnosti ({{language}})",
+    "value": "Hodnota ({{language}})",
+    "addOption": "Přidat možnost",
+    "addValue": "Přidat hodnotu",
+    "newOption": "Možnost {{count}}",
+    "newValue": "Hodnota {{count}}",
+    "removeOption": "Odebrat možnost {{name}}",
+    "removeValue": "Odebrat hodnotu {{value}}",
+    "apply": "Použít možnosti",
+    "applied": "Možnosti použity",
+    "removeTitle": "Odebrat varianty?",
+    "removeText": "Tyto varianty už neodpovídají možnostem a budou smazány:",
+    "labelRequired": "Vyplňte všechny názvy v jazyce {{language}}",
+    "valueRequired": "Každá možnost potřebuje aspoň jednu hodnotu",
+    "max": "Nejvýše 3 možnosti"
+  },
+  "variants": {
+    "title": "Varianty",
+    "variant": "Varianta",
+    "sku": "SKU",
+    "skuLabel": "SKU, {{variant}}",
+    "price": "Cena {{currency}}",
+    "priceLabel": "Cena {{currency}}, {{variant}}",
+    "setAll": "Nastavit {{currency}} všem",
+    "weight": "Hmotnost (g)",
+    "weightLabel": "Hmotnost, {{variant}}",
+    "stock": "Sklad",
+    "tracked": "Sledovat sklad, {{variant}}",
+    "quantityLabel": "Množství, {{variant}}",
+    "active": "Aktivní",
+    "activeLabel": "Aktivní, {{variant}}",
+    "save": "Uložit varianty",
+    "saved": "Varianty uloženy",
+    "priceInvalid": "Zadejte cenu, například {{example}}",
+    "numberInvalid": "Zadejte celé číslo"
+  },
+  "file": {
+    "title": "Soubor",
+    "hint": "Zákazníci tento soubor dostanou po zaplacení. Nikdy není veřejný.",
+    "upload": "Nahrát soubor",
+    "replace": "Nahradit soubor",
+    "uploading": "Nahrávám…",
+    "none": "Zatím žádný soubor",
+    "uploaded": "Soubor nahrán"
   }
 }
