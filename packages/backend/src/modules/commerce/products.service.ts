@@ -229,7 +229,12 @@ async function regenerate(product: IProduct, options: ProductOption[]): Promise<
   const existing = await VariantModel.find({ productId: product._id }).sort({ createdAt: 1 }).exec();
   const wanted = combinations(options);
   const keys = options.map((o) => o.key);
-  const project = (values: Record<string, string>) => Object.fromEntries(Object.entries(values ?? {}).filter(([k]) => keys.includes(k)));
+  // Keep only current options; an option the variant has no value for yet takes its first value,
+  // so adding an option turns existing variants into its first combinations instead of removing them.
+  const project = (values: Record<string, string>) => ({
+    ...Object.fromEntries(options.map((o) => [o.key, o.values[0]?.key])),
+    ...Object.fromEntries(Object.entries(values ?? {}).filter(([k]) => keys.includes(k))),
+  });
   const kept = new Set<string>();
   const removed: string[] = [];
   for (const v of existing) {

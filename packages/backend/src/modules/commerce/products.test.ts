@@ -107,3 +107,17 @@ it('lists products with name, price range, stock and status, and finds them by S
   expect(bySku.body.data.map((p: { name: string }) => p.name)).toEqual(['Tee']);
   expect((await request(app).get('/commerce/products').query({ type: 'DIGITAL' })).body.data.map((p: { name: string }) => p.name)).toEqual(['Guide']);
 });
+
+it('adding the first option keeps the existing variant as the first combination', async () => {
+  await ready();
+  const created = (await request(app).post('/commerce/products').send({ name: 'Tee', type: 'PHYSICAL' })).body.data;
+  const base = created.variants[0];
+  await request(app).put(`/commerce/products/${created.product.id}/variants`).send({
+    variants: [{ ...base, prices: { CZK: 49000 }, stock: { tracked: true, quantity: 7 } }],
+  });
+  const res = await request(app).put(`/commerce/products/${created.product.id}`).send({ options: sizes });
+  const kept = res.body.data.variants.find((v: { id: string }) => v.id === base.id);
+  expect(kept).toMatchObject({ sku: base.sku, optionValues: { size: 's' }, prices: { CZK: 49000 }, stock: { quantity: 7 } });
+  expect(res.body.data.removedVariantIds).toEqual([]);
+  expect(res.body.data.variants).toHaveLength(2);
+});
