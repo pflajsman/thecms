@@ -16,6 +16,8 @@ interface EditorSidePanelProps {
   canArchive: boolean
   onArchive: () => void
   onDelete: () => void
+  /** Language versions section, shown when the installation has more than one language. */
+  languages?: ReactNode
 }
 
 function statusHint(status: EntryStatus, entry?: ContentEntry): string {
@@ -25,7 +27,7 @@ function statusHint(status: EntryStatus, entry?: ContentEntry): string {
   return i18n.t('editor:panel.draftHint')
 }
 
-export function EditorSidePanel({ status, isNew, entry, cover, canArchive, onArchive, onDelete }: EditorSidePanelProps) {
+export function EditorSidePanel({ status, isNew, entry, cover, canArchive, onArchive, onDelete, languages }: EditorSidePanelProps) {
   const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-4">
@@ -34,6 +36,7 @@ export function EditorSidePanel({ status, isNew, entry, cover, canArchive, onArc
         <StatusPill status={status} />
         <p className="mt-2 text-xs text-muted-foreground">{statusHint(status, entry)}</p>
       </section>
+      {languages}
       {cover && <section className="rounded-lg border bg-card p-3">{cover}</section>}
       {entry && (
         <section className="rounded-lg border bg-card p-3 text-xs text-muted-foreground">

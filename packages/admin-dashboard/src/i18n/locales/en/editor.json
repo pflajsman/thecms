@@ -47,7 +47,8 @@
     "deleteText": "This permanently removes the entry and cannot be undone.",
     "leaveTitle": "Leave without saving?",
     "leaveText": "Your changes to this entry have not been saved.",
-    "leave": "Leave"
+    "leave": "Leave",
+    "deleteVersionText": "This permanently removes the {{language}} version. Other languages stay."
   },
   "topBar": {
     "back": "Content",
@@ -164,5 +165,22 @@
     "wrapRight": "Wrap text on the right",
     "noWrap": "No text wrap",
     "wrapLeft": "Wrap text on the left"
+  },
+  "languages": {
+    "switcherLabel": "Language: {{language}}",
+    "missing": "Missing",
+    "translateTo": "Translate to {{language}}",
+    "saveFirst": "Save your changes before translating",
+    "panelTitle": "Languages",
+    "changeLanguage": "Change language",
+    "changeTitle": "Change the language of this version",
+    "changeText": "Choose the language this version is written in. The content stays as it is.",
+    "changeSelect": "Language",
+    "changeConfirm": "Change language",
+    "noFreeLanguage": "Every language already has a version of this entry.",
+    "noDefaultWarning": "After this change the entry has no version in {{language}}, the default language. Sites that do not ask for a language will not show it.",
+    "sharedHint": "Same in all languages",
+    "translated": "Created the {{language}} version",
+    "changed": "Moved to {{language}}"
   }
 }

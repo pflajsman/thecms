@@ -49,7 +49,8 @@
     "deleteText": "Položka bude trvale odstraněna a nelze to vrátit.",
     "leaveTitle": "Odejít bez uložení?",
     "leaveText": "Změny v této položce nejsou uložené.",
-    "leave": "Odejít"
+    "leave": "Odejít",
+    "deleteVersionText": "Trvale odstraní verzi {{language}}. Ostatní jazyky zůstanou."
   },
   "topBar": {
     "back": "Obsah",
@@ -168,5 +169,22 @@
     "wrapRight": "Obtékat text vpravo",
     "noWrap": "Bez obtékání",
     "wrapLeft": "Obtékat text vlevo"
+  },
+  "languages": {
+    "switcherLabel": "Jazyk: {{language}}",
+    "missing": "Chybí",
+    "translateTo": "Vytvořit překlad: {{language}}",
+    "saveFirst": "Před překladem uložte změny",
+    "panelTitle": "Jazyky",
+    "changeLanguage": "Změnit jazyk",
+    "changeTitle": "Změnit jazyk této verze",
+    "changeText": "Vyberte jazyk, ve kterém je tato verze napsaná. Obsah zůstane beze změny.",
+    "changeSelect": "Jazyk",
+    "changeConfirm": "Změnit jazyk",
+    "noFreeLanguage": "Tato položka už má verzi ve všech jazycích.",
+    "noDefaultWarning": "Po této změně položka nebude mít verzi ve výchozím jazyce ({{language}}). Weby, které o jazyk neřeknou, ji nezobrazí.",
+    "sharedHint": "Stejné ve všech jazycích",
+    "translated": "Verze {{language}} je vytvořená",
+    "changed": "Přesunuto do jazyka {{language}}"
   }
 }

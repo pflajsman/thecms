@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import type { ContentEntry, ContentType, EntryStatus } from '@/types'
+import type { ContentEntry, ContentType, EntryStatus, Field } from '@/types'
 import { apiErrorMessage } from '@/lib/api-error'
 import { createInitialValues, duplicateData, resolveTitleField, toEntryPayload, type EntryValues } from '@/lib/entry-schema'
 import { useAutosave } from '@/lib/hooks/useAutosave'
@@ -18,6 +18,12 @@ import { EditorTopBar } from './EditorTopBar'
 import { EditorSidePanel } from './EditorSidePanel'
 import { UnsavedChangesDialog } from './UnsavedChangesDialog'
 import { FieldControl } from './fields/FieldControl'
+import { useLanguages } from '@/features/languages/languages-queries'
+import { isLocalized } from '@/lib/localized'
+import { useVersions } from '../queries'
+import { LanguageMenu } from './LanguageMenu'
+import { LanguagesSection } from './LanguagesSection'
+import { ChangeLanguageDialog } from './ChangeLanguageDialog'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -42,6 +48,17 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
   const [busy, setBusy] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirm, setConfirm] = useState<'archive' | 'delete' | null>(null)
+
+  const languagesQuery = useLanguages()
+  const languages = useMemo(() => languagesQuery.data ?? [], [languagesQuery.data])
+  const multilingual = languages.length > 1
+  const versionsQuery = useVersions(entry, { enabled: multilingual })
+  const versions = versionsQuery.data ?? []
+  const defaultLanguage = languages.find((l) => l.isDefault)
+  const language = entry?.language ?? defaultLanguage?.code ?? 'en'
+  const languageName = (code: string) => languages.find((l) => l.code === code)?.name ?? code
+  const showLanguages = multilingual && !!entry && versions.length > 0
+  const [changeOpen, setChangeOpen] = useState(false)
 
   const form = useEntryForm(fields, createInitialValues(fields, initialEntry?.data))
   const readOnly = status === 'ARCHIVED'
@@ -180,7 +197,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
           case 'duplicate': {
             const copy = await writes.create({
               typeId: contentType.id,
-              body: { data: duplicateData(toEntryPayload(fields, form.values), fields, contentType.titleField), status: 'DRAFT' },
+              body: { data: duplicateData(toEntryPayload(fields, form.values), fields, contentType.titleField), status: 'DRAFT', language: entry?.language },
             })
             toast.success(t('toast.duplicated'))
             navigate(`/content/${copy.id}`)
@@ -193,7 +210,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         setBusy(false)
       }
     },
-    [contentType, fields, form, navigate, persist, requireValid, writes, t],
+    [contentType, entry?.language, fields, form, navigate, persist, requireValid, writes, t],
   )
 
   const confirmArchive = async () => {
@@ -218,6 +235,36 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       toast.error(apiErrorMessage(error))
     }
   }
+
+  const translate = async (code: string) => {
+    setBusy(true)
+    try {
+      const created = await writes.translate(entryIdRef.current!, code)
+      toast.success(t('languages.translated', { language: languageName(code) }))
+      navigate(`/content/${created.id}`)
+    } catch (error) {
+      toast.error(apiErrorMessage(error))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const changeLanguage = async (code: string) => {
+    setBusy(true)
+    try {
+      const moved = await writes.changeLanguage(entryIdRef.current!, code)
+      setEntry(moved)
+      setChangeOpen(false)
+      toast.success(t('languages.changed', { language: languageName(code) }))
+    } catch (error) {
+      toast.error(apiErrorMessage(error))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const sharedHint = (field: { type: Field['type']; localized?: boolean }) =>
+    multilingual && !isLocalized(field) ? <p className="mt-1 text-xs text-muted-foreground">{t('languages.sharedHint')}</p> : null
 
   useHotkey(
     's',
@@ -258,6 +305,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
           error={form.visibleErrors[field.name]}
           disabled={readOnly}
         />
+        {sharedHint(field)}
       </div>
     )
   }
@@ -271,6 +319,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       canArchive={status !== 'ARCHIVED'}
       onArchive={() => setConfirm('archive')}
       onDelete={() => setConfirm('delete')}
+      languages={showLanguages ? <LanguagesSection languages={languages} versions={versions} current={language} onChange={() => setChangeOpen(true)} /> : undefined}
     />
   )
 
@@ -288,6 +337,19 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         busy={busy}
         onAction={(a) => void act(a)}
         onOpenDetails={() => setDetailsOpen(true)}
+        languageMenu={
+          showLanguages ? (
+            <LanguageMenu
+              languages={languages}
+              versions={versions}
+              current={language}
+              canTranslate={!form.isDirty}
+              busy={busy}
+              onOpen={(id) => navigate(`/content/${id}`)}
+              onTranslate={(code) => void translate(code)}
+            />
+          ) : undefined
+        }
       />
       {serverError && (
         <div role="alert" className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -323,6 +385,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
                   )}
                 />
                 {titleError && <p id={`field-${titleKey}-error`} className="mt-1 text-sm text-destructive">{titleError}</p>}
+                {sharedHint(fields.find((f) => f.name === titleKey)!)}
               </div>
             )}
             <div className="grid gap-6 sm:grid-cols-2">
@@ -345,6 +408,16 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         </SheetContent>
       </Sheet>
       <UnsavedChangesDialog blocker={blocker} />
+      <ChangeLanguageDialog
+        open={changeOpen}
+        onOpenChange={setChangeOpen}
+        free={languages.filter((l) => !versions.some((v) => v.language === l.code))}
+        current={language}
+        defaultLanguage={defaultLanguage}
+        defaultCovered={versions.some((v) => v.language === defaultLanguage?.code && v.id !== entry?.id)}
+        pending={busy}
+        onConfirm={(code) => void changeLanguage(code)}
+      />
       <ConfirmDialog
         open={confirm === 'archive'}
         onOpenChange={(o) => !o && setConfirm(null)}
@@ -357,7 +430,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         open={confirm === 'delete'}
         onOpenChange={(o) => !o && setConfirm(null)}
         title={t('confirm.deleteTitle')}
-        description={t('confirm.deleteText')}
+        description={versions.length > 1 ? t('confirm.deleteVersionText', { language: languageName(language) }) : t('confirm.deleteText')}
         confirmLabel={t('actions.delete')}
         destructive
         onConfirm={() => void confirmDelete()}

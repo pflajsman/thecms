@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, MoreHorizontal, PanelRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -20,9 +21,11 @@ interface EditorTopBarProps {
   busy: boolean
   onAction: (action: EditorAction) => void
   onOpenDetails: () => void
+  /** Language switcher, shown when the installation has more than one language. */
+  languageMenu?: ReactNode
 }
 
-export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, busy, onAction, onOpenDetails }: EditorTopBarProps) {
+export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, busy, onAction, onOpenDetails, languageMenu }: EditorTopBarProps) {
   const { t } = useTranslation('editor')
   const safeMenu = actions.menu.filter((m) => !m.destructive)
   const dangerMenu = actions.menu.filter((m) => m.destructive)
@@ -35,6 +38,7 @@ export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, 
         </Link>
       </Button>
       <span className="hidden text-sm text-muted-foreground sm:inline">/ {typeName}</span>
+      {languageMenu}
       <span className="flex-1" />
       <span role="status" aria-live="polite" className={saveTone === 'error' ? 'text-sm text-destructive' : 'text-sm text-muted-foreground'}>
         {saveLabel}
