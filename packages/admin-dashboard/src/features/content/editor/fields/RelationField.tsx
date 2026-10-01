@@ -9,6 +9,8 @@ import { StatusPill } from '@/components/common/StatusPill'
 import { useDebouncedValue } from '@/lib/hooks/useDebouncedValue'
 import { useEntry, useEntryList } from '../../queries'
 import { FieldShell } from './FieldShell'
+import { useLanguages } from '@/features/languages/languages-queries'
+import type { EntryListItem } from '@/types'
 import { describedBy, type FieldControlProps } from './field-aria'
 
 const OBJECT_ID = /^[a-f0-9]{24}$/i
@@ -26,6 +28,9 @@ export function RelationField(props: FieldControlProps) {
     { search: debounced || undefined, contentTypeId: target && OBJECT_ID.test(target) ? target : undefined, limit: 20 },
     { enabled: open },
   )
+
+  const defaultCode = useLanguages().data?.find((l) => l.isDefault)?.code
+  const items = onePerItem(results.data?.data ?? [], defaultCode)
 
   const choose = (entryId: string) => {
     if (multiple) {
@@ -57,13 +62,17 @@ export function RelationField(props: FieldControlProps) {
                 <CommandList>
                   <CommandEmpty>{results.isFetching ? t('fields.searching') : t('fields.noEntries')}</CommandEmpty>
                   <CommandGroup>
-                    {(results.data?.data ?? []).map((entry) => (
-                      <CommandItem key={entry.id} value={entry.id} onSelect={() => choose(entry.id)}>
-                        <span className="flex-1 truncate">{entry.title}</span>
-                        <span className="text-xs text-muted-foreground">{entry.contentType?.name}</span>
-                        {selected.includes(entry.id) && <span className="sr-only">{t('fields.selected')}</span>}
-                      </CommandItem>
-                    ))}
+                    {items.map((entry) => {
+                      // Relations store item ids, so they survive deleting one language version.
+                      const itemId = entry.itemId ?? entry.id
+                      return (
+                        <CommandItem key={itemId} value={itemId} onSelect={() => choose(itemId)}>
+                          <span className="flex-1 truncate">{entry.title}</span>
+                          <span className="text-xs text-muted-foreground">{entry.contentType?.name}</span>
+                          {selected.includes(itemId) && <span className="sr-only">{t('fields.selected')}</span>}
+                        </CommandItem>
+                      )
+                    })}
                   </CommandGroup>
                 </CommandList>
               </Command>
@@ -90,4 +99,15 @@ function RelationChip({ id, onRemove }: { id: string; onRemove?: () => void }) {
       )}
     </span>
   )
+}
+
+/** One row per item: its default-language version when listed, else the first version listed. */
+function onePerItem(entries: EntryListItem[], defaultCode?: string): EntryListItem[] {
+  const chosen = new Map<string, EntryListItem>()
+  for (const e of entries) {
+    const key = e.itemId ?? e.id
+    const current = chosen.get(key)
+    if (!current || (current.language !== defaultCode && e.language === defaultCode)) chosen.set(key, e)
+  }
+  return [...chosen.values()]
 }

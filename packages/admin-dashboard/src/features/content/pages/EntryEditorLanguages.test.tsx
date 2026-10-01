@@ -151,3 +151,35 @@ it('shows a shared value saved in another language when switching back', async (
   await waitFor(() => expect(screen.getByDisplayValue('Over the hills')).toBeInTheDocument())
   expect(screen.getByLabelText('Distance (km)')).toHaveValue(99)
 })
+
+it('switching language waits for a save in progress, then opens the other version with the saved shared value', async () => {
+  let enDistance = 10
+  let finish: () => void = () => {}
+  vi.mocked(api.getEntry).mockImplementation(async (id) => (id === 'cs1' ? csEntry : { ...enEntry, data: { ...enEntry.data, distanceKm: enDistance } }))
+  vi.mocked(api.updateEntry).mockImplementation(
+    (_id, body) =>
+      new Promise((resolve) => {
+        finish = () => {
+          enDistance = 99
+          resolve({ ...csEntry, data: { ...csEntry.data, ...body.data } })
+        }
+      }),
+  )
+  const { router } = renderRoutes(routes, { route: '/content/en1' })
+  expect(await screen.findByLabelText('Distance (km)')).toHaveValue(10)
+  await router.navigate('/content/cs1')
+  await waitFor(() => expect(screen.getByDisplayValue('Přes kopce')).toBeInTheDocument())
+  const distance = screen.getByLabelText('Distance (km)')
+  await userEvent.clear(distance)
+  await userEvent.type(distance, '99')
+  // Opening the menu blurs the field, which starts the autosave.
+  await userEvent.click(screen.getByRole('button', { name: 'Language: Čeština' }))
+  await waitFor(() => expect(api.updateEntry).toHaveBeenCalled())
+  await userEvent.click(screen.getByRole('menuitem', { name: /English/ }))
+  expect(router.state.location.pathname).toBe('/content/cs1')
+  finish()
+  await waitFor(() => expect(router.state.location.pathname).toBe('/content/en1'))
+  await waitFor(() => expect(screen.getByDisplayValue('Over the hills')).toBeInTheDocument())
+  expect(screen.getByLabelText('Distance (km)')).toHaveValue(99)
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+})

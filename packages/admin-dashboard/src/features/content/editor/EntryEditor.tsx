@@ -263,6 +263,14 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     }
   }
 
+  // A save in progress may change shared fields of the other version: open it only after the save.
+  const openVersion = async (versionId: string) => {
+    await queueRef.current
+    // Let React apply the saved state first, so the unsaved-changes guard sees a clean form.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    navigate(`/content/${versionId}`)
+  }
+
   const sharedHint = (field: { type: Field['type']; localized?: boolean }) =>
     multilingual && !isLocalized(field) ? <p className="mt-1 text-xs text-muted-foreground">{t('languages.sharedHint')}</p> : null
 
@@ -319,7 +327,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       canArchive={status !== 'ARCHIVED'}
       onArchive={() => setConfirm('archive')}
       onDelete={() => setConfirm('delete')}
-      languages={showLanguages ? <LanguagesSection languages={languages} versions={versions} current={language} onChange={() => setChangeOpen(true)} /> : undefined}
+      languages={showLanguages ? <LanguagesSection languages={languages} versions={versions} current={language} onOpen={(id) => void openVersion(id)} onChange={() => setChangeOpen(true)} /> : undefined}
     />
   )
 
@@ -345,7 +353,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
               current={language}
               canTranslate={!form.isDirty}
               busy={busy}
-              onOpen={(id) => navigate(`/content/${id}`)}
+              onOpen={(id) => void openVersion(id)}
               onTranslate={(code) => void translate(code)}
             />
           ) : undefined

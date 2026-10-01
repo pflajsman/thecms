@@ -15,6 +15,7 @@ vi.mock('../content-api', async (importOriginal) => {
     listEntries: vi.fn(),
     listContentTypes: vi.fn(),
     updateEntry: vi.fn(),
+    createEntry: vi.fn(),
     archiveEntry: vi.fn(),
     deleteEntry: vi.fn(),
   }
@@ -66,6 +67,16 @@ describe('content languages', () => {
     await userEvent.click(await screen.findByRole('combobox', { name: 'Missing translation' }))
     await userEvent.click(await screen.findByRole('option', { name: 'Missing in Čeština' }))
     await waitFor(() => expect(api.listEntries).toHaveBeenLastCalledWith(expect.objectContaining({ missing: 'cs' })))
+  })
+
+  it('duplicating a row keeps its language', async () => {
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem({ id: 'cs1', language: 'cs', languages: ['cs', 'en'], title: 'Přes kopce' })]))
+    vi.mocked(api.createEntry).mockResolvedValue({ ...makeListItem({ id: 'cs2', language: 'cs' }), contentType: undefined })
+    renderRoutes(routes, { route: '/content' })
+    const table = await screen.findByRole('table', { name: 'Entries' })
+    await userEvent.click(within(table).getByRole('button', { name: 'Actions for Přes kopce' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Duplicate' }))
+    await waitFor(() => expect(api.createEntry).toHaveBeenCalledWith(tripType.id, expect.objectContaining({ language: 'cs' })))
   })
 
   it('hides language filters and badges with one language', async () => {

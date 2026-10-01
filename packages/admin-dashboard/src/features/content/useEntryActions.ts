@@ -37,7 +37,7 @@ export function useEntryActions() {
       if (!e.contentType) return
       try {
         const data = type ? duplicateData(e.data, type.fields, type.titleField) : { ...e.data }
-        const copy = await writes.create({ typeId: e.contentType.id, body: { data, status: 'DRAFT' } })
+        const copy = await writes.create({ typeId: e.contentType.id, body: { data, status: 'DRAFT', language: e.language } })
         toast.success(t('toast.duplicated', { title: e.title }))
         navigate(`/content/${copy.id}`)
       } catch (error) {

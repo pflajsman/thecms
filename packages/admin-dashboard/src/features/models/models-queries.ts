@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { statsKeys } from '@/lib/queries/stats'
 import { contentKeys } from '@/features/content/queries'
+import { entryTypeId } from '@/features/content/content-api'
+import type { ContentEntry } from '@/types'
 import { createModel, deleteModel, getEntryCount, updateModel, type ModelPayload } from './models-api'
 
 export function useEntryCount(id?: string) {
@@ -27,6 +29,13 @@ export function useModelWrites() {
       update: async (id: string, body: ModelPayload) => {
         const ct = await updateModel(id, body)
         queryClient.setQueryData(contentKeys.type(id), ct)
+        // Saving can rewrite entry data on the server (fields made shared, titles recomputed).
+        queryClient.removeQueries({
+          predicate: (q) => {
+            const entry = q.queryKey[0] === contentKeys.all[0] && q.queryKey[1] === 'entry' ? (q.state.data as ContentEntry | undefined) : undefined
+            return !!entry && entryTypeId(entry) === id
+          },
+        })
         refresh(id)
         return ct
       },

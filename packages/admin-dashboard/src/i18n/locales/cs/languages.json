@@ -26,7 +26,7 @@
   },
   "confirm": {
     "defaultTitle": "Nastavit {{name}} jako výchozí jazyk?",
-    "defaultText": "Weby, které o jazyk neřeknou, dostanou {{name}}. Chybějící překlady se nahradí tímto jazykem.",
+    "defaultText": "Weby, které si o jazyk neřeknou, dostanou {{name}}. Chybějící překlady se nahradí tímto jazykem.",
     "defaultConfirm": "Nastavit jako výchozí",
     "deleteTitle": "Smazat jazyk {{name}}?",
     "deleteText_one": "Smaže se i {{count}} verze položky v jazyce {{name}}. Weby ji přestanou dostávat.",

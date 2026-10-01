@@ -74,20 +74,26 @@ export function useVersions(entry?: ContentEntry, options: { enabled?: boolean }
 export function useEntryWrites() {
   const queryClient = useQueryClient()
   return useMemo(() => {
-    const refresh = (savedId?: string) => {
+    const refresh = (saved?: ContentEntry) => {
       void queryClient.invalidateQueries({ queryKey: contentKeys.lists() })
       void queryClient.invalidateQueries({ queryKey: statsKeys.all })
       void queryClient.invalidateQueries({ queryKey: [...contentKeys.all, 'versions'] })
-      // Shared fields are copied to the other language versions on the server. Drop those cached
-      // versions: the editor reads its values once on open, so a stale copy would stay on screen.
-      queryClient.removeQueries({
-        predicate: (q) => q.queryKey[0] === contentKeys.all[0] && q.queryKey[1] === 'entry' && q.queryKey[2] !== savedId,
-      })
+      // Shared fields are copied to the item's other language versions on the server. Drop those
+      // cached versions: the editor reads its values once on open, so a stale copy would stay on screen.
+      if (saved?.itemId) {
+        queryClient.removeQueries({
+          predicate: (q) =>
+            q.queryKey[0] === contentKeys.all[0] &&
+            q.queryKey[1] === 'entry' &&
+            q.queryKey[2] !== saved.id &&
+            (q.state.data as ContentEntry | undefined)?.itemId === saved.itemId,
+        })
+      }
     }
     const done = async (promise: Promise<ContentEntry>) => {
       const entry = await promise
       queryClient.setQueryData(contentKeys.entry(entry.id), entry)
-      refresh(entry.id)
+      refresh(entry)
       return entry
     }
     return {

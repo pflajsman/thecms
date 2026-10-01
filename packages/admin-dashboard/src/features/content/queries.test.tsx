@@ -39,3 +39,13 @@ it('translate creates a version and caches it', async () => {
   expect(api.createVersion).toHaveBeenCalledWith('en1', 'cs')
   expect(queryClient.getQueryData(contentKeys.entry('cs1'))).toEqual(created)
 })
+
+it('a save keeps cached entries of other items, such as relation chips on screen', async () => {
+  const { queryClient, writes } = setup()
+  const cs = makeEntry({ id: 'cs1', itemId: 'en1', language: 'cs' })
+  const other = makeEntry({ id: 'x1', itemId: 'x1', language: 'en' })
+  queryClient.setQueryData(contentKeys.entry('x1'), other)
+  vi.mocked(api.updateEntry).mockResolvedValue(cs)
+  await writes.update({ id: 'cs1', body: { data: {} } })
+  expect(queryClient.getQueryData(contentKeys.entry('x1'))).toEqual(other)
+})
