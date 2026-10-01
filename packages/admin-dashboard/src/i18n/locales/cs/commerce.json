@@ -142,5 +142,39 @@
     "uploading": "Nahrávám…",
     "none": "Zatím žádný soubor",
     "uploaded": "Soubor nahrán"
+  },
+  "checkout": {
+    "title": "Objednávky a platby",
+    "hint": "Bankovní spojení pro převody, jak dlouho čekají nezaplacené objednávky, odkazy ke stažení a upozornění na objednávky.",
+    "bankAccounts": "Bankovní účty",
+    "noCurrencies": "Nejdřív přidejte měnu.",
+    "accountFor": "Účet pro {{code}}",
+    "addAccount": "Přidat bankovní účet pro {{code}}",
+    "removeAccount": "Odebrat účet pro {{code}}",
+    "holder": "Majitel účtu",
+    "accountNumber": "Číslo účtu",
+    "iban": "IBAN",
+    "ibanHint": "S IBAN obsahují e-maily k objednávce QR kód pro platbu.",
+    "bic": "BIC",
+    "unpaidCancelDays": "Zrušit nezaplacené převody po (dnech)",
+    "downloadDays": "Platnost odkazů ke stažení (dny)",
+    "downloadLimit": "Počet stažení na odkaz",
+    "shopEmail": "E-mail pro nové objednávky",
+    "shopEmailHint": "Nechte prázdné, pokud e-maily o nových objednávkách nechcete.",
+    "termsUrl": "Odkaz na obchodní podmínky",
+    "termsUrlHint": "Když je vyplněný, zákazníci musí při objednávce podmínky přijmout.",
+    "save": "Uložit nastavení objednávek",
+    "saved": "Nastavení objednávek uloženo",
+    "errors": {
+      "holder": "Zadejte majitele účtu, nejvýše 100 znaků",
+      "account": "Zadejte číslo účtu (nejvýše 40 znaků) nebo IBAN",
+      "iban": "Zadejte IBAN, například CZ65 0800 0000 1920 0014 5399",
+      "bic": "Zadejte BIC o 8 nebo 11 písmenech a číslicích",
+      "unpaidCancelDays": "Zadejte celé dny od 1 do 90",
+      "downloadDays": "Zadejte celé dny od 1 do 365",
+      "downloadLimit": "Zadejte celé číslo od 1 do 100",
+      "email": "Zadejte e-mailovou adresu",
+      "url": "Zadejte odkaz začínající http nebo https"
+    }
   }
 }

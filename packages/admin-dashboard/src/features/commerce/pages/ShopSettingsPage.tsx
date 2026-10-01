@@ -16,6 +16,7 @@ import { UnsavedChangesDialog } from '@/features/content/editor/UnsavedChangesDi
 import { toApiKey } from '@/features/builder/api-key'
 import type { ShopSettings } from '../commerce-api'
 import { useCommerceWrites, useShopSettings } from '../commerce-queries'
+import { CheckoutSettingsSection } from '../components/CheckoutSettingsSection'
 
 const CODE = /^[A-Z]{3}$/
 
@@ -41,13 +42,16 @@ export function ShopSettingsPage() {
   const [vatName, setVatName] = useState('')
   const [vatRate, setVatRate] = useState('')
   const [vatError, setVatError] = useState<'name' | 'rate' | null>(null)
+  const [checkoutDirty, setCheckoutDirty] = useState(false)
 
   useEffect(() => {
     if (settings.data && !draft) setDraft(settings.data)
   }, [settings.data, draft])
 
-  const dirty = !!draft && !!settings.data && JSON.stringify(draft) !== JSON.stringify(settings.data)
-  const blocker = useUnsavedGuard(dirty)
+  // Only the currency and VAT part counts here; the checkout section tracks its own edits.
+  const own = (s: ShopSettings) => JSON.stringify([s.currencies, s.defaultCurrency ?? null, s.vatRates])
+  const dirty = !!draft && !!settings.data && own(draft) !== own(settings.data)
+  const blocker = useUnsavedGuard(dirty || checkoutDirty)
   const percent = (rate: number) => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 }).format(rate / 100)
 
   if (settings.isError) return <ErrorState message={t('settings.loadError')} onRetry={() => void settings.refetch()} />
@@ -94,7 +98,7 @@ export function ShopSettingsPage() {
     setSaving(true)
     setServerError(null)
     try {
-      const saved = await writes.saveSettings(draft)
+      const saved = await writes.saveSettings({ currencies: draft.currencies, defaultCurrency: draft.defaultCurrency, vatRates: draft.vatRates })
       setDraft(saved)
       toast.success(t('settings.saved'))
     } catch (error) {
@@ -197,6 +201,7 @@ export function ShopSettingsPage() {
           {vatError && <p className="text-sm text-destructive">{vatError === 'name' ? t('settings.nameInvalid') : t('settings.rateInvalid')}</p>}
         </section>
       </div>
+      {settings.data && <CheckoutSettingsSection settings={settings.data} onDirty={setCheckoutDirty} />}
       <UnsavedChangesDialog blocker={blocker} />
     </>
   )

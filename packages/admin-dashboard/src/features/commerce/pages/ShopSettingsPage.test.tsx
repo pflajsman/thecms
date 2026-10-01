@@ -12,6 +12,11 @@ const saved = {
   currencies: [{ code: 'CZK', decimals: 2 }],
   defaultCurrency: 'CZK',
   vatRates: [{ id: 'standard', name: 'Standard', rate: 2100 }],
+  bankAccounts: [],
+  unpaidCancelDays: 14,
+  downloadDays: 30,
+  downloadLimit: 5,
+  termsUrl: 'https://shop.test/terms',
 }
 
 beforeEach(() => {
@@ -81,4 +86,64 @@ it('renames a VAT rate in place and keeps ids within 40 characters', async () =>
   expect(body.vatRates[0]).toEqual({ id: 'standard', name: 'Basic', rate: 2100 })
   expect(body.vatRates[1].id.length).toBeLessThanOrEqual(40)
   expect(body.vatRates[1].id).toMatch(/^[a-z0-9-]+$/)
+})
+
+it('adds a bank account, clears the terms link and saves only checkout settings', async () => {
+  const { container } = renderRoutes(routes, { route: '/commerce/settings' })
+  await userEvent.click(await screen.findByRole('button', { name: 'Add bank account for CZK' }))
+  await userEvent.type(screen.getByLabelText('Account holder'), 'Test Shop')
+  await userEvent.type(screen.getByLabelText('IBAN'), 'cz65 0800 0000 1920 0014 5399')
+  await userEvent.clear(screen.getByLabelText('Terms and conditions link'))
+  const days = screen.getByLabelText('Cancel unpaid transfers after (days)')
+  await userEvent.clear(days)
+  await userEvent.type(days, '10')
+  await userEvent.click(screen.getByRole('button', { name: 'Save checkout settings' }))
+  await waitFor(() =>
+    expect(apiClient.put).toHaveBeenCalledWith('/commerce/settings', {
+      currencies: saved.currencies,
+      defaultCurrency: 'CZK',
+      vatRates: saved.vatRates,
+      bankAccounts: [{ currency: 'CZK', holder: 'Test Shop', iban: 'CZ6508000000192000145399' }],
+      unpaidCancelDays: 10,
+      downloadDays: 30,
+      downloadLimit: 5,
+      shopEmail: null,
+      termsUrl: null,
+    }),
+  )
+  expect(await screen.findByText('Checkout settings saved')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Save settings' })).toBeDisabled()
+  await expectNoA11yViolations(container)
+})
+
+it('marks a bank account without number or IBAN and a bad email, and sends nothing', async () => {
+  renderRoutes(routes, { route: '/commerce/settings' })
+  await userEvent.click(await screen.findByRole('button', { name: 'Add bank account for CZK' }))
+  await userEvent.type(screen.getByLabelText('Account holder'), 'Test Shop')
+  await userEvent.type(screen.getByLabelText('Email for new orders'), 'shop@')
+  await userEvent.click(screen.getByRole('button', { name: 'Save checkout settings' }))
+  expect(screen.getByText('Enter an account number (up to 40 characters) or an IBAN')).toBeInTheDocument()
+  expect(screen.getByText('Enter an email address')).toBeInTheDocument()
+  expect(screen.getByLabelText('Account number')).toHaveAttribute('aria-invalid', 'true')
+  expect(apiClient.put).not.toHaveBeenCalled()
+})
+
+it('keeps unsaved checkout edits when the currencies are saved', async () => {
+  renderRoutes(routes, { route: '/commerce/settings' })
+  await userEvent.type(await screen.findByLabelText('Email for new orders'), 'shop@example.test')
+  await userEvent.type(screen.getByLabelText('Currency code'), 'EUR')
+  await userEvent.click(screen.getByRole('button', { name: 'Add currency' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Save settings' }))
+  await waitFor(() => expect(apiClient.put).toHaveBeenCalledTimes(1))
+  expect(screen.getByLabelText('Email for new orders')).toHaveValue('shop@example.test')
+  expect(screen.getByRole('button', { name: 'Save checkout settings' })).toBeEnabled()
+})
+
+it('renders the checkout section in Czech', async () => {
+  await setTestLanguage('cs')
+  const { container } = renderRoutes(routes, { route: '/commerce/settings' })
+  expect(await screen.findByRole('heading', { name: 'Objednávky a platby' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Přidat bankovní účet pro CZK' })).toBeInTheDocument()
+  expect(screen.getByLabelText('Odkaz na obchodní podmínky')).toHaveValue('https://shop.test/terms')
+  await expectNoA11yViolations(container)
 })
