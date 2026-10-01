@@ -30,9 +30,11 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 interface EntryEditorProps {
   contentType: ContentType
   entry?: ContentEntry
+  /** Editor inside another page (for example a product): own back link and version URLs, no Duplicate or Delete. */
+  embedded?: { backTo: string; backLabel: string; versionPath: (versionId: string) => string }
 }
 
-export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorProps) {
+export function EntryEditor({ contentType, entry: initialEntry, embedded }: EntryEditorProps) {
   const navigate = useNavigate()
   const { t } = useTranslation('editor')
   const writes = useEntryWrites()
@@ -49,6 +51,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirm, setConfirm] = useState<'archive' | 'delete' | null>(null)
 
+  const versionPath = embedded?.versionPath ?? ((versionId: string) => `/content/${versionId}`)
   const languagesQuery = useLanguages()
   const languages = useMemo(() => languagesQuery.data ?? [], [languagesQuery.data])
   const multilingual = languages.length > 1
@@ -241,7 +244,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     try {
       const created = await writes.translate(entryIdRef.current!, code)
       toast.success(t('languages.translated', { language: languageName(code) }))
-      navigate(`/content/${created.id}`)
+      navigate(versionPath(created.id))
     } catch (error) {
       toast.error(apiErrorMessage(error))
     } finally {
@@ -268,7 +271,7 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
     await queueRef.current
     // Let React apply the saved state first, so the unsaved-changes guard sees a clean form.
     await new Promise((resolve) => setTimeout(resolve, 0))
-    navigate(`/content/${versionId}`)
+    navigate(versionPath(versionId))
   }
 
   const sharedHint = (field: { type: Field['type']; localized?: boolean }) =>
@@ -285,7 +288,8 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
   )
 
   const isNew = !entryIdRef.current
-  const actions = getEditorActions({ isNew, status, isDirty: form.isDirty })
+  const allActions = getEditorActions({ isNew, status, isDirty: form.isDirty })
+  const actions = embedded ? { ...allActions, menu: allActions.menu.filter((m) => m.action !== 'duplicate' && m.action !== 'delete') } : allActions
   const errorCount = Object.keys(form.errors).length
 
   const saveLabel = useMemo(() => {
@@ -327,7 +331,8 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
       canArchive={status !== 'ARCHIVED'}
       onArchive={() => setConfirm('archive')}
       onDelete={() => setConfirm('delete')}
-      languages={showLanguages ? <LanguagesSection languages={languages} versions={versions} current={language} onOpen={(id) => void openVersion(id)} onChange={() => setChangeOpen(true)} /> : undefined}
+      canDelete={!embedded}
+      languages={showLanguages ? <LanguagesSection languages={languages} versions={versions} current={language} onOpen={(id) => void openVersion(id)} onChange={() => setChangeOpen(true)} pathFor={versionPath} /> : undefined}
     />
   )
 
@@ -345,6 +350,8 @@ export function EntryEditor({ contentType, entry: initialEntry }: EntryEditorPro
         busy={busy}
         onAction={(a) => void act(a)}
         onOpenDetails={() => setDetailsOpen(true)}
+        backTo={embedded?.backTo}
+        backLabel={embedded?.backLabel}
         languageMenu={
           showLanguages ? (
             <LanguageMenu

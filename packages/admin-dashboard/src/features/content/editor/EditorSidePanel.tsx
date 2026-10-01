@@ -18,6 +18,8 @@ interface EditorSidePanelProps {
   onDelete: () => void
   /** Language versions section, shown when the installation has more than one language. */
   languages?: ReactNode
+  /** False hides Delete (an embedded editor deletes through its owner). */
+  canDelete?: boolean
 }
 
 function statusHint(status: EntryStatus, entry?: ContentEntry): string {
@@ -27,7 +29,7 @@ function statusHint(status: EntryStatus, entry?: ContentEntry): string {
   return i18n.t('editor:panel.draftHint')
 }
 
-export function EditorSidePanel({ status, isNew, entry, cover, canArchive, onArchive, onDelete, languages }: EditorSidePanelProps) {
+export function EditorSidePanel({ status, isNew, entry, cover, canArchive, onArchive, onDelete, languages, canDelete = true }: EditorSidePanelProps) {
   const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-4">
@@ -64,7 +66,7 @@ export function EditorSidePanel({ status, isNew, entry, cover, canArchive, onArc
       {!isNew && (
         <div className="flex flex-wrap gap-2">
           {canArchive && <Button variant="outline" size="sm" onClick={onArchive}>{t('actions.archive')}</Button>}
-          <Button variant="outline" size="sm" className="text-destructive" onClick={onDelete}>{t('actions.delete')}</Button>
+          {canDelete && <Button variant="outline" size="sm" className="text-destructive" onClick={onDelete}>{t('actions.delete')}</Button>}
         </div>
       )}
     </div>

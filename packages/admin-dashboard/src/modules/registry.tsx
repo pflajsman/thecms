@@ -32,9 +32,9 @@ import { SiteFormPage } from '@/features/sites/pages/SiteFormPage'
 import { WebhooksListPage } from '@/features/webhooks/pages/WebhooksListPage'
 import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
 import { LanguagesPage } from '@/features/languages/pages/LanguagesPage'
-import { ComingSoon } from '@/features/commerce/ComingSoon'
 import { ShopSettingsPage } from '@/features/commerce/pages/ShopSettingsPage'
 import { ProductsListPage } from '@/features/commerce/pages/ProductsListPage'
+import { ProductPage } from '@/features/commerce/pages/ProductPage'
 
 export const modules: AppModule[] = [
   {
@@ -92,8 +92,8 @@ export const modules: AppModule[] = [
     path: '/commerce/products',
     routes: [
       { path: 'commerce/products', element: <ProductsListPage /> },
-      { path: 'commerce/products/:id', element: <ComingSoon /> },
-      { path: 'commerce/products/:id/content/:versionId', element: <ComingSoon /> },
+      { path: 'commerce/products/:id', element: <ProductPage /> },
+      { path: 'commerce/products/:id/content/:versionId', element: <ProductPage /> },
     ],
   },
   {

@@ -1,5 +1,4 @@
 {
-  "comingSoon": "Připravujeme",
   "settings": {
     "title": "Nastavení obchodu",
     "description": "Měny, ve kterých zadáváte ceny, a sazby DPH vašich produktů.",
@@ -73,6 +72,15 @@
     "action": "Otevřít nastavení obchodu"
   },
   "product": {
-    "untitled": "Produkt bez názvu"
+    "untitled": "Produkt bez názvu",
+    "sections": "Části produktu",
+    "selling": "Prodej",
+    "content": "Obsah",
+    "delete": "Smazat produkt",
+    "deleteTitle": "Smazat {{name}}?",
+    "deleteText": "Smaže se produkt, jeho varianty, soubor i texty ve všech jazycích.",
+    "deleted": "Produkt {{name}} je smazaný",
+    "loadError": "Produkt se nepodařilo načíst.",
+    "contentError": "Obsah produktu se nepodařilo načíst."
   }
 }

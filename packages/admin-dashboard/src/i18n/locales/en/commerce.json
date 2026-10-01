@@ -1,5 +1,4 @@
 {
-  "comingSoon": "Coming soon",
   "settings": {
     "title": "Shop settings",
     "description": "Currencies your prices use and the VAT rates of your products.",
@@ -72,6 +71,15 @@
     "action": "Open shop settings"
   },
   "product": {
-    "untitled": "Untitled product"
+    "untitled": "Untitled product",
+    "sections": "Product sections",
+    "selling": "Selling",
+    "content": "Content",
+    "delete": "Delete product",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "This removes the product, its variants, its file and its text in every language.",
+    "deleted": "Deleted {{name}}",
+    "loadError": "Could not load the product.",
+    "contentError": "Could not load the product's content."
   }
 }

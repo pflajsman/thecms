@@ -23,18 +23,21 @@ interface EditorTopBarProps {
   onOpenDetails: () => void
   /** Language switcher, shown when the installation has more than one language. */
   languageMenu?: ReactNode
+  /** Back link target and label; defaults to the Content list. */
+  backTo?: string
+  backLabel?: string
 }
 
-export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, busy, onAction, onOpenDetails, languageMenu }: EditorTopBarProps) {
+export function EditorTopBar({ typeName, saveLabel, saveTone, onRetry, actions, busy, onAction, onOpenDetails, languageMenu, backTo = '/content', backLabel }: EditorTopBarProps) {
   const { t } = useTranslation('editor')
   const safeMenu = actions.menu.filter((m) => !m.destructive)
   const dangerMenu = actions.menu.filter((m) => m.destructive)
   return (
     <div className="sticky top-14 z-20 -mx-4 mb-6 flex flex-wrap items-center gap-2 border-b bg-background/95 px-4 py-2 backdrop-blur md:top-0 md:-mx-8 md:px-8">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link to="/content">
+        <Link to={backTo}>
           <ArrowLeft aria-hidden />
-          {t('topBar.back')}
+          {backLabel ?? t('topBar.back')}
         </Link>
       </Button>
       <span className="hidden text-sm text-muted-foreground sm:inline">/ {typeName}</span>
