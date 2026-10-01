@@ -1,3 +1,32 @@
 {
-  "comingSoon": "Připravujeme"
+  "comingSoon": "Připravujeme",
+  "settings": {
+    "title": "Nastavení obchodu",
+    "description": "Měny, ve kterých zadáváte ceny, a sazby DPH vašich produktů.",
+    "loadError": "Nastavení obchodu se nepodařilo načíst.",
+    "currencies": "Měny",
+    "currencyCode": "Kód měny",
+    "decimals": "Desetinná místa",
+    "decimalsValue_one": "{{count}} desetinné místo",
+    "decimalsValue_few": "{{count}} desetinná místa",
+    "decimalsValue_other": "{{count}} desetinných míst",
+    "addCurrency": "Přidat měnu",
+    "default": "Výchozí",
+    "makeDefault": "Nastavit jako výchozí",
+    "removeCurrency": "Odebrat {{code}}",
+    "codeInvalid": "Zadejte třípísmenný kód, například EUR",
+    "codeTaken": "Tato měna už v seznamu je",
+    "vatRates": "Sazby DPH",
+    "vatName": "Název sazby",
+    "vatRate": "Sazba (%)",
+    "percent": "{{value}} %",
+    "addVat": "Přidat sazbu",
+    "removeVat": "Odebrat {{name}}",
+    "rateInvalid": "Zadejte sazbu od 0 do 100",
+    "nameInvalid": "Zadejte název o délce nejvýše 50 znaků",
+    "save": "Uložit nastavení",
+    "saved": "Nastavení uloženo",
+    "empty": "Zatím žádné měny",
+    "emptyVat": "Zatím žádné sazby"
+  }
 }

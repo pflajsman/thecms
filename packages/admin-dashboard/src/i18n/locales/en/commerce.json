@@ -1,3 +1,31 @@
 {
-  "comingSoon": "Coming soon"
+  "comingSoon": "Coming soon",
+  "settings": {
+    "title": "Shop settings",
+    "description": "Currencies your prices use and the VAT rates of your products.",
+    "loadError": "Could not load shop settings.",
+    "currencies": "Currencies",
+    "currencyCode": "Currency code",
+    "decimals": "Decimals",
+    "decimalsValue_one": "{{count}} decimal",
+    "decimalsValue_other": "{{count}} decimals",
+    "addCurrency": "Add currency",
+    "default": "Default",
+    "makeDefault": "Make default",
+    "removeCurrency": "Remove {{code}}",
+    "codeInvalid": "Use a three-letter code such as EUR",
+    "codeTaken": "This currency is already in the list",
+    "vatRates": "VAT rates",
+    "vatName": "VAT rate name",
+    "vatRate": "Rate (%)",
+    "percent": "{{value}} %",
+    "addVat": "Add VAT rate",
+    "removeVat": "Remove {{name}}",
+    "rateInvalid": "Use a rate from 0 to 100",
+    "nameInvalid": "Enter a name of up to 50 characters",
+    "save": "Save settings",
+    "saved": "Settings saved",
+    "empty": "No currencies yet",
+    "emptyVat": "No VAT rates yet"
+  }
 }

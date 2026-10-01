@@ -33,6 +33,7 @@ import { WebhooksListPage } from '@/features/webhooks/pages/WebhooksListPage'
 import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
 import { LanguagesPage } from '@/features/languages/pages/LanguagesPage'
 import { ComingSoon } from '@/features/commerce/ComingSoon'
+import { ShopSettingsPage } from '@/features/commerce/pages/ShopSettingsPage'
 
 export const modules: AppModule[] = [
   {
@@ -100,7 +101,7 @@ export const modules: AppModule[] = [
     icon: Store,
     group: 'commerce',
     path: '/commerce/settings',
-    routes: [{ path: 'commerce/settings', element: <ComingSoon /> }],
+    routes: [{ path: 'commerce/settings', element: <ShopSettingsPage /> }],
   },
   {
     id: 'models',
