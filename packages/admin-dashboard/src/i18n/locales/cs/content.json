@@ -11,7 +11,8 @@
     "emptyText": "Vytvořte první položku a zobrazí se tady.",
     "newEntry": "Nová položka",
     "deletedModel": "Smazaný model",
-    "untitled": "Bez názvu"
+    "untitled": "Bez názvu",
+    "alsoIn": "Také: {{languages}}"
   },
   "columns": {
     "title": "Název",
@@ -30,7 +31,12 @@
     "sortCreated": "Datum vytvoření",
     "sortTitle": "Název (A–Z)",
     "model": "Model obsahu",
-    "allTypes": "Všechny typy"
+    "allTypes": "Všechny typy",
+    "language": "Jazyk",
+    "allLanguages": "Všechny jazyky",
+    "missing": "Chybějící překlad",
+    "missingAny": "Bez ohledu na překlad",
+    "missingIn": "Chybí: {{language}}"
   },
   "rowMenu": {
     "actionsFor": "Akce pro {{title}}",

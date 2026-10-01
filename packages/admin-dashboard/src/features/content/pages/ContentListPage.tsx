@@ -26,6 +26,7 @@ import { useMediaByIds } from '@/features/media/queries'
 import { MediaThumb } from '@/features/media/components/MediaTile'
 import { isImage } from '@/features/media/media-utils'
 import { coverMediaId } from '../cover'
+import { useLanguages } from '@/features/languages/languages-queries'
 
 export function ContentListPage() {
   const navigate = useNavigate()
@@ -33,6 +34,8 @@ export function ContentListPage() {
   const [params, update] = useContentListParams()
   const typesQuery = useContentTypes()
   const stats = useStats()
+  const languages = useLanguages().data
+  const multilingual = (languages?.length ?? 0) > 1
   const list = useEntryList(toEntryQuery(params))
   const types = useMemo(() => typesQuery.data ?? [], [typesQuery.data])
   const typeById = useMemo(() => new Map(types.map((t) => [t.id, t])), [types])
@@ -45,7 +48,7 @@ export function ContentListPage() {
     const id = coverMediaId(e, e.contentType ? typeById.get(e.contentType.id) : undefined)
     return id ? covers.byId.get(id) : undefined
   }
-  const filtersActive = !!(params.type || params.status || params.q)
+  const filtersActive = !!(params.type || params.status || params.q || params.lang || params.missing)
 
   useHotkey('n', () => navigate(params.type ? `/content/new?type=${params.type}` : '/content/new'))
 
@@ -59,7 +62,7 @@ export function ContentListPage() {
   }, [rows, pagination, params.page, update])
 
   const columns: DataColumn<EntryListItem>[] = [
-    { id: 'title', header: t('columns.title'), cell: (e) => <span className="flex items-center gap-3"><TypeBadge entry={e} cover={coverFor(e)} /><TitleLink entry={e} /></span> },
+    { id: 'title', header: t('columns.title'), cell: (e) => <span className="flex items-center gap-3"><TypeBadge entry={e} cover={coverFor(e)} /><span><TitleLink entry={e} />{multilingual && <LanguageBadges entry={e} />}</span></span> },
     { id: 'type', header: t('columns.model'), cell: (e) => <TypeLabel entry={e} />, className: 'w-40' },
     { id: 'edited', header: t('columns.edited'), cell: (e) => <Edited date={e.updatedAt} />, className: 'w-32 whitespace-nowrap' },
     { id: 'status', header: t('columns.status'), cell: (e) => <StatusPill status={e.status} />, className: 'w-28' },
@@ -78,7 +81,7 @@ export function ContentListPage() {
       <EmptyState
         icon={SearchX}
         title={t('list.noMatch')}
-        action={<Button variant="outline" onClick={() => update({ type: undefined, status: undefined, q: undefined })}>{t('list.clearFilters')}</Button>}
+        action={<Button variant="outline" onClick={() => update({ type: undefined, status: undefined, q: undefined, lang: undefined, missing: undefined })}>{t('list.clearFilters')}</Button>}
       />
     )
   } else if (list.data.data.length === 0) {
@@ -103,6 +106,7 @@ export function ContentListPage() {
               <TypeBadge entry={e} cover={coverFor(e)} />
               <div className="min-w-0 flex-1">
                 <TitleLink entry={e} />
+                {multilingual && <LanguageBadges entry={e} />}
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {e.contentType?.name ?? t('list.deletedModel')} · <Edited date={e.updatedAt} />
                 </p>
@@ -120,7 +124,7 @@ export function ContentListPage() {
   return (
     <>
       <PageHeader title={t('list.title')} description={t('list.description')} actions={<NewEntryButton types={types} />} />
-      {types.length > 0 && <ContentFilters types={types} counts={stats.data?.entries.byType} params={params} update={update} />}
+      {types.length > 0 && <ContentFilters types={types} counts={stats.data?.entries.byType} params={params} update={update} languages={languages} />}
       {body}
     </>
   )
@@ -136,6 +140,18 @@ function TitleLink({ entry }: { entry: EntryListItem }) {
     >
       {untitled ? t('list.untitled') : entry.title}
     </Link>
+  )
+}
+
+function LanguageBadges({ entry }: { entry: EntryListItem }) {
+  const { t } = useTranslation('content')
+  if (!entry.language) return null
+  const others = (entry.languages ?? []).filter((l) => l !== entry.language)
+  return (
+    <span className="ml-2 inline-flex items-center gap-1.5 align-middle text-xs text-muted-foreground">
+      <span className="rounded border px-1 font-mono">{entry.language.toUpperCase()}</span>
+      {others.length > 0 && <span>{t('list.alsoIn', { languages: others.map((l) => l.toUpperCase()).join(', ') })}</span>}
+    </span>
   )
 }
 

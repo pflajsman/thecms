@@ -11,7 +11,8 @@
     "emptyText": "Create your first entry to see it here.",
     "newEntry": "New entry",
     "deletedModel": "Deleted model",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "alsoIn": "Also in {{languages}}"
   },
   "columns": {
     "title": "Title",
@@ -30,7 +31,12 @@
     "sortCreated": "Created",
     "sortTitle": "Title A to Z",
     "model": "Content model",
-    "allTypes": "All types"
+    "allTypes": "All types",
+    "language": "Language",
+    "allLanguages": "All languages",
+    "missing": "Missing translation",
+    "missingAny": "Any translation",
+    "missingIn": "Missing in {{language}}"
   },
   "rowMenu": {
     "actionsFor": "Actions for {{title}}",

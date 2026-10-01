@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { useDebouncedValue } from '@/lib/hooks/useDebouncedValue'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import type { Language } from '@/features/languages/languages-api'
 import type { ContentListParams, ContentSort } from '../list-params'
 
 interface ContentFiltersProps {
@@ -13,11 +14,13 @@ interface ContentFiltersProps {
   counts?: Record<string, number>
   params: ContentListParams
   update: (patch: Partial<ContentListParams>) => void
+  /** Language filters show when there is more than one language. */
+  languages?: Language[]
 }
 
 const ANY = 'any'
 
-export function ContentFilters({ types, counts, params, update }: ContentFiltersProps) {
+export function ContentFilters({ types, counts, params, update, languages }: ContentFiltersProps) {
   const { t } = useTranslation('content')
   const [search, setSearch] = useState(params.q ?? '')
   const debounced = useDebouncedValue(search, 300)
@@ -62,6 +65,32 @@ export function ContentFilters({ types, counts, params, update }: ContentFilters
               <SelectItem value="ARCHIVED">{t('status.ARCHIVED', { ns: 'common' })}</SelectItem>
             </SelectContent>
           </Select>
+          {languages && languages.length > 1 && (
+            <>
+              <Select value={params.lang ?? ANY} onValueChange={(v) => update({ lang: v === ANY ? undefined : v })}>
+                <SelectTrigger aria-label={t('filters.language')} className="w-auto min-w-36 rounded-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>{t('filters.allLanguages')}</SelectItem>
+                  {languages.map((l) => (
+                    <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={params.missing ?? ANY} onValueChange={(v) => update({ missing: v === ANY ? undefined : v })}>
+                <SelectTrigger aria-label={t('filters.missing')} className="w-auto min-w-40 rounded-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY}>{t('filters.missingAny')}</SelectItem>
+                  {languages.map((l) => (
+                    <SelectItem key={l.code} value={l.code}>{t('filters.missingIn', { language: l.name })}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
           <Select value={params.sort} onValueChange={(v) => update({ sort: v as ContentSort })}>
             <SelectTrigger aria-label={t('filters.sort')} className="w-auto min-w-40 rounded-full">
               <SelectValue />

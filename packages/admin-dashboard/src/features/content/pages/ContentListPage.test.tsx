@@ -6,6 +6,7 @@ import { ContentListPage } from './ContentListPage'
 import { makeListItem, page, postType, tripType } from '../test-fixtures'
 import { makeMedia, mediaPage } from '@/features/media/test-fixtures'
 import * as mediaApi from '@/features/media/media-api'
+import * as languagesApi from '@/features/languages/languages-api'
 
 vi.mock('../content-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../content-api')>()
@@ -22,6 +23,10 @@ vi.mock('@/features/media/media-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/features/media/media-api')>()
   return { ...actual, listMedia: vi.fn() }
 })
+vi.mock('@/features/languages/languages-api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/languages/languages-api')>()),
+  listLanguages: vi.fn(),
+}))
 vi.mock('@/lib/queries/stats', () => ({
   statsKeys: { all: ['stats'] },
   useStats: () => ({ data: { entries: { byType: { [tripType.id]: 8, [postType.id]: 12 } } } }),
@@ -34,8 +39,43 @@ const routes = [
   { path: '/models', element: <p>models</p> },
 ]
 
+const en = { id: 'l1', code: 'en', name: 'English', isDefault: true, order: 0 }
+const cs = { id: 'l2', code: 'cs', name: 'Čeština', isDefault: false, order: 1 }
+
 beforeEach(() => {
   vi.mocked(api.listContentTypes).mockResolvedValue([tripType, postType])
+  vi.mocked(languagesApi.listLanguages).mockResolvedValue([en])
+})
+
+describe('content languages', () => {
+  beforeEach(() => vi.mocked(languagesApi.listLanguages).mockResolvedValue([en, cs]))
+
+  it('filters by language and shows each row’s language and the others it has', async () => {
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem({ id: 'cs1', language: 'cs', languages: ['cs', 'en'], title: 'Přes kopce' })]))
+    renderRoutes(routes, { route: '/content?lang=cs' })
+    const table = await screen.findByRole('table', { name: 'Entries' })
+    expect(api.listEntries).toHaveBeenLastCalledWith(expect.objectContaining({ language: 'cs' }))
+    const row = within(table).getByRole('link', { name: 'Přes kopce' }).closest('tr')!
+    expect(await within(row).findByText('CS')).toBeInTheDocument()
+    expect(within(row).getByText('Also in EN')).toBeInTheDocument()
+  })
+
+  it('finds entries missing a language', async () => {
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem()]))
+    renderRoutes(routes, { route: '/content' })
+    await userEvent.click(await screen.findByRole('combobox', { name: 'Missing translation' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Missing in Čeština' }))
+    await waitFor(() => expect(api.listEntries).toHaveBeenLastCalledWith(expect.objectContaining({ missing: 'cs' })))
+  })
+
+  it('hides language filters and badges with one language', async () => {
+    vi.mocked(languagesApi.listLanguages).mockResolvedValue([en])
+    vi.mocked(api.listEntries).mockResolvedValue(page([makeListItem({ language: 'en', languages: ['en'] })]))
+    renderRoutes(routes, { route: '/content' })
+    await screen.findByRole('table', { name: 'Entries' })
+    expect(screen.queryByRole('combobox', { name: 'Language' })).not.toBeInTheDocument()
+    expect(screen.queryByText('EN')).not.toBeInTheDocument()
+  })
 })
 
 describe('ContentListPage', () => {

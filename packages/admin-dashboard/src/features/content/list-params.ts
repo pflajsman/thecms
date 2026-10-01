@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { EntryStatus } from '@/types'
+import { LANGUAGE_CODE } from '@/features/languages/languages-api'
 import type { EntryListParams } from './content-api'
 
 export type ContentSort = 'updatedAt' | 'createdAt' | 'title'
@@ -11,6 +12,10 @@ export interface ContentListParams {
   q?: string
   sort: ContentSort
   page: number
+  /** Only versions in this language. */
+  lang?: string
+  /** Items with no version in this language. */
+  missing?: string
 }
 
 export const PAGE_SIZE = 20
@@ -30,6 +35,10 @@ export function parseListParams(sp: URLSearchParams): ContentListParams {
   if (sort && SORTS.includes(sort)) params.sort = sort
   const pageNo = Number(sp.get('page'))
   if (Number.isInteger(pageNo) && pageNo > 1) params.page = pageNo
+  const lang = sp.get('lang')
+  if (lang && LANGUAGE_CODE.test(lang)) params.lang = lang
+  const missing = sp.get('missing')
+  if (missing && LANGUAGE_CODE.test(missing)) params.missing = missing
   return params
 }
 
@@ -40,6 +49,8 @@ export function serializeListParams(p: ContentListParams): URLSearchParams {
   if (p.q) sp.set('q', p.q)
   if (p.sort !== 'updatedAt') sp.set('sort', p.sort)
   if (p.page > 1) sp.set('page', String(p.page))
+  if (p.lang) sp.set('lang', p.lang)
+  if (p.missing) sp.set('missing', p.missing)
   return sp
 }
 
@@ -52,6 +63,8 @@ export function toEntryQuery(p: ContentListParams): EntryListParams {
     sortOrder: p.sort === 'title' ? 'asc' : 'desc',
     page: p.page,
     limit: PAGE_SIZE,
+    language: p.lang,
+    missing: p.missing,
   }
 }
 

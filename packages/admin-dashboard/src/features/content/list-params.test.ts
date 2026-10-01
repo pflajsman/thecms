@@ -21,3 +21,18 @@ describe('list params', () => {
     expect(toEntryQuery({ sort: 'updatedAt', page: 1 }).sortOrder).toBe('desc')
   })
 })
+
+describe('language filters', () => {
+  it('reads and writes the language filters', () => {
+    const p = parseListParams(new URLSearchParams('lang=cs&missing=de'))
+    expect(p).toMatchObject({ lang: 'cs', missing: 'de' })
+    expect(serializeListParams(p).toString()).toBe('lang=cs&missing=de')
+    expect(toEntryQuery(p)).toMatchObject({ language: 'cs', missing: 'de' })
+  })
+
+  it('ignores malformed language codes', () => {
+    const p = parseListParams(new URLSearchParams('lang=Czech!&missing=x'))
+    expect(p).not.toHaveProperty('lang')
+    expect(p).not.toHaveProperty('missing')
+  })
+})
