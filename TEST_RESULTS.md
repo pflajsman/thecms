@@ -471,3 +471,34 @@ Environment: local mongod and Azurite; worktree backend (port 3100) and admin (p
 | Products list in Czech: "490,00 Kč", "Dochází", "Aktivní", "Nepublikováno" | Pass |
 | 360px (iframe) in English and Czech: products, settings, Selling and Content tabs have no horizontal scroll | Pass (after fix in this plan: Czech currency rows were 400px wide) |
 | New product dialog, delete confirmation, options removal dialog, leave dialog, file upload picker | Covered by unit tests only (the browser tool cannot act while a dialog or the OS file picker is open) |
+
+## E-shop orders Plan 1 verification (2026-10-01)
+
+Environment: local mongod and Azurite; worktree backend (port 3100) on a throwaway copy of the local database, dropped afterwards. Brevo not configured. All checks through the HTTP API with curl.
+
+| Check | Result |
+|---|---|
+| Backend tests (175) | Pass |
+| Settings: CZK, bank account with IBAN, terms link, shop email; `unpaidCancelDays` defaults to 14 | Pass |
+| Zones CZ and rest; Courier (bank transfer and COD, COD fee 39, bands 2 kg 129 / above 199, free over 2000) and Abroad (rest zone, 499) | Pass |
+| Tee with sizes S and M (stock 3) and a digital guide with an uploaded file, both published | Pass |
+| Quote CZ with tee and guide: Courier 129 with bank transfer only (COD hidden), VAT split 21 % and 12 % | Pass |
+| Quote CZ with the tee only: Courier with bank transfer (fee 0) and COD (fee 39) | Pass |
+| Quote DE: only Abroad, 499 | Pass |
+| `GET /shop/shipping-countries` returns `["CZ"]` (the rest zone is not listed as countries) | Pass |
+| Order placed: number `2026000001`, total 918, variable symbol = order number, SPD string with IBAN and `AM:918.00`; S stock 3 → 2 | Pass |
+| Same `Idempotency-Key` again: 200 with the same order number, no second order | Pass |
+| Wrong `expectedTotal`: 409 `PRICE_CHANGED` with a fresh quote | Pass |
+| Customer view with the access token: PLACED, UNPAID | Pass |
+| History records `email-failed` "confirmation: email is not configured" and "new-order: ..." | Pass |
+| QR PNG rendered from the SPD string with `qrcode` | Pass (image produced; not scanned with a banking app in this run, to do in Plan 2 or after deploy) |
+| Mark paid: one download grant (limit 5, 30 days); `needs-action` count 1 | Pass |
+| Download link: 5 × 302 to an Azurite SAS URL that serves the file, 6th 410, unknown token 404 | Pass |
+| Mark shipped with tracking: SHIPPED, order COMPLETED | Pass |
+| COD order (total 658 incl. COD fee) cancelled by admin: CANCELLED, S stock returned to 2, cancel email attempt recorded | Pass |
+| Unpaid bank-transfer order backdated 15 days: job cancels it (`by: system`, detail `unpaid`), stock returned | Pass |
+
+Cosmos DB checks after deploy (not reproducible locally):
+- `redeem` uses `$expr: {$lt: ['$used', '$limit']}` in a `findOneAndUpdate` filter; confirm Cosmos accepts it, else switch to a stored `remaining` counter.
+- Order number counter: `findOneAndUpdate` with `$inc` and `upsert` on `counters`; confirm two concurrent first orders of a year do not both fail.
+- Stock reservation: conditional `findOneAndUpdate` on `stock.quantity >= n`; confirm concurrent orders for the last item reserve it only once.
