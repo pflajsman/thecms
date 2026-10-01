@@ -5,6 +5,7 @@ import { storageService } from './config/storage';
 import { EmailService } from './services/email.service';
 import { migrateLanguages } from './utils/migrate-languages';
 import { ensureProductModel } from './modules/commerce/product-model';
+import { startUnpaidJob } from './modules/commerce/unpaid-job';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,9 @@ async function startServer() {
 
     // The system content model that holds product text and images (idempotent).
     await ensureProductModel();
+
+    // Hourly: cancel unpaid bank transfer orders older than the shop's limit.
+    if (process.env.NODE_ENV !== 'test') startUnpaidJob();
 
     // Initialize blob storage
     await storageService.initialize();
