@@ -9,6 +9,7 @@ import { contentTypesService } from '../content-types/content-types.service';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
 import { LanguagesService } from '../languages/languages.service';
 import { ensureProductModel } from './product-model';
+import { ProductModel, ProductType } from '../../models/product.model';
 
 useTestDb();
 
@@ -42,6 +43,7 @@ it('refuses to delete the last version of a product entry or the only language o
   await LanguageModel.create([{ code: 'en', name: 'English', isDefault: true, order: 0 }, { code: 'cs', name: 'Čeština', order: 1 }]);
   const model = await ensureProductModel();
   const cs = await ContentEntriesService.createEntry({ contentTypeId: String(model._id), data: { name: 'Tričko' }, language: 'cs' });
+  await ProductModel.create({ itemId: cs.itemId, type: ProductType.PHYSICAL, vatRateId: 'standard' });
   await expect(ContentEntriesService.deleteEntry(String(cs._id))).rejects.toMatchObject({ statusCode: 409 });
   await expect(LanguagesService.remove('cs', 'cs')).rejects.toMatchObject({ statusCode: 409 });
   expect(await ContentEntryModel.countDocuments({ _id: cs._id })).toBe(1);
@@ -49,4 +51,11 @@ it('refuses to delete the last version of a product entry or the only language o
   const en = await ContentEntriesService.createEntry({ contentTypeId: String(model._id), data: { name: 'T-shirt' }, itemId: String(cs.itemId) });
   expect(await ContentEntriesService.deleteEntry(String(cs._id))).toBe(true);
   expect(await ContentEntryModel.countDocuments({ _id: en._id })).toBe(1);
+});
+
+it('an entry of the Product model without a product can be deleted', async () => {
+  await LanguageModel.create({ code: 'en', name: 'English', isDefault: true, order: 0 });
+  const model = await ensureProductModel();
+  const stray = await ContentEntriesService.createEntry({ contentTypeId: String(model._id), data: { name: 'Stray' } });
+  expect(await ContentEntriesService.deleteEntry(String(stray._id))).toBe(true);
 });

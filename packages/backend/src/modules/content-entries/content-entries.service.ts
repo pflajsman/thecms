@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { ContentEntryModel, ContentStatus, IContentEntry } from '../../models/content-entry.model';
 import { ContentTypeModel } from '../../models/content-type.model';
+import { ProductModel } from '../../models/product.model';
 import { ContentEntryValidator } from './validation.helper';
 import { WebhookService } from '../../services/webhook.service';
 import { WebhookEvent } from '../../models/webhook.model';
@@ -396,7 +397,11 @@ export class ContentEntriesService {
 
     const contentType = await ContentTypeModel.findById(entry.contentTypeId)
       .select('_id name slug system').lean();
-    if (contentType?.system === 'product' && (await ContentEntryModel.countDocuments({ itemId: entry.itemId })) === 1) {
+    if (
+      contentType?.system === 'product' &&
+      (await ProductModel.exists({ itemId: entry.itemId })) &&
+      (await ContentEntryModel.countDocuments({ itemId: entry.itemId })) === 1
+    ) {
       throw new AppError('This entry belongs to a product; delete it under Commerce', 409);
     }
     const entryData = entry.toJSON();

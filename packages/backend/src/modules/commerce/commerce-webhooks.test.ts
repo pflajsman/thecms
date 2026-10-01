@@ -35,3 +35,11 @@ it('sends product.updated, stock.changed only when a quantity changes, and produ
   await ProductsService.remove(p.product.id);
   expect(triggered).toHaveBeenCalledWith('product.deleted', expect.objectContaining({ product: expect.objectContaining({ id: p.product.id }) }));
 });
+
+it('reports variants whose option values were rewritten', async () => {
+  const p = await ProductsService.create({ name: 'Tee', type: 'PHYSICAL' as never });
+  const triggered = jest.mocked(WebhookService.triggerEvent);
+  triggered.mockClear();
+  await ProductsService.update(p.product.id, { options: [{ key: 'size', labels: { en: 'Size' }, values: [{ key: 's', labels: { en: 'S' } }] }] });
+  expect(triggered).toHaveBeenCalledWith('product.updated', expect.objectContaining({ variantIds: [p.variants[0].id] }));
+});

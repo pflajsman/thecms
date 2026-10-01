@@ -18,15 +18,26 @@ export class SettingsService {
   static async replace(input: SettingsInput): Promise<IShopSettings> {
     const current = await SettingsService.get();
     for (const c of current.currencies) {
-      if (input.currencies.some((n) => n.code === c.code)) continue;
+      const next = input.currencies.find((n) => n.code === c.code);
+      if (next && next.decimals === c.decimals) continue;
       if (await VariantModel.exists({ [`prices.${c.code}`]: { $exists: true } })) {
-        throw new AppError(`Currency ${c.code} has prices; remove them from the variants first`, 409);
+        // Prices are stored in minor units, so changing decimals would change every price.
+        throw new AppError(
+          next
+            ? `Currency ${c.code} has prices; its decimals cannot change`
+            : `Currency ${c.code} has prices; remove them from the variants first`,
+          409
+        );
       }
     }
     for (const r of current.vatRates) {
       if (input.vatRates.some((n) => n.id === r.id)) continue;
       if (await ProductModel.exists({ vatRateId: r.id })) throw new AppError(`VAT rate ${r.name} is used by products`, 409);
     }
-    return ShopSettingsModel.findOneAndUpdate({}, { $set: input }, { upsert: true, new: true });
+    // Without currencies there is no default; Mongoose drops undefined from $set, so unset it explicitly.
+    const update = input.currencies.length
+      ? { $set: input }
+      : { $set: { currencies: [], vatRates: input.vatRates }, $unset: { defaultCurrency: '' } };
+    return ShopSettingsModel.findOneAndUpdate({}, update, { upsert: true, new: true });
   }
 }

@@ -150,18 +150,21 @@ export class ProductsService {
     }
     if (input.active !== undefined) product.active = input.active;
     let removedVariantIds: string[] | undefined;
+    let rewrittenVariantIds: string[] = [];
     const before = new Set((await VariantModel.find({ productId: product._id }).select('_id').lean()).map((v) => String(v._id)));
     if (input.options !== undefined) {
       const codes = (await LanguagesService.codes()).length ? await LanguagesService.codes() : ['en'];
       assertOptions(input.options, codes, await LanguagesService.defaultCode());
-      removedVariantIds = await regenerate(product, input.options);
+      const changes = await regenerate(product, input.options);
+      removedVariantIds = changes.removed;
+      rewrittenVariantIds = changes.rewritten;
       product.options = input.options;
     }
     if (userId) product.updatedBy = new mongoose.Types.ObjectId(userId);
     await product.save();
     const detail = await ProductsService.get(id);
     const created = detail.variants.map((v) => v.id).filter((vid) => !before.has(vid));
-    emitProductEvent(WebhookEvent.PRODUCT_UPDATED, product, [...created, ...(removedVariantIds ?? [])]);
+    emitProductEvent(WebhookEvent.PRODUCT_UPDATED, product, [...created, ...rewrittenVariantIds, ...(removedVariantIds ?? [])]);
     return removedVariantIds ? { ...detail, removedVariantIds } : detail;
   }
 
@@ -225,7 +228,7 @@ export class ProductsService {
 }
 
 /** Keep variants whose combination still exists, add missing ones, remove the rest. Returns removed ids. */
-async function regenerate(product: IProduct, options: ProductOption[]): Promise<string[]> {
+async function regenerate(product: IProduct, options: ProductOption[]): Promise<{ removed: string[]; rewritten: string[] }> {
   const existing = await VariantModel.find({ productId: product._id }).sort({ createdAt: 1 }).exec();
   const wanted = combinations(options);
   const keys = options.map((o) => o.key);
@@ -237,6 +240,7 @@ async function regenerate(product: IProduct, options: ProductOption[]): Promise<
   });
   const kept = new Set<string>();
   const removed: string[] = [];
+  const rewritten: string[] = [];
   for (const v of existing) {
     const projected = project(v.optionValues);
     const match = wanted.find((w) => sameCombo(w, projected));
@@ -247,11 +251,14 @@ async function regenerate(product: IProduct, options: ProductOption[]): Promise<
         v.optionValues = match;
         v.markModified('optionValues');
         await v.save();
+        rewritten.push(String(v._id));
       }
     } else {
       removed.push(String(v._id));
     }
   }
+  // Remove first so new combinations can reuse SKUs of removed variants.
+  if (removed.length) await VariantModel.deleteMany({ _id: { $in: removed } });
   const template = existing.find((v) => kept.has(String(v._id))) ?? existing[0];
   const baseSku = template?.sku ?? 'PRODUCT';
   const keptCombos = existing.filter((v) => kept.has(String(v._id))).map((v) => project(v.optionValues));
@@ -270,6 +277,5 @@ async function regenerate(product: IProduct, options: ProductOption[]): Promise<
       stock: { tracked: product.type === ProductType.PHYSICAL, quantity: 0 },
     });
   }
-  if (removed.length) await VariantModel.deleteMany({ _id: { $in: removed } });
-  return removed;
+  return { removed, rewritten };
 }

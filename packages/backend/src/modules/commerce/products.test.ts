@@ -90,7 +90,9 @@ it('saves the variants table and refuses duplicate SKUs within and across produc
   const clash = await request(app).put(`/commerce/products/${b.product.id}/variants`).send({ variants: [{ ...b.variants[0], sku: 'TEE-1' }] });
   expect(clash.status).toBe(409);
   expect(clash.body.error).toContain('TEE-1');
-  expect((await request(app).put(`/commerce/products/${a.product.id}/variants`).send({ variants: [row, { ...row, id: undefined }] })).status).toBe(400);
+  const dup = await request(app).put(`/commerce/products/${a.product.id}/variants`).send({ variants: [row, { ...row, id: undefined }] });
+  expect(dup.status).toBe(409);
+  expect(dup.body.error).toContain('TEE-1');
   expect((await request(app).put(`/commerce/products/${a.product.id}/variants`).send({ variants: [{ ...row, prices: { USD: 100 } }] })).status).toBe(400);
 });
 
@@ -120,4 +122,38 @@ it('adding the first option keeps the existing variant as the first combination'
   expect(kept).toMatchObject({ sku: base.sku, optionValues: { size: 's' }, prices: { CZK: 49000 }, stock: { quantity: 7 } });
   expect(res.body.data.removedVariantIds).toEqual([]);
   expect(res.body.data.variants).toHaveLength(2);
+});
+
+describe('review fixes', () => {
+  async function teeWithSizes() {
+    await ready();
+    const created = (await request(app).post('/commerce/products').send({ name: 'Tee', type: 'PHYSICAL' })).body.data;
+    const three = [{ ...sizes[0], values: [...sizes[0].values, { key: 'l', labels: { en: 'L' } }] }];
+    return (await request(app).put(`/commerce/products/${created.product.id}`).send({ options: three })).body.data;
+  }
+
+  it('swaps SKUs between variants of the same product in one save', async () => {
+    const { product, variants } = await teeWithSizes();
+    const [s, m, l] = ['s', 'm', 'l'].map((k) => variants.find((v: { optionValues: { size: string } }) => v.optionValues.size === k));
+    const res = await request(app).put(`/commerce/products/${product.id}/variants`).send({ variants: [{ ...m, sku: l.sku }, { ...l, sku: m.sku }] });
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((v: { id: string; sku: string }) => [v.id, v.sku]).sort()).toEqual([[m.id, l.sku], [l.id, m.sku]].sort());
+    expect(await VariantModel.exists({ _id: s.id })).toBeNull();
+  });
+
+  it('a failed save leaves the variants table as it was', async () => {
+    const { product, variants } = await teeWithSizes();
+    const other = (await request(app).post('/commerce/products').send({ name: 'Cap', type: 'PHYSICAL' })).body.data;
+    const res = await request(app).put(`/commerce/products/${product.id}/variants`).send({ variants: [{ ...variants[0], sku: other.variants[0].sku }] });
+    expect(res.status).toBe(409);
+    expect(await VariantModel.countDocuments({ productId: product.id })).toBe(3);
+  });
+
+  it('renaming an option key keeps the variants and their SKUs, and reports rewritten variants', async () => {
+    const { product, variants } = await teeWithSizes();
+    const renamed = [{ key: 'sz', labels: { en: 'Size' }, values: [{ key: 's', labels: { en: 'S' } }, { key: 'm', labels: { en: 'M' } }, { key: 'l', labels: { en: 'L' } }] }];
+    const res = await request(app).put(`/commerce/products/${product.id}`).send({ options: renamed });
+    const skus = res.body.data.variants.map((v: { sku: string }) => v.sku).sort();
+    expect(skus).toEqual(variants.map((v: { sku: string }) => v.sku).sort());
+  });
 });

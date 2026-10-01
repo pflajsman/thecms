@@ -19,7 +19,8 @@ export class VariantsService {
     const optionKeys = product.options.map((o) => o.key);
 
     const skus = rows.map((r) => r.sku.trim());
-    if (new Set(skus).size !== skus.length) throw new AppError('SKUs must be unique', 400);
+    const repeated = skus.find((sku, i) => skus.indexOf(sku) !== i);
+    if (repeated) throw new AppError(`SKU ${repeated} is already used`, 409);
     for (const [i, row] of rows.entries()) {
       const unknown = Object.keys(row.prices).filter((c) => !currencies.includes(c));
       if (unknown.length) throw new AppError(`Unknown currency ${unknown.join(', ')}`, 400);
@@ -42,8 +43,12 @@ export class VariantsService {
     const keepIds = rows.map((r) => r.id).filter((id): id is string => !!id);
     const digital = product.type === ProductType.DIGITAL;
     try {
-      // Delete first so a SKU can move between rows of the same product.
+      // Delete first, then park changed SKUs on temporary values, so SKUs can move or swap between rows.
       await VariantModel.deleteMany({ productId: product._id, _id: { $nin: keepIds } });
+      for (const row of rows) {
+        const current = row.id ? existing.find((v) => String(v._id) === row.id) : undefined;
+        if (current && current.sku !== row.sku.trim()) await VariantModel.updateOne({ _id: current._id }, { $set: { sku: `~tmp-${current._id}` } });
+      }
       for (const row of rows) {
         const values = {
           sku: row.sku.trim(),
@@ -64,7 +69,8 @@ export class VariantsService {
         }
       }
     } catch (error) {
-      if ((error as { code?: number }).code === 11000) throw new AppError('A SKU is already used', 409);
+      const duplicate = error as { code?: number; keyValue?: { sku?: string } };
+      if (duplicate.code === 11000) throw new AppError(`SKU ${duplicate.keyValue?.sku ?? ''} is already used`.replace('  ', ' '), 409);
       throw error;
     }
     const saved = await VariantModel.find({ productId: product._id }).sort({ createdAt: 1 }).exec();

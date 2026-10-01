@@ -57,3 +57,19 @@ it('refuses to remove a currency with prices or a VAT rate in use', async () => 
   expect(noStandard.body.error).toContain('Standard');
   expect((await request(app).put('/commerce/settings').send({ ...settings, vatRates: [settings.vatRates[0]] })).status).toBe(200);
 });
+
+it('clears the default currency when every currency is removed', async () => {
+  await request(app).put('/commerce/settings').send(settings);
+  const res = await request(app).put('/commerce/settings').send({ currencies: [], vatRates: settings.vatRates });
+  expect(res.status).toBe(200);
+  expect(res.body.data.defaultCurrency).toBeUndefined();
+});
+
+it('refuses to change the decimals of a currency that has prices', async () => {
+  await request(app).put('/commerce/settings').send(settings);
+  const product = await ProductModel.create({ itemId: new mongoose.Types.ObjectId(), type: ProductType.PHYSICAL, vatRateId: 'standard' });
+  await VariantModel.create({ productId: product._id, sku: 'TEE-M', prices: { CZK: 49000 } });
+  const res = await request(app).put('/commerce/settings').send({ ...settings, currencies: [{ code: 'CZK', decimals: 0 }, settings.currencies[1]] });
+  expect(res.status).toBe(409);
+  expect(res.body.error).toContain('CZK');
+});
