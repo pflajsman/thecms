@@ -4,6 +4,7 @@ import { connectDatabase } from './config/database';
 import { storageService } from './config/storage';
 import { EmailService } from './services/email.service';
 import { migrateLanguages } from './utils/migrate-languages';
+import { ensureProductModel } from './modules/commerce/product-model';
 
 // Load environment variables
 dotenv.config();
@@ -26,6 +27,9 @@ async function startServer() {
         `✅ Content languages migrated (default created: ${migration.createdDefault}, entries: ${migration.migratedEntries})`
       );
     }
+
+    // The system content model that holds product text and images (idempotent).
+    await ensureProductModel();
 
     // Initialize blob storage
     await storageService.initialize();

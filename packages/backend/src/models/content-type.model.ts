@@ -10,6 +10,8 @@ export interface IContentType extends Document {
   description?: string;
   fields: FieldDefinition[];
   titleField?: string;
+  /** Set on models TheCMS owns: 'product' holds product text and images (cannot be deleted). */
+  system?: 'product';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -119,6 +121,7 @@ const ContentTypeSchema = new Schema<IContentType>(
       type: String,
       trim: true,
     },
+    system: { type: String, enum: ['product'], index: true },
   },
   {
     timestamps: true,

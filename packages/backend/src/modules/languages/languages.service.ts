@@ -1,5 +1,6 @@
 import { LanguageModel, type ILanguage } from '../../models/language.model';
 import { ContentEntryModel } from '../../models/content-entry.model';
+import { ContentTypeModel } from '../../models/content-type.model';
 import { AppError } from '../../middleware/error.middleware';
 
 export class LanguagesService {
@@ -53,6 +54,14 @@ export class LanguagesService {
     if (confirm !== code) throw new AppError(`Type ${code} to confirm`, 400);
     if (found.isDefault) throw new AppError('The default language cannot be deleted', 409);
     if ((await LanguageModel.countDocuments()) <= 1) throw new AppError('The last language cannot be deleted', 409);
+    // A product whose text exists only in this language would be left without content.
+    const productType = await ContentTypeModel.findOne({ system: 'product' }).select('_id').lean();
+    if (productType) {
+      const inLanguage = await ContentEntryModel.distinct('itemId', { contentTypeId: productType._id, language: code });
+      const elsewhere = await ContentEntryModel.distinct('itemId', { itemId: { $in: inLanguage }, language: { $ne: code } });
+      const only = inLanguage.length - elsewhere.length;
+      if (only > 0) throw new AppError(`${only} products have content only in ${code}; translate or delete them first`, 409);
+    }
     const { deletedCount } = await ContentEntryModel.deleteMany({ language: code });
     await found.deleteOne();
     return { deletedVersions: deletedCount ?? 0 };

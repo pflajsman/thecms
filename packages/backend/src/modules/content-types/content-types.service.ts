@@ -2,6 +2,8 @@ import { ContentTypeModel, IContentType } from '../../models/content-type.model'
 import { ContentEntryModel } from '../../models/content-entry.model';
 import { CreateContentTypeInput, UpdateContentTypeInput } from './content-types.schema';
 import { FieldType } from '../../types/field-types';
+import { AppError } from '../../middleware/error.middleware';
+import { PRODUCT_CORE_FIELDS } from '../commerce/product-model';
 import { recomputeTitlesForType } from '../content-entries/entry-titles.service';
 import { unifySharedField } from '../content-entries/entry-versions.service';
 import { isLocalized } from '../../utils/localized';
@@ -95,9 +97,16 @@ export class ContentTypesService {
       }
     }
 
-    const previousFields = data.fields
-      ? (await ContentTypeModel.findById(id).select('fields').lean())?.fields ?? []
-      : [];
+    const previous = data.fields ? await ContentTypeModel.findById(id).select('fields system').lean() : null;
+    const previousFields = previous?.fields ?? [];
+    if (previous?.system === 'product' && data.fields) {
+      const kept = PRODUCT_CORE_FIELDS.every((name) => {
+        const before = previousFields.find((f) => f.name === name);
+        const after = data.fields!.find((f) => f.name === name);
+        return !!before && !!after && before.type === after.type;
+      });
+      if (!kept) throw new AppError("The Product model's name, description and images fields cannot be removed or changed", 409);
+    }
 
     // Update content type
     const contentType = await ContentTypeModel.findByIdAndUpdate(
@@ -141,6 +150,9 @@ export class ContentTypesService {
    */
   async deleteContentType(id: string, options?: { force?: boolean }): Promise<boolean> {
     const force = options?.force ?? false;
+
+    const system = (await ContentTypeModel.findById(id).select('system').lean())?.system;
+    if (system === 'product') throw new AppError('The Product model cannot be deleted', 409);
 
     const entryCount = await this.countEntriesForType(id);
     if (entryCount > 0 && !force) {

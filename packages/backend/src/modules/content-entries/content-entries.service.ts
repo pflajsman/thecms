@@ -395,7 +395,10 @@ export class ContentEntriesService {
     }
 
     const contentType = await ContentTypeModel.findById(entry.contentTypeId)
-      .select('_id name slug').lean();
+      .select('_id name slug system').lean();
+    if (contentType?.system === 'product' && (await ContentEntryModel.countDocuments({ itemId: entry.itemId })) === 1) {
+      throw new AppError('This entry belongs to a product; delete it under Commerce', 409);
+    }
     const entryData = entry.toJSON();
 
     const result = await ContentEntryModel.findByIdAndDelete(entryId);
