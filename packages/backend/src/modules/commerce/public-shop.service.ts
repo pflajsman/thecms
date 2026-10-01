@@ -15,11 +15,11 @@ export async function resolveCurrency(requested?: unknown): Promise<string> {
   return code;
 }
 
-const label = (labels: Labels | undefined, language: string, defaultLanguage: string) =>
+export const label = (labels: Labels | undefined, language: string, defaultLanguage: string) =>
   labels?.[language] ?? labels?.[defaultLanguage] ?? Object.values(labels ?? {})[0] ?? '';
 
 /** Published version per item: the requested language, else the default language. */
-async function contentFor(itemIds: mongoose.Types.ObjectId[], language: string, defaultLanguage: string) {
+export async function contentFor(itemIds: mongoose.Types.ObjectId[], language: string, defaultLanguage: string) {
   const versions = await ContentEntryModel.find({ itemId: { $in: itemIds }, status: ContentStatus.PUBLISHED, language: { $in: [language, defaultLanguage] } }).exec();
   const byItem = new Map<string, IContentEntry>();
   for (const v of versions) {
