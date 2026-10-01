@@ -108,16 +108,16 @@ export function ShopSettingsPage() {
         <div role="alert" className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">{serverError}</div>
       )}
       <div className="grid gap-8 lg:grid-cols-2">
-        <section aria-labelledby="currencies-title" className="space-y-3">
+        <section aria-labelledby="currencies-title" className="min-w-0 space-y-3">
           <h2 id="currencies-title" className="font-serif text-xl font-semibold">{t('settings.currencies')}</h2>
           {draft.currencies.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t('settings.empty')}</p>
           ) : (
             <ul aria-label={t('settings.currencies')} className="flex flex-col divide-y rounded-xl border bg-card">
               {draft.currencies.map((c) => (
-                <li key={c.code} className="flex items-center gap-3 px-4 py-2.5">
+                <li key={c.code} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
                   <span className="w-12 font-mono font-medium">{c.code}</span>
-                  <span className="flex-1 text-sm text-muted-foreground">{t('settings.decimalsValue', { count: c.decimals })}</span>
+                  <span className="min-w-0 flex-1 text-sm text-muted-foreground">{t('settings.decimalsValue', { count: c.decimals })}</span>
                   {draft.defaultCurrency === c.code ? (
                     <Badge variant="secondary">{t('settings.default')}</Badge>
                   ) : (
@@ -152,15 +152,15 @@ export function ShopSettingsPage() {
           </div>
           {codeError && <p id="currency-code-error" className="text-sm text-destructive">{codeError === 'invalid' ? t('settings.codeInvalid') : t('settings.codeTaken')}</p>}
         </section>
-        <section aria-labelledby="vat-title" className="space-y-3">
+        <section aria-labelledby="vat-title" className="min-w-0 space-y-3">
           <h2 id="vat-title" className="font-serif text-xl font-semibold">{t('settings.vatRates')}</h2>
           {draft.vatRates.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t('settings.emptyVat')}</p>
           ) : (
             <ul aria-label={t('settings.vatRates')} className="flex flex-col divide-y rounded-xl border bg-card">
               {draft.vatRates.map((r) => (
-                <li key={r.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <span className="flex-1 font-medium">{r.name}</span>
+                <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
+                  <span className="min-w-0 flex-1 truncate font-medium">{r.name}</span>
                   <span className="text-sm text-muted-foreground">{t('settings.percent', { value: percent(r.rate) })}</span>
                   <Button variant="ghost" size="icon" aria-label={t('settings.removeVat', { name: r.name })} onClick={() => setDraft({ ...draft, vatRates: draft.vatRates.filter((x) => x.id !== r.id) })}>
                     <Trash2 aria-hidden />
