@@ -104,3 +104,14 @@ it('clears the shop email and terms link when they are sent as null', async () =
   expect(saved.body.data.shopEmail).toBeUndefined();
   expect(saved.body.data.termsUrl).toBeUndefined();
 });
+
+it('drops the bank account of a removed currency when the save leaves accounts out', async () => {
+  const accounts = [
+    { currency: 'CZK', iban: 'CZ6508000000192000145399', holder: 'Shop' },
+    { currency: 'EUR', iban: 'CZ6508000000192000145399', holder: 'Shop' },
+  ];
+  await request(app).put('/commerce/settings').send({ ...settings, bankAccounts: accounts });
+  const saved = await request(app).put('/commerce/settings').send({ ...settings, currencies: [settings.currencies[0]] });
+  expect(saved.status).toBe(200);
+  expect(saved.body.data.bankAccounts.map((a: { currency: string }) => a.currency)).toEqual(['CZK']);
+});

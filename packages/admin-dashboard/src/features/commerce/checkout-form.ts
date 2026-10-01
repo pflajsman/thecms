@@ -35,7 +35,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function checkoutToForm(settings: ShopSettings): CheckoutForm {
   return {
-    accounts: (settings.bankAccounts ?? []).map((a) => ({ currency: a.currency, holder: a.holder, accountNumber: a.accountNumber ?? '', iban: a.iban ?? '', bic: a.bic ?? '' })),
+    // An account of a removed currency cannot be shown or edited, so it is not kept.
+    accounts: (settings.bankAccounts ?? []).filter((a) => settings.currencies.some((c) => c.code === a.currency)).map((a) => ({ currency: a.currency, holder: a.holder, accountNumber: a.accountNumber ?? '', iban: a.iban ?? '', bic: a.bic ?? '' })),
     unpaidCancelDays: String(settings.unpaidCancelDays ?? 14),
     downloadDays: String(settings.downloadDays ?? 30),
     downloadLimit: String(settings.downloadLimit ?? 5),

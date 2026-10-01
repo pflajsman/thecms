@@ -147,3 +147,13 @@ it('renders the checkout section in Czech', async () => {
   expect(screen.getByLabelText('Odkaz na obchodní podmínky')).toHaveValue('https://shop.test/terms')
   await expectNoA11yViolations(container)
 })
+
+it('leaves out a stored account for a currency the shop no longer has', async () => {
+  const stale = { ...saved, bankAccounts: [{ currency: 'EUR', iban: 'CZ6508000000192000145399', holder: 'Old' }] }
+  vi.mocked(apiClient.get).mockResolvedValue({ data: { success: true, data: stale } })
+  renderRoutes(routes, { route: '/commerce/settings' })
+  await userEvent.type(await screen.findByLabelText('Email for new orders'), 'shop@example.test')
+  await userEvent.click(screen.getByRole('button', { name: 'Save checkout settings' }))
+  await waitFor(() => expect(apiClient.put).toHaveBeenCalled())
+  expect((vi.mocked(apiClient.put).mock.calls[0][1] as { bankAccounts: unknown[] }).bankAccounts).toEqual([])
+})
