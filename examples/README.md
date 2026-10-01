@@ -61,6 +61,9 @@ Without a real `config.js` the app shows a Setup screen.
   The basemap uses MapTiler (monochrome "toner" style) when `mapTilerKey` is
   set, otherwise falls back to OpenStreetMap. Get a free key at maptiler.com.
 - **Contact form** slug `contact-us` (any fields; the form renders itself).
+- **Content language** (optional): `contentLanguage: "cs"` in `config.js` asks the
+  CMS for Czech versions of entries (`?language=cs`). Entries without a published
+  Czech version come in the CMS default language. Empty or missing = the default language.
 
 ## Deploy
 
@@ -68,4 +71,4 @@ Push to `main` with changes under `examples/**`. CI builds the app and injects
 `config.js` from these GitHub secrets:
 `EXAMPLE_CMS_API_URL`, `EXAMPLE_CMS_API_KEY`, `EXAMPLE_CMS_SITE_TITLE`,
 `EXAMPLE_CMS_POSTS_SLUG`, `EXAMPLE_CMS_CONTACT_FORM_SLUG`,
-plus `AZURE_EXAMPLE_WEB_APPS_API_TOKEN`.
+`EXAMPLE_CMS_CONTENT_LANGUAGE` (optional), plus `AZURE_EXAMPLE_WEB_APPS_API_TOKEN`.

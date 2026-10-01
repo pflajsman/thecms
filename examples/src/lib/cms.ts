@@ -4,7 +4,9 @@ import type { ContactForm, Entry, EntryList, Page, Post, Trip } from '../types';
 /** Low-level fetch against the TheCMS public API. */
 async function request<T>(endpoint: string, params: Record<string, unknown> = {}): Promise<T> {
   const url = new URL(`${config.apiUrl}${endpoint}`);
-  for (const [k, v] of Object.entries(params)) {
+  // Content requests ask for the configured language; the CMS falls back to its default language.
+  const all = endpoint.startsWith('/content/') ? { language: config.contentLanguage, ...params } : params;
+  for (const [k, v] of Object.entries(all)) {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
   }
 

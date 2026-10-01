@@ -41,6 +41,7 @@ jobs:
             tripsSlug: "${{ secrets.EXAMPLE_CMS_TRIPS_SLUG }}",
             contactFormSlug: "${{ secrets.EXAMPLE_CMS_CONTACT_FORM_SLUG }}",
             mapTilerKey: "${{ secrets.EXAMPLE_MAPTILER_KEY }}",
+            contentLanguage: "${{ secrets.EXAMPLE_CMS_CONTENT_LANGUAGE }}",
           };
           EOF
 
