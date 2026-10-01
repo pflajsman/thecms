@@ -1,0 +1,47 @@
+{
+  "list": {
+    "title": "Orders",
+    "description": "Orders placed on your sites.",
+    "tableLabel": "Orders",
+    "search": "Search orders",
+    "searchPlaceholder": "Number, email or name",
+    "statusFilter": "Order status",
+    "paymentFilter": "Payment",
+    "shippingFilter": "Shipping",
+    "anyStatus": "Any status",
+    "anyPayment": "Any payment",
+    "anyShipping": "Any shipping",
+    "needsAction": "Needs action",
+    "emptyTitle": "No orders yet",
+    "emptyText": "Orders appear here when customers check out on your site.",
+    "noMatches": "No orders match these filters.",
+    "loadError": "Could not load orders.",
+    "columns": {
+      "number": "Order",
+      "date": "Date",
+      "customer": "Customer",
+      "total": "Total",
+      "payment": "Payment",
+      "shipping": "Shipping",
+      "status": "Status"
+    }
+  },
+  "status": {
+    "PLACED": "Open",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled"
+  },
+  "payment": {
+    "UNPAID": "Unpaid",
+    "PAID": "Paid",
+    "REFUNDED": "Refunded"
+  },
+  "fulfilment": {
+    "UNFULFILLED": "Not shipped",
+    "SHIPPED": "Shipped"
+  },
+  "method": {
+    "BANK_TRANSFER": "Bank transfer",
+    "CASH_ON_DELIVERY": "Cash on delivery"
+  }
+}

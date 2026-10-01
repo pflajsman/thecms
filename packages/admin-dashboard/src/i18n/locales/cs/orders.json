@@ -1,0 +1,47 @@
+{
+  "list": {
+    "title": "Objednávky",
+    "description": "Objednávky z vašich webů.",
+    "tableLabel": "Objednávky",
+    "search": "Hledat objednávky",
+    "searchPlaceholder": "Číslo, e-mail nebo jméno",
+    "statusFilter": "Stav objednávky",
+    "paymentFilter": "Platba",
+    "shippingFilter": "Doprava",
+    "anyStatus": "Jakýkoli stav",
+    "anyPayment": "Jakákoli platba",
+    "anyShipping": "Jakákoli doprava",
+    "needsAction": "Čeká na vyřízení",
+    "emptyTitle": "Zatím žádné objednávky",
+    "emptyText": "Objednávky se tu objeví, až zákazníci nakoupí na vašem webu.",
+    "noMatches": "Filtrům neodpovídá žádná objednávka.",
+    "loadError": "Objednávky se nepodařilo načíst.",
+    "columns": {
+      "number": "Objednávka",
+      "date": "Datum",
+      "customer": "Zákazník",
+      "total": "Celkem",
+      "payment": "Platba",
+      "shipping": "Doprava",
+      "status": "Stav"
+    }
+  },
+  "status": {
+    "PLACED": "Otevřená",
+    "COMPLETED": "Vyřízená",
+    "CANCELLED": "Zrušená"
+  },
+  "payment": {
+    "UNPAID": "Nezaplaceno",
+    "PAID": "Zaplaceno",
+    "REFUNDED": "Vráceno"
+  },
+  "fulfilment": {
+    "UNFULFILLED": "Neodesláno",
+    "SHIPPED": "Odesláno"
+  },
+  "method": {
+    "BANK_TRANSFER": "Bankovní převod",
+    "CASH_ON_DELIVERY": "Dobírka"
+  }
+}

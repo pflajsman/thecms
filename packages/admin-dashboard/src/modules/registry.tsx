@@ -8,6 +8,7 @@ import {
   KeyRound,
   Languages,
   Plus,
+  ReceiptText,
   ShoppingBag,
   Store,
   Truck,
@@ -37,6 +38,8 @@ import { ShopSettingsPage } from '@/features/commerce/pages/ShopSettingsPage'
 import { ProductsListPage } from '@/features/commerce/pages/ProductsListPage'
 import { ProductPage } from '@/features/commerce/pages/ProductPage'
 import { ShippingPage } from '@/features/commerce/pages/ShippingPage'
+import { OrdersListPage } from '@/features/commerce/pages/OrdersListPage'
+import { useOrdersNeedingAction } from '@/features/commerce/orders-queries'
 import { ShippingMethodPage } from '@/features/commerce/pages/ShippingMethodPage'
 
 export const modules: AppModule[] = [
@@ -86,6 +89,15 @@ export const modules: AppModule[] = [
       { path: 'inbox', element: <InboxPage /> },
       { path: 'inbox/:submissionId', element: <InboxPage /> },
     ],
+  },
+  {
+    id: 'orders',
+    labelKey: 'nav.orders',
+    icon: ReceiptText,
+    group: 'commerce',
+    path: '/commerce/orders',
+    useBadge: useOrdersNeedingAction,
+    routes: [{ path: 'commerce/orders', element: <OrdersListPage /> }],
   },
   {
     id: 'products',

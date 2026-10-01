@@ -27,7 +27,8 @@
     "languages": "Jazyky",
     "products": "Produkty",
     "shopSettings": "Nastavení obchodu",
-    "shipping": "Doprava"
+    "shipping": "Doprava",
+    "orders": "Objednávky"
   },
   "groups": {
     "workspace": "Práce",

@@ -27,7 +27,8 @@
     "languages": "Languages",
     "products": "Products",
     "shopSettings": "Shop settings",
-    "shipping": "Shipping"
+    "shipping": "Shipping",
+    "orders": "Orders"
   },
   "groups": {
     "workspace": "Workspace",
