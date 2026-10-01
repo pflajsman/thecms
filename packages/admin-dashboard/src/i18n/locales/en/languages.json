@@ -1,0 +1,42 @@
+{
+  "page": {
+    "title": "Languages",
+    "description": "Languages your content can be written in. Sites ask for one and get the default language when a translation is missing.",
+    "add": "Add language",
+    "loadError": "Could not load languages.",
+    "tableLabel": "Languages"
+  },
+  "default": "Default",
+  "form": {
+    "addTitle": "Add language",
+    "renameTitle": "Rename {{name}}",
+    "code": "Code",
+    "codeHint": "Lowercase, for example en, cs or de-at. It cannot be changed later.",
+    "codeInvalid": "Use a code such as en, cs or de-at",
+    "name": "Name",
+    "nameRequired": "Enter a name of up to 50 characters",
+    "add": "Add language",
+    "save": "Save"
+  },
+  "menu": {
+    "actionsFor": "Actions for {{name}}",
+    "rename": "Rename",
+    "makeDefault": "Make default",
+    "delete": "Delete"
+  },
+  "confirm": {
+    "defaultTitle": "Make {{name}} the default language?",
+    "defaultText": "Sites that do not ask for a language get {{name}}, and missing translations fall back to it.",
+    "defaultConfirm": "Make default",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText_one": "This also deletes {{count}} entry version in {{name}}. Sites stop receiving it.",
+    "deleteText_other": "This also deletes {{count}} entry versions in {{name}}. Sites stop receiving them.",
+    "deleteNone": "No entry has a version in {{name}}."
+  },
+  "toast": {
+    "added": "Added {{name}}",
+    "renamed": "Renamed to {{name}}",
+    "madeDefault": "{{name}} is now the default language",
+    "deleted": "Deleted {{name}}"
+  }
+}

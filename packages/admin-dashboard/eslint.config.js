@@ -54,7 +54,7 @@ export default defineConfig([
           // Template literal parts that are paths, key prefixes (label:, preview-) or arrows are not copy.
           words: { exclude: ['[0-9!-/:-@[-`{-~·…×–•]+', '[A-Z_-]+', 'TheCMS', '⌘[A-Z]', 'https?://\\S*', '\\s*px', '/[\\w/?=&.-]*', '[a-z]+[:-]', '\\s*→\\s*'] },
           // Editor and state APIs take identifiers, not copy.
-          callees: { exclude: ['i18n(ext)?', 't', 'tr', 'numberInput', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'renderField', 'setParam', 'setParams', 'includes', 'startsWith', 'endsWith'] },
+          callees: { exclude: ['i18n(ext)?', 't', 'tr', 'numberInput', 'isActive', 'getAttributes', 'updateAttributes', 'setTextAlign', 'extendMarkRange', 'setConfirm', 'setDialog', 'renderField', 'setParam', 'setParams', 'includes', 'startsWith', 'endsWith'] },
           'object-properties': { exclude: ['[A-Z_-]+', 'textAlign', 'float', 'ns'] },
         },
       ],

@@ -11,7 +11,7 @@ describe('module registry', () => {
   it('matches the approved information architecture', () => {
     const { workspace, setup } = groupModules(modules)
     expect(workspace.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Home', 'Content', 'Media', 'Inbox'])
-    expect(setup.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Content models', 'Forms', 'Sites & API keys', 'Webhooks'])
+    expect(setup.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Content models', 'Forms', 'Sites & API keys', 'Webhooks', 'Languages'])
   })
 
   it('shows exactly Home, Content, Media and Inbox as mobile tabs', () => {

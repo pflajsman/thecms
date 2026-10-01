@@ -23,7 +23,8 @@
     "models": "Content models",
     "forms": "Forms",
     "sites": "Sites & API keys",
-    "webhooks": "Webhooks"
+    "webhooks": "Webhooks",
+    "languages": "Languages"
   },
   "groups": {
     "workspace": "Workspace",

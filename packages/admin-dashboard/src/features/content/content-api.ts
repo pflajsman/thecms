@@ -9,6 +9,10 @@ export interface EntryListParams {
   sortOrder?: 'asc' | 'desc'
   page?: number
   limit?: number
+  /** Only versions in this language. */
+  language?: string
+  /** Items with no version in this language. */
+  missing?: string
 }
 
 export interface EntryWriteBody {

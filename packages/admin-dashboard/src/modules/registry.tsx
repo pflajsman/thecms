@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   Inbox,
   KeyRound,
+  Languages,
   Plus,
   Upload,
   Webhook,
@@ -28,6 +29,7 @@ import { SitesListPage } from '@/features/sites/pages/SitesListPage'
 import { SiteFormPage } from '@/features/sites/pages/SiteFormPage'
 import { WebhooksListPage } from '@/features/webhooks/pages/WebhooksListPage'
 import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
+import { LanguagesPage } from '@/features/languages/pages/LanguagesPage'
 
 export const modules: AppModule[] = [
   {
@@ -130,6 +132,14 @@ export const modules: AppModule[] = [
       { path: 'webhooks', element: <WebhooksListPage /> },
       { path: 'webhooks/:id', element: <WebhookFormPage /> },
     ],
+  },
+  {
+    id: 'languages',
+    labelKey: 'nav.languages',
+    icon: Languages,
+    group: 'setup',
+    path: '/languages',
+    routes: [{ path: 'languages', element: <LanguagesPage /> }],
   },
 ]
 

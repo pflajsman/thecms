@@ -1,0 +1,43 @@
+{
+  "page": {
+    "title": "Jazyky",
+    "description": "Jazyky, ve kterých můžete psát obsah. Weby si o jeden řeknou, a když překlad chybí, dostanou výchozí jazyk.",
+    "add": "Přidat jazyk",
+    "loadError": "Jazyky se nepodařilo načíst.",
+    "tableLabel": "Jazyky"
+  },
+  "default": "Výchozí",
+  "form": {
+    "addTitle": "Přidat jazyk",
+    "renameTitle": "Přejmenovat jazyk {{name}}",
+    "code": "Kód",
+    "codeHint": "Malými písmeny, například en, cs nebo de-at. Později ho nejde změnit.",
+    "codeInvalid": "Zadejte kód, například en, cs nebo de-at",
+    "name": "Název",
+    "nameRequired": "Zadejte název o délce nejvýše 50 znaků",
+    "add": "Přidat jazyk",
+    "save": "Uložit"
+  },
+  "menu": {
+    "actionsFor": "Akce pro jazyk {{name}}",
+    "rename": "Přejmenovat",
+    "makeDefault": "Nastavit jako výchozí",
+    "delete": "Smazat"
+  },
+  "confirm": {
+    "defaultTitle": "Nastavit {{name}} jako výchozí jazyk?",
+    "defaultText": "Weby, které o jazyk neřeknou, dostanou {{name}}. Chybějící překlady se nahradí tímto jazykem.",
+    "defaultConfirm": "Nastavit jako výchozí",
+    "deleteTitle": "Smazat jazyk {{name}}?",
+    "deleteText_one": "Smaže se i {{count}} verze položky v jazyce {{name}}. Weby ji přestanou dostávat.",
+    "deleteText_few": "Smažou se i {{count}} verze položek v jazyce {{name}}. Weby je přestanou dostávat.",
+    "deleteText_other": "Smaže se i {{count}} verzí položek v jazyce {{name}}. Weby je přestanou dostávat.",
+    "deleteNone": "Žádná položka nemá verzi v jazyce {{name}}."
+  },
+  "toast": {
+    "added": "Jazyk {{name}} je přidaný",
+    "renamed": "Přejmenováno na {{name}}",
+    "madeDefault": "{{name}} je teď výchozí jazyk",
+    "deleted": "Jazyk {{name}} je smazaný"
+  }
+}

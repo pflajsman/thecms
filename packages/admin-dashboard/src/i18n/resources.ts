@@ -22,10 +22,12 @@ import csForms from './locales/cs/forms.json'
 import csSites from './locales/cs/sites.json'
 import csWebhooks from './locales/cs/webhooks.json'
 import csBuilder from './locales/cs/builder.json'
+import enLanguages from './locales/en/languages.json'
+import csLanguages from './locales/cs/languages.json'
 
-export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder'] as const
+export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages'] as const
 
 export const resources = {
-  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder },
-  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder },
+  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages },
+  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages },
 } as const

@@ -23,7 +23,8 @@
     "models": "Modely obsahu",
     "forms": "Formuláře",
     "sites": "Weby a API klíče",
-    "webhooks": "Webhooky"
+    "webhooks": "Webhooky",
+    "languages": "Jazyky"
   },
   "groups": {
     "workspace": "Práce",
