@@ -7,14 +7,14 @@ import { cancelOrder } from './order-actions';
 export async function cancelStaleUnpaidOrders(now = new Date()): Promise<number> {
   const settings = await SettingsService.get();
   const before = new Date(now.getTime() - (settings.unpaidCancelDays ?? 14) * 24 * 3600_000);
-  const candidates = await OrderModel.find({ status: 'PLACED', paymentStatus: 'UNPAID', 'payment.method': 'BANK_TRANSFER', createdAt: { $lt: before } })
+  const candidates = await OrderModel.find({ status: 'PLACED', paymentStatus: 'UNPAID', 'payment.method': 'BANK_TRANSFER', fulfilmentStatus: 'UNFULFILLED', createdAt: { $lt: before } })
     .select('_id')
     .lean();
   let cancelled = 0;
   for (const c of candidates) {
     try {
       // cancelOrder's conditional update lets only one runner cancel each order.
-      await cancelOrder(String(c._id), { paymentStatus: 'UNPAID' }, { by: 'system', detail: 'unpaid' });
+      await cancelOrder(String(c._id), { paymentStatus: 'UNPAID', fulfilmentStatus: 'UNFULFILLED' }, { by: 'system', detail: 'unpaid' });
       cancelled++;
     } catch (error) {
       if (!(error instanceof AppError && error.statusCode === 409)) console.error('Unpaid order job:', error);

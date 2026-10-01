@@ -28,3 +28,15 @@ it('cancels unpaid bank transfers older than the setting, once, even with two ru
   expect((await VariantModel.findById(shop.teeS).lean())?.stock.quantity).toBe(1);
   expect(jest.mocked(notify).mock.calls.filter((c) => c[1] === 'cancelled')).toHaveLength(1);
 });
+
+it('leaves a shipped but unpaid bank transfer alone', async () => {
+  const shop = await seedShop();
+  const order = await placeTestOrder(shop);
+  await OrderModel.collection.updateOne(
+    { _id: order._id },
+    { $set: { fulfilmentStatus: 'SHIPPED', createdAt: new Date(Date.now() - 15 * 24 * 3600_000) } }
+  );
+  expect(await cancelStaleUnpaidOrders()).toBe(0);
+  expect((await OrderModel.findById(order._id).lean())?.status).toBe('PLACED');
+  expect((await VariantModel.findById(shop.teeS).lean())?.stock.quantity).toBe(2);
+});

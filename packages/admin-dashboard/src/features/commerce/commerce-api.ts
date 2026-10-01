@@ -55,7 +55,8 @@ export interface Variant {
   active: boolean
 }
 
-export type VariantRow = Omit<Variant, 'id'> & { id?: string }
+// baseQuantity: the stock the form loaded, so the server applies only the admin's change.
+export type VariantRow = Omit<Variant, 'id' | 'stock'> & { id?: string; stock: Variant['stock'] & { baseQuantity?: number } }
 
 export interface ProductDetail {
   product: Product

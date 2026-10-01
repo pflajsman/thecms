@@ -27,8 +27,9 @@ export const settingsBody = z
     unpaidCancelDays: z.number().int().min(1).max(90).optional(),
     downloadDays: z.number().int().min(1).max(365).optional(),
     downloadLimit: z.number().int().min(1).max(100).optional(),
-    shopEmail: z.string().trim().email().optional(),
-    termsUrl: z.string().trim().url().refine((u) => /^https?:\/\//.test(u), 'Use an http or https link').optional(),
+    // null removes the value; a missing field keeps it.
+    shopEmail: z.string().trim().email().nullable().optional(),
+    termsUrl: z.string().trim().url().refine((u) => /^https?:\/\//.test(u), 'Use an http or https link').nullable().optional(),
   })
   .superRefine((s, ctx) => {
     const accounts = (s.bankAccounts ?? []).map((a) => a.currency);
@@ -67,7 +68,10 @@ const variantInput = z.object({
   optionValues: z.record(z.string()).default({}),
   prices: z.record(z.number().int().min(0)).default({}),
   weightGrams: z.number().int().min(0).default(0),
-  stock: z.object({ tracked: z.boolean(), quantity: z.number().int().min(0) }).default({ tracked: false, quantity: 0 }),
+  // baseQuantity: the quantity the form loaded; the save applies the difference so orders placed meanwhile keep their stock.
+  stock: z
+    .object({ tracked: z.boolean(), quantity: z.number().int().min(0), baseQuantity: z.number().int().min(0).optional() })
+    .default({ tracked: false, quantity: 0 }),
   active: z.boolean().default(true),
 });
 export const variantsSchema = z.object({ params: z.object({ id: z.string() }), body: z.object({ variants: z.array(variantInput).min(1).max(500) }) });

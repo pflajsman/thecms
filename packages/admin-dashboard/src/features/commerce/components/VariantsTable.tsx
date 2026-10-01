@@ -86,13 +86,18 @@ export function VariantsTable({ productId, productName, type, options, variants,
       }
       if (physical && !WHOLE.test(r.weight.trim())) bad.add(`${i}:weight`)
       if (physical && !WHOLE.test(r.quantity.trim())) bad.add(`${i}:quantity`)
+      const loaded = variants.find((v) => v.id === r.id)?.stock.quantity
       return {
         id: r.id,
         sku: r.sku.trim(),
         optionValues: r.optionValues,
         prices,
         weightGrams: physical ? Number(r.weight) : 0,
-        stock: { tracked: physical && r.tracked, quantity: physical ? Number(r.quantity) : 0 },
+        stock: {
+          tracked: physical && r.tracked,
+          quantity: physical ? Number(r.quantity) : 0,
+          ...(physical && loaded !== undefined ? { baseQuantity: loaded } : {}),
+        },
         active: r.active,
       }
     })

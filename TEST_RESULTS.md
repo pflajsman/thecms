@@ -502,3 +502,8 @@ Cosmos DB checks after deploy (not reproducible locally):
 - `redeem` uses `$expr: {$lt: ['$used', '$limit']}` in a `findOneAndUpdate` filter; confirm Cosmos accepts it, else switch to a stored `remaining` counter.
 - Order number counter: `findOneAndUpdate` with `$inc` and `upsert` on `counters`; confirm two concurrent first orders of a year do not both fail.
 - Stock reservation: conditional `findOneAndUpdate` on `stock.quantity >= n`; confirm concurrent orders for the last item reserve it only once.
+- The sparse unique index on `orders.idempotencyKey`: confirm a second order without a key does not fail (Cosmos may index a missing value as null).
+
+Azure App Service settings to add before customers order:
+- `PUBLIC_API_URL` (download links in payment emails; without it they point at localhost).
+- `TRUST_PROXY` only if the front end has more than one hop; production trusts one hop by default, so the order rate limit counts per customer address.

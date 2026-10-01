@@ -68,6 +68,21 @@ it('edits prices in the variants table, sets one for all and saves minor units',
   ])
 })
 
+it('sends the loaded stock as baseQuantity so orders placed meanwhile keep their stock', async () => {
+  renderRoutes(routes(), { route: '/commerce/products/p1' })
+  const table = await screen.findByRole('table', { name: 'Variants' })
+  const czkS = within(table).getByRole('textbox', { name: 'CZK price, S' })
+  await userEvent.clear(czkS)
+  await userEvent.type(czkS, '500')
+  await userEvent.click(screen.getByRole('button', { name: 'Save variants' }))
+  await waitFor(() => expect(apiClient.put).toHaveBeenCalledWith('/commerce/products/p1/variants', expect.anything()))
+  const rows = vi.mocked(apiClient.put).mock.calls.find((c) => c[0].endsWith('/variants'))![1] as { variants: { stock: unknown }[] }
+  expect(rows.variants.map((v) => v.stock)).toEqual([
+    { tracked: true, quantity: 3, baseQuantity: 3 },
+    { tracked: true, quantity: 3, baseQuantity: 3 },
+  ])
+})
+
 it('refuses a price that is not a number and sends nothing', async () => {
   renderRoutes(routes(), { route: '/commerce/products/p1' })
   const czkS = await screen.findByRole('textbox', { name: 'CZK price, S' })

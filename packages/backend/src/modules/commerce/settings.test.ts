@@ -96,3 +96,11 @@ it('keeps checkout fields when a save sends only currencies and VAT rates', asyn
   const saved = await request(app).put('/commerce/settings').send(settings);
   expect(saved.body.data).toMatchObject({ unpaidCancelDays: 10, shopEmail: 'shop@example.test' });
 });
+
+it('clears the shop email and terms link when they are sent as null', async () => {
+  await request(app).put('/commerce/settings').send({ ...settings, shopEmail: 'shop@example.test', termsUrl: 'https://example.test/terms' });
+  const saved = await request(app).put('/commerce/settings').send({ ...settings, shopEmail: null, termsUrl: null });
+  expect(saved.status).toBe(200);
+  expect(saved.body.data.shopEmail).toBeUndefined();
+  expect(saved.body.data.termsUrl).toBeUndefined();
+});

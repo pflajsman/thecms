@@ -53,3 +53,16 @@ it('resending downloads expires the old links and issues new ones', async () => 
   expect(grants.find((g) => g.token === first?.token)?.expiresAt.getTime()).toBeLessThanOrEqual(Date.now());
 });
 
+
+it('refuses to mark a digital-only order shipped: its download links deliver it', async () => {
+  const shop = await seedShop();
+  const { placeOrder } = await import('./orders.service');
+  const address = { name: 'Jana', street: 'Hlavní 1', city: 'Praha', postalCode: '11000', country: 'CZ' };
+  const { order } = await placeOrder(
+    { currency: 'CZK', items: [{ variantId: shop.guide, quantity: 1 }], country: 'CZ', paymentMethod: 'BANK_TRANSFER', customer: { email: 'jana@example.test', name: 'Jana' }, billingAddress: address, acceptTerms: true, expectedTotal: 29900 } as never,
+    { skipHooks: true }
+  );
+  await expect(OrderActions.markShipped(String(order._id), {})).rejects.toMatchObject({ statusCode: 409 });
+  const paid = await OrderActions.markPaid(String(order._id));
+  expect(paid).toMatchObject({ paymentStatus: 'PAID', fulfilmentStatus: 'SHIPPED', status: 'COMPLETED' });
+});

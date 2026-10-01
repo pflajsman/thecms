@@ -66,7 +66,10 @@ export const OrderActions = {
   },
 
   async markShipped(id: string, tracking: { trackingNumber?: string; trackingUrl?: string }, by?: string): Promise<IOrder> {
-    const existing = await OrderModel.findById(id).select('payment paymentStatus').lean();
+    const existing = await OrderModel.findById(id).select('payment paymentStatus lines.type').lean();
+    if (existing && existing.lines.every((l) => l.type === 'DIGITAL')) {
+      throw new AppError('Digital orders are delivered by their download links when they are paid', 409);
+    }
     const update: Record<string, unknown> = { fulfilmentStatus: 'SHIPPED' };
     if (tracking.trackingNumber || tracking.trackingUrl) update.tracking = { number: tracking.trackingNumber, url: tracking.trackingUrl };
     // Cash on delivery is paid when the parcel is handed over.

@@ -78,18 +78,39 @@ export async function placeOrder(
   opts: { idempotencyKey?: string; siteId?: string; skipHooks?: boolean } = {}
 ): Promise<{ order: IOrder; instructions?: PaymentInstructions; replay: boolean }> {
   const settings = await SettingsService.get();
-  if (opts.idempotencyKey) {
-    const existing = await OrderModel.findOne({ idempotencyKey: opts.idempotencyKey });
-    if (existing) return { order: existing, instructions: providers[existing.payment.method].instructions(existing, settings), replay: true };
-  }
+  const siteId = opts.siteId && mongoose.Types.ObjectId.isValid(opts.siteId) ? opts.siteId : undefined;
+  // Keys are unique per site key, so two storefronts cannot collide.
+  const idempotencyKey = opts.idempotencyKey ? `${siteId ?? 'none'}:${opts.idempotencyKey}` : undefined;
+  const replay = async () => {
+    if (!idempotencyKey) return undefined;
+    const existing = await OrderModel.findOne({ idempotencyKey });
+    if (!existing) return undefined;
+    if (existing.customer.email.toLowerCase() !== input.customer.email.toLowerCase() || existing.totals.total !== input.expectedTotal) {
+      throw new AppError('This Idempotency-Key was already used for a different order', 422, { reason: 'IDEMPOTENCY_KEY_REUSED' });
+    }
+    return { order: existing, instructions: providers[existing.payment.method].instructions(existing, settings), replay: true };
+  };
+  const earlier = await replay();
+  if (earlier) return earlier;
 
   const q = await quote(input);
-  assertOrderable(q, input, settings);
-  if (q.totals.total !== input.expectedTotal) {
-    throw new AppError('Prices changed; please review your order', 409, { reason: 'PRICE_CHANGED', quote: q });
+  try {
+    assertOrderable(q, input, settings);
+    if (q.totals.total !== input.expectedTotal) {
+      throw new AppError('Prices changed; please review your order', 409, { reason: 'PRICE_CHANGED', quote: q });
+    }
+    await reserveStock(q.lines);
+  } catch (error) {
+    // A retry that arrives while the first request is still placing the order sees its stock already taken.
+    if (error instanceof AppError && error.statusCode === 409 && idempotencyKey) {
+      for (let i = 0; i < 5; i++) {
+        const inFlight = await replay();
+        if (inFlight) return inFlight;
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+    }
+    throw error;
   }
-
-  await reserveStock(q.lines);
   let order: IOrder;
   try {
     const number = await nextOrderNumber();
@@ -120,15 +141,15 @@ export async function placeOrder(
       payment: { method: q.payment!.method, fee: q.payment!.fee, reference: number },
       totals: q.totals,
       history: [{ at: new Date(), type: 'placed' }],
-      idempotencyKey: opts.idempotencyKey,
-      siteId: opts.siteId && mongoose.Types.ObjectId.isValid(opts.siteId) ? opts.siteId : undefined,
+      idempotencyKey,
+      siteId,
     });
   } catch (error) {
     await releaseStock(q.lines);
     // A concurrent retry with the same key won the insert: return its order.
-    if ((error as { code?: number }).code === 11000 && opts.idempotencyKey) {
-      const existing = await OrderModel.findOne({ idempotencyKey: opts.idempotencyKey });
-      if (existing) return { order: existing, instructions: providers[existing.payment.method].instructions(existing, settings), replay: true };
+    if ((error as { code?: number }).code === 11000 && idempotencyKey) {
+      const existing = await replay();
+      if (existing) return existing;
     }
     throw error;
   }

@@ -4,8 +4,12 @@ import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import { errorMiddleware } from './middleware/error.middleware';
 import { swaggerSpec } from './config/swagger';
+import { configureTrustProxy } from './config/trust-proxy';
 
 const app: Application = express();
+
+// Rate limits key on the client address, which sits behind the hosting front end.
+configureTrustProxy(app);
 
 // Security middleware
 app.use(helmet());

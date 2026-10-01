@@ -35,9 +35,12 @@ export class SettingsService {
       if (await ProductModel.exists({ vatRateId: r.id })) throw new AppError(`VAT rate ${r.name} is used by products`, 409);
     }
     // Without currencies there is no default; Mongoose drops undefined from $set, so unset it explicitly.
+    const cleared = (['shopEmail', 'termsUrl'] as const).filter((k) => input[k] === null);
+    const set = Object.fromEntries(Object.entries(input).filter(([, v]) => v !== null));
+    const unset = Object.fromEntries(cleared.map((k) => [k, '']));
     const update = input.currencies.length
-      ? { $set: input }
-      : { $set: { currencies: [], vatRates: input.vatRates }, $unset: { defaultCurrency: '' } };
+      ? { $set: set, ...(cleared.length ? { $unset: unset } : {}) }
+      : { $set: { currencies: [], vatRates: input.vatRates }, $unset: { defaultCurrency: '', ...unset } };
     return ShopSettingsModel.findOneAndUpdate({}, update, { upsert: true, new: true });
   }
 }
