@@ -1170,3 +1170,9 @@ body {
   height: auto;
   image-rendering: pixelated;
 }
+.checkout-main {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}

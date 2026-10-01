@@ -39,6 +39,9 @@ export function useQuote(request: QuoteRequest | null) {
     queryFn: () => shop.quote(request!),
     enabled: isConfigured && !!request && request.items.length > 0,
     placeholderData: keepPreviousData,
+    // Prices and stock change; never show a quote from the cache as current.
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 

@@ -71,7 +71,8 @@ export type FieldErrors = Partial<Record<FieldKey, string>>;
 /** Order of the fields on the page, for focusing the first error. */
 export const FIELD_ORDER: FieldKey[] = ['email', 'name', 'phone', 'street', 'city', 'postalCode', 'company', 'vatId', 'shipName', 'shipStreet', 'shipCity', 'shipPostalCode', 'shipping', 'payment', 'note', 'terms'];
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Same rule as the server (zod's email check), so nothing the browser accepts is refused there.
+const EMAIL = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i;
 const CZ_SK_POSTAL = /^\d{3}\s?\d{2}$/;
 
 function required(value: string, max: number, missing: string, tooLong: string): string | undefined {
@@ -162,21 +163,55 @@ export function paymentOptions(quote: Quote | undefined, shippingMethodId: strin
 }
 
 const KEY = 'flajsman.checkout.key';
-let memoryKey: string | null = null;
+const DAY = 24 * 3600_000;
 
-/** One key per checkout attempt, so a double click or a retry returns the same order. */
-export function checkoutKey(): string {
+interface StoredKey {
+  key: string;
+  /** The order body the key was made for. */
+  body: string;
+  at: number;
+  /** A request with this key got no answer: an order may exist. */
+  unanswered: boolean;
+}
+
+let memoryKey: StoredKey | null = null;
+
+function readKey(): StoredKey | null {
   try {
-    const stored = sessionStorage.getItem(KEY);
-    if (stored) return stored;
-    const key = crypto.randomUUID();
-    sessionStorage.setItem(KEY, key);
-    return key;
+    const raw = sessionStorage.getItem(KEY);
+    return raw ? (JSON.parse(raw) as StoredKey) : null;
   } catch {
-    // Storage blocked: keep the key for this page.
-    memoryKey ??= crypto.randomUUID();
     return memoryKey;
   }
+}
+
+function writeKey(value: StoredKey): void {
+  memoryKey = value;
+  try {
+    sessionStorage.setItem(KEY, JSON.stringify(value));
+  } catch {
+    // Storage blocked: the key lives for this page.
+  }
+}
+
+/**
+ * The idempotency key for this order body: the same body within a day reuses the key, so a double click or a retry
+ * returns the same order. A different body gets a new key; `afterLostAnswer` says an earlier attempt got no answer,
+ * so an order may already exist and the customer should be told before a second one is sent.
+ */
+export function keyFor(body: OrderRequest, now = Date.now()): { key: string; afterLostAnswer: boolean } {
+  const text = JSON.stringify(body);
+  const stored = readKey();
+  const fresh = stored && now - stored.at < DAY ? stored : null;
+  if (fresh && fresh.body === text) return { key: fresh.key, afterLostAnswer: false };
+  writeKey({ key: crypto.randomUUID(), body: text, at: now, unanswered: false });
+  return { key: readKey()!.key, afterLostAnswer: !!fresh?.unanswered };
+}
+
+/** The last request got no answer (network failure). */
+export function markUnanswered(): void {
+  const stored = readKey();
+  if (stored) writeKey({ ...stored, unanswered: true });
 }
 
 export function forgetCheckoutKey(): void {

@@ -1,5 +1,5 @@
 import { quoteFor } from '../test/shop-fixtures';
-import { checkoutKey, emptyForm, forgetCheckoutKey, orderRequest, paymentOptions, validateCheckout } from './checkout-form';
+import { emptyForm, forgetCheckoutKey, keyFor, markUnanswered, orderRequest, paymentOptions, validateCheckout } from './checkout-form';
 
 const filled = { ...emptyForm, email: 'jana@example.test', name: 'Jana', street: 'Hlavní 1', city: 'Praha', postalCode: '110 00', shippingMethodId: 'x', paymentMethod: 'BANK_TRANSFER' as const, acceptTerms: true };
 const items = [{ variantId: 'v-tee-s', productId: 'p-tee', quantity: 1 }];
@@ -41,9 +41,25 @@ it('sends no delivery address for a digital-only cart and offers bank transfer o
   expect(paymentOptions(quote, '')).toEqual([{ method: 'BANK_TRANSFER', fee: 0 }]);
 });
 
-it('keeps one idempotency key until it is dropped', () => {
-  const first = checkoutKey();
-  expect(checkoutKey()).toBe(first);
+it('rejects emails the server rejects', () => {
+  for (const email of ['jana@seznam.c', 'jana.nováková@seznam.cz', '.jana@seznam.cz', 'jana..n@seznam.cz']) {
+    expect(validateCheckout({ ...filled, email }, { hasPhysical: true })).toEqual({ email: 'Zadejte platný e-mail.' });
+  }
+  expect(validateCheckout({ ...filled, email: 'jana.novakova+obchod@seznam.cz' }, { hasPhysical: true })).toEqual({});
+});
+
+it('keeps one key per order body for a day and warns when the body changed after an unanswered attempt', () => {
+  const quote = quoteFor({ items: [{ variantId: 'v-tee-s', quantity: 1 }], country: 'CZ' });
+  const body = orderRequest(filled, items, quote);
+  const changedBody = { ...body, note: 'jinak' };
+  const first = keyFor(body, 1000);
+  expect(keyFor(body, 2000)).toEqual({ key: first.key, afterLostAnswer: false });
+  markUnanswered();
+  const changed = keyFor(changedBody, 3000);
+  expect(changed).toEqual({ key: expect.any(String), afterLostAnswer: true });
+  expect(changed.key).not.toBe(first.key);
+  expect(keyFor(changedBody, 4000)).toEqual({ key: changed.key, afterLostAnswer: false });
+  expect(keyFor(changedBody, 4000 + 24 * 3600_000).key).not.toBe(changed.key);
   forgetCheckoutKey();
-  expect(checkoutKey()).not.toBe(first);
+  expect(keyFor(body, 5000).key).not.toBe(first.key);
 });

@@ -7,6 +7,7 @@ import { COURIER, quoteFor } from '../../test/shop-fixtures';
 import { CART_KEY } from '../cart';
 import type { OrderRequest, QuoteRequest } from '../types';
 import { CheckoutPage } from './CheckoutPage';
+import { CartPage } from './CartPage';
 
 function OrderProbe() {
   const location = useLocation();
@@ -15,6 +16,7 @@ function OrderProbe() {
 
 const routes = [
   { path: '/pokladna', element: <CheckoutPage /> },
+  { path: '/kosik', element: <CartPage /> },
   { path: '/objednavka/:number', element: <OrderProbe /> },
 ];
 const address = { name: 'Jana Nováková', street: 'Hlavní 1', city: 'Praha', postalCode: '110 00', country: 'CZ' };
@@ -170,4 +172,79 @@ it('says when the country cannot be shipped to and blocks the order', async () =
   await userEvent.selectOptions(screen.getByLabelText(/Země/), 'SK');
   expect(await screen.findByText('Do této země bohužel nedoručujeme.')).toBeInTheDocument();
   expect(orderButton()).toBeDisabled();
+});
+
+it('marks the lines when stock ran out at order time, also in the cart', async () => {
+  localStorage.setItem(CART_KEY, JSON.stringify([{ variantId: 'v-tee-s', productId: 'p-tee', quantity: 2 }]));
+  let soldOut = false;
+  const stock = () => (soldOut ? { stock: { 'v-tee-s': 1 } } : {});
+  const api = serve(
+    (body) => {
+      soldOut = true;
+      return { status: 409, body: { success: false, error: 'Out of stock', reason: 'OUT_OF_STOCK', quote: quoteFor(body, stock()) } };
+    },
+    (body) => ok(quoteFor(body, stock())),
+  );
+  const { router } = renderRoutes(routes, '/kosik');
+  await screen.findByRole('link', { name: 'K pokladně' });
+  await router.navigate('/pokladna');
+  await fillForm();
+  await waitFor(() => expect(orderButton()).toBeEnabled());
+  await userEvent.click(orderButton());
+  expect(await screen.findByText(/Některé zboží v košíku je potřeba upravit/)).toBeInTheDocument();
+  expect(orderButton()).toBeDisabled();
+  await userEvent.click(screen.getAllByRole('link', { name: 'Upravit košík' })[0]);
+  expect(await screen.findByText('Skladem jen 1 ks.')).toBeInTheDocument();
+  expect(ordersOf(api)).toHaveLength(1);
+});
+
+it('marks the field the server refused', async () => {
+  setCart('v-tee-s', 'p-tee');
+  serve(() => ({ status: 400, body: { success: false, error: 'Validation failed', details: [{ path: 'body.billingAddress.postalCode', message: 'Too long' }] } }));
+  renderRoutes(routes, '/pokladna');
+  await fillForm();
+  await waitFor(() => expect(orderButton()).toBeEnabled());
+  await userEvent.click(orderButton());
+  expect(await screen.findByText('Zkontrolujte prosím tento údaj.')).toBeInTheDocument();
+  expect(screen.getByLabelText(/^PSČ/)).toHaveAttribute('aria-invalid', 'true');
+});
+
+it('warns before sending changed details after an attempt that got no answer', async () => {
+  setCart('v-tee-s', 'p-tee');
+  let fail = true;
+  const api = serve(() => {
+    if (fail) {
+      fail = false;
+      throw new TypeError('Failed to fetch');
+    }
+    return placed();
+  });
+  renderRoutes(routes, '/pokladna');
+  await fillForm();
+  await waitFor(() => expect(orderButton()).toBeEnabled());
+  await userEvent.click(orderButton());
+  await screen.findByText(/Nepodařilo se spojit se serverem/);
+  await userEvent.type(screen.getByLabelText(/Ulice a číslo/), 'a');
+  await userEvent.click(orderButton());
+  expect(await screen.findByText(/Předchozí pokus o objednávku mohl projít/)).toBeInTheDocument();
+  expect(ordersOf(api)).toHaveLength(1);
+  await userEvent.click(orderButton());
+  await screen.findByText('order /objednavka/2026000001?t=tok');
+  const keys = ordersOf(api).map((c) => c.headers.get('Idempotency-Key'));
+  expect(keys).toHaveLength(2);
+  expect(keys[1]).not.toBe(keys[0]);
+});
+
+it('locks the choices while the order is being sent', async () => {
+  setCart('v-tee-s', 'p-tee');
+  let release: () => void = () => {};
+  serve(() => new Promise((resolve) => (release = () => resolve(placed()))));
+  renderRoutes(routes, '/pokladna');
+  await fillForm();
+  await waitFor(() => expect(orderButton()).toBeEnabled());
+  await userEvent.click(orderButton());
+  expect(screen.getByRole('radio', { name: /Dobírka/ })).toBeDisabled();
+  expect(screen.getByLabelText(/E-mail/)).toBeDisabled();
+  release();
+  await screen.findByText('order /objednavka/2026000001?t=tok');
 });

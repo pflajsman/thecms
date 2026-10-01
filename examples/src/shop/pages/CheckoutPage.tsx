@@ -8,9 +8,10 @@ import { useCart } from '../cart';
 import {
   FIELD_ORDER,
   PAYMENT_LABEL,
-  checkoutKey,
   emptyForm,
   forgetCheckoutKey,
+  keyFor,
+  markUnanswered,
   orderRequest,
   paymentOptions,
   quoteRequest,
@@ -31,6 +32,8 @@ const countryName = (code: string) => {
     return code;
   }
 };
+
+const LOST_ANSWER = 'Předchozí pokus o objednávku mohl projít, jen se nám nevrátila odpověď. Zkontrolujte prosím e-mail, zda vám nepřišlo potvrzení; pokud ne, klikněte znovu a odešleme objednávku se změněnými údaji.';
 
 /** Element ids for focusing the first invalid field. */
 const FIELD_ID: Record<FieldKey, string> = {
@@ -148,20 +151,35 @@ export function CheckoutPage() {
       document.getElementById(FIELD_ID[first])?.focus();
       return;
     }
+    const body = orderRequest(form, cart.items, current);
+    const { key, afterLostAnswer } = keyFor(body);
+    if (afterLostAnswer) {
+      setProblem({ section: 'form', text: LOST_ANSWER });
+      return;
+    }
     inFlight.current = true;
     setSubmitting(true);
     setProblem(null);
     try {
-      const placed = await shop.placeOrder(orderRequest(form, cart.items, current), checkoutKey());
+      const placed = await shop.placeOrder(body, key);
       forgetCheckoutKey();
       cart.clear();
       navigate(`/objednavka/${placed.number}?t=${encodeURIComponent(placed.accessToken)}`, { replace: true, state: { placed: true } });
     } catch (error) {
       const found = checkoutProblem(error);
-      if (error instanceof ApiError && error.reason === 'PRICE_CHANGED' && error.body.quote) {
-        queryClient.setQueryData(quoteKey(debounced), error.body.quote as Quote);
+      if (error instanceof ApiError) {
+        // The answer carries fresh prices and stock: show them, and refresh every other quote (the cart's too).
+        if (error.body.quote) queryClient.setQueryData(quoteKey(debounced), error.body.quote as Quote);
+        void queryClient.invalidateQueries({ queryKey: ['shop', 'quote'], refetchType: 'none' });
+      } else {
+        markUnanswered();
       }
       if (found.retryWithNewKey) forgetCheckoutKey();
+      if (found.fields) {
+        setErrors(found.fields);
+        const first = FIELD_ORDER.find((k) => found.fields?.[k]);
+        if (first) document.getElementById(FIELD_ID[first])?.focus();
+      }
       setProblem(found);
     } finally {
       inFlight.current = false;
@@ -199,7 +217,8 @@ export function CheckoutPage() {
         <div className="kicker">pokladna</div>
         <h1>Pokladna</h1>
         <form className="checkout" noValidate onSubmit={(e) => void submit(e)}>
-          <div className="checkout-main">
+          {/* Locked while the order is being sent, so what was clicked is what gets ordered. */}
+          <fieldset className="checkout-main" disabled={submitting}>
             <fieldset className="checkout-section">
               <legend>1. Kontakt</legend>
               <TextField id="email" type="email" autoComplete="email" label="E-mail" value={form.email} onChange={(v) => set('email', v)} error={errors.email} />
@@ -301,7 +320,7 @@ export function CheckoutPage() {
                 </p>
               )}
             </div>
-          </div>
+          </fieldset>
 
           <aside className="checkout-summary" aria-labelledby="summary-title">
             <h2 id="summary-title">Souhrn</h2>
