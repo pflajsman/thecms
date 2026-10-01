@@ -10,6 +10,8 @@ import { SettingsService } from './settings.service';
 import { productContentTypeId } from './product-model';
 import { deleteDigitalFile } from './digital-files';
 import { assertOptions, combinations, sameCombo, skuFromName } from './product-rules';
+import { emitProductEvent } from './commerce-events';
+import { WebhookEvent } from '../../models/webhook.model';
 
 export interface ProductJSON {
   id: string;
@@ -120,6 +122,7 @@ export class ProductsService {
       await ContentEntryModel.deleteMany({ itemId: entry.itemId });
       throw error;
     }
+    emitProductEvent(WebhookEvent.PRODUCT_UPDATED, product);
     return ProductsService.get(String(product._id));
   }
 
@@ -147,6 +150,7 @@ export class ProductsService {
     }
     if (input.active !== undefined) product.active = input.active;
     let removedVariantIds: string[] | undefined;
+    const before = new Set((await VariantModel.find({ productId: product._id }).select('_id').lean()).map((v) => String(v._id)));
     if (input.options !== undefined) {
       const codes = (await LanguagesService.codes()).length ? await LanguagesService.codes() : ['en'];
       assertOptions(input.options, codes, await LanguagesService.defaultCode());
@@ -156,6 +160,8 @@ export class ProductsService {
     if (userId) product.updatedBy = new mongoose.Types.ObjectId(userId);
     await product.save();
     const detail = await ProductsService.get(id);
+    const created = detail.variants.map((v) => v.id).filter((vid) => !before.has(vid));
+    emitProductEvent(WebhookEvent.PRODUCT_UPDATED, product, [...created, ...(removedVariantIds ?? [])]);
     return removedVariantIds ? { ...detail, removedVariantIds } : detail;
   }
 
@@ -166,6 +172,7 @@ export class ProductsService {
     await product.deleteOne();
     await ContentEntryModel.deleteMany({ itemId: product.itemId });
     await deleteDigitalFile(product);
+    emitProductEvent(WebhookEvent.PRODUCT_DELETED, product, variantIds);
     return { variantIds, product };
   }
 

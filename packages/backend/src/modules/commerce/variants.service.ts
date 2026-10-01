@@ -5,6 +5,8 @@ import { AppError } from '../../middleware/error.middleware';
 import { SettingsService } from './settings.service';
 import { sameCombo } from './product-rules';
 import type { VariantInput } from './commerce.schema';
+import { emitProductEvent } from './commerce-events';
+import { WebhookEvent } from '../../models/webhook.model';
 
 export class VariantsService {
   /** Save the whole variants table of a product: update rows with an id, add the others, delete the rest. */
@@ -34,6 +36,9 @@ export class VariantsService {
     if (taken) throw new AppError(`SKU ${taken.sku} is already used`, 409);
 
     const existing = await VariantModel.find({ productId: product._id }).exec();
+    const stockOf = (v: Pick<IVariant, 'stock'>) => `${v.stock?.tracked}:${v.stock?.quantity}`;
+    // Snapshot before the rows are updated in place below.
+    const stockBefore = new Map(existing.map((v) => [String(v._id), stockOf(v)]));
     const keepIds = rows.map((r) => r.id).filter((id): id is string => !!id);
     const digital = product.type === ProductType.DIGITAL;
     try {
@@ -62,6 +67,15 @@ export class VariantsService {
       if ((error as { code?: number }).code === 11000) throw new AppError('A SKU is already used', 409);
       throw error;
     }
-    return VariantModel.find({ productId: product._id }).sort({ createdAt: 1 }).exec();
+    const saved = await VariantModel.find({ productId: product._id }).sort({ createdAt: 1 }).exec();
+    const stockChanged = saved
+      .filter((v) => {
+        const old = stockBefore.get(String(v._id));
+        return old !== undefined ? old !== stockOf(v) : v.stock?.tracked;
+      })
+      .map((v) => String(v._id));
+    emitProductEvent(WebhookEvent.PRODUCT_UPDATED, product, saved.map((v) => String(v._id)));
+    if (stockChanged.length) emitProductEvent(WebhookEvent.STOCK_CHANGED, product, stockChanged);
+    return saved;
   }
 }

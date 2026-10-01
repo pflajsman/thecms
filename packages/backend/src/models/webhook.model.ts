@@ -20,6 +20,11 @@ export enum WebhookEvent {
   // Media Events
   MEDIA_UPLOADED = 'media.uploaded',
   MEDIA_DELETED = 'media.deleted',
+
+  // Commerce Events
+  PRODUCT_UPDATED = 'product.updated',
+  PRODUCT_DELETED = 'product.deleted',
+  STOCK_CHANGED = 'stock.changed',
 }
 
 /**

@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import { storageService } from '../../config/storage';
 import { ProductModel, ProductType, type DigitalFile, type IProduct } from '../../models/product.model';
 import { AppError } from '../../middleware/error.middleware';
+import { WebhookEvent } from '../../models/webhook.model';
+import { emitProductEvent } from './commerce-events';
 
 export async function uploadDigitalFile(productId: string, file: Express.Multer.File): Promise<DigitalFile> {
   try {
@@ -15,6 +17,7 @@ export async function uploadDigitalFile(productId: string, file: Express.Multer.
     product.digitalFile = { blobName, originalName: file.originalname, mimeType: file.mimetype, size: file.size };
     await product.save();
     if (previous) await storageService.deletePrivateFile(previous).catch((err) => console.error('Old digital file not deleted:', err));
+    emitProductEvent(WebhookEvent.PRODUCT_UPDATED, product);
     return product.digitalFile;
   } finally {
     await fs.unlink(file.path).catch(() => undefined);
