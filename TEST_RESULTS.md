@@ -453,3 +453,21 @@ Environment: local mongod and Azurite, backend from the Plan 1 worktree on a thr
 | Digital product: GPX upload stored in `downloads`; anonymous GET of the blob returns 403 | Pass |
 | Deleting Czech while products exist only in Czech: 409 "2 products have content only in cs" | Pass |
 | Deleting products removes product, variants and entry | Pass |
+
+## E-shop catalogue Plan 2 verification (2026-10-01)
+
+Environment: local mongod and Azurite; worktree backend (port 3100) and admin (port 5175) on a throwaway copy of the local database, dropped afterwards.
+
+| Check | Result |
+|---|---|
+| Admin tests (666), `pnpm lint` (0 problems), build | Pass |
+| Sidebar shows Commerce (Products, Shop settings); Products shows the setup prompt until a currency and VAT rate exist | Pass |
+| Shop settings: CZK (default), EUR, Standard 21 %, Reduced 12 %; saved | Pass |
+| Product page: Selling and Content tabs as routes; General, Options, Variants sections | Pass |
+| Options: add Size with S and M (Czech label "Velikost"), apply: the existing variant becomes S, M is added; keys `size`, `s`, `m` | Pass (after fix in this plan: new options and values had placeholder keys `option-1`, `value-1`) |
+| Variants: CZK 490 for S, "Set CZK for all", EUR 20.5 for S, stock 3; saved as 49000 and 2050 minor units, shown back as 490.00 and 20.50 | Pass |
+| Content tab: embedded editor with "Products" back link and no Delete; Translate to Čeština stays under `/commerce/products/...` | Pass |
+| Active switch saved; public API with `language=cs&currency=EUR` returns "Cyklistické tričko", option "Velikost", S at 2050 | Pass |
+| Products list in Czech: "490,00 Kč", "Dochází", "Aktivní", "Nepublikováno" | Pass |
+| 360px (iframe) in English and Czech: products, settings, Selling and Content tabs have no horizontal scroll | Pass (after fix in this plan: Czech currency rows were 400px wide) |
+| New product dialog, delete confirmation, options removal dialog, leave dialog, file upload picker | Covered by unit tests only (the browser tool cannot act while a dialog or the OS file picker is open) |
