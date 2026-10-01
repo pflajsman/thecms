@@ -507,3 +507,28 @@ Cosmos DB checks after deploy (not reproducible locally):
 Azure App Service settings to add before customers order:
 - `PUBLIC_API_URL` (download links in payment emails; without it they point at localhost).
 - `TRUST_PROXY` only if the front end has more than one hop; production trusts one hop by default, so the order rate limit counts per customer address.
+
+## E-shop orders Plan 2 verification (2026-10-01)
+
+Environment: local mongod and Azurite; worktree backend (port 3100) and admin (port 5175) on a throwaway copy of the local database, dropped afterwards. Brevo not configured. Products and orders were created through the API (the catalogue screens were verified in catalogue Plan 2; the storefront is spec 4); everything else was done in the admin.
+
+| Check | Result |
+|---|---|
+| Admin tests (740), backend tests, `pnpm lint` (0 problems), build | Pass |
+| Shop settings: CZK, Standard 21 %, Reduced 12 % saved; checkout section: CZK account with IBAN typed as `cz65 0800 0000 1920 0014 5399`, holder, shop email, terms link; after reload the API holds `CZ6508000000192000145399` | Pass |
+| Shipping: zone "Czechia" (codes `cz, xyz` first refused with "Use two-letter codes such as CZ: XYZ", then `cz` saved) and "Everywhere else" | Pass |
+| A second zone with CZ: the server message "CZ is already in Czechia" shows in the dialog | Pass |
+| New method "Courier": bank transfer and cash on delivery, fee 39, free from 2000, Czechia bands 2000 g → 129 and open → 199; saved and opened at its id | Pass |
+| New method "Abroad" for everywhere else: price `4 99,9` refused with "Enter an amount such as 129.00", then 499 saved | Pass |
+| Deleting "Czechia" (used by Courier): "A shipping method uses this zone", zone stays | Pass |
+| Variant save through the API without a `stock` field | Pass (after fix in this plan: 500 "Cannot destructure property 'baseQuantity'", a regression from the Plan 1 review fix) |
+| Orders list: both orders with totals, customers and status badges; navigation badge 1 (the cash on delivery order) | Pass |
+| "Needs action" toggle: only the cash on delivery order, `?action=1` in the address | Pass |
+| Order page (bank transfer, tee and guide): lines with "Size: S" and "Download", totals 789 + 129 = 918, VAT 21 % and 12 %, addresses, transfer details, customer note, history with "Email not sent" | Pass |
+| Mark as paid (confirm dialog): toast, history "Marked as paid", Resend download links appears, needs-action count 2 | Pass |
+| Mark as shipped: `ftp://x` refused, then number DR123 and https link saved; order Completed, tracking shown | Pass |
+| Cancel the cash on delivery order (no refund option, unpaid): cancelled, S stock back to 2 | Pass |
+| Czech: order page, list, shipping, method editor, settings read through in Czech ("Objednávka 2026000002", "918,00 Kč", "Včetně DPH 21 %") | Pass |
+| 360px iframe in English and Czech: orders list, order page, shipping, method editor, settings have no horizontal scroll | Pass |
+| Console errors | None |
+| QR code from the order's SPD string scanned with a banking app | Not scanned yet (PNG rendered, waiting for the scan) |
