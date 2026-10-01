@@ -32,6 +32,18 @@ each entry's dynamic `data` is normalised into a typed `Post` in `cms.ts`
 (`toPost`), tolerant of field-name variations (`title`/`name`, `body`/`content`,
 `excerpt`/`summary`, `coverImage`/`image`).
 
+## Shop
+
+The shop lives in `src/shop/` and uses the TheCMS public shop API with the same API key:
+
+- `/obchod` products, `/obchod/:id` product detail, `/kosik` cart, `/pokladna` checkout
+- `/objednavka/:number?t=<token>` order status (the personal link shown after ordering)
+- `/obchodni-podminky` terms: a page entry with key `obchodni-podminky` in the pages content type; write the seller details, terms and withdrawal information there
+
+The cart is kept in the browser (`flajsman.cart.v1` in localStorage) and holds only variant ids and quantities; prices always come from the API.
+
+Tests: `pnpm --filter blog-flajsman test`.
+
 ## Local development
 
 ```bash

@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test blog
+        run: pnpm --filter blog-flajsman test
+
       - name: Build blog
         run: pnpm --filter blog-flajsman build
 

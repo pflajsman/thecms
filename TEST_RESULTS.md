@@ -532,3 +532,24 @@ Environment: local mongod and Azurite; worktree backend (port 3100) and admin (p
 | 360px iframe in English and Czech: orders list, order page, shipping, method editor, settings have no horizontal scroll | Pass |
 | Console errors | None |
 | QR code from the order's SPD string scanned with a banking app | Not scanned yet (PNG rendered, waiting for the scan) |
+
+## E-shop storefront verification (2026-10-01)
+
+Environment: local mongod and Azurite; worktree backend (port 3100) on a throwaway copy of the local database (dropped afterwards); example site dev server (port 5176) with a local `config.js` pointing at it. Shop, products and terms page set up through the admin API; the order was marked paid and shipped through the admin API (the admin screens were verified in orders Plan 2). Brevo not configured.
+
+| Check | Result |
+|---|---|
+| Site tests (43) and build | Pass |
+| `/obchod`: guide 299 Kč, tee "od 490 Kč" with its image | Pass |
+| Tee detail: size S preselected, "Skladem posledních 3 ks", price 490 Kč; Do košíku: "Přidáno do košíku.", header "Košík, 2 položky" after adding the guide | Pass |
+| Guide detail: "Ke stažení po zaplacení" | Pass |
+| `/kosik`: lines, prices and subtotal from the quote; raising S to 4 shows "Skladem jen 3 ks." with "Snížit na 3" and disables "K pokladně"; "Snížit na 3" fixes it | Pass |
+| `/pokladna` with tee and guide: country list from the API (Česko), Kurýr 129 Kč, only bank transfer (digital item in the cart), total 918 Kč with VAT 21 % and 12 % | Pass |
+| Order placed: `/objednavka/2026000001?t=...`, "děkujeme za objednávku", account number, IBAN, 918 Kč, variable symbol 2026000001, QR code shown; cart emptied | Pass |
+| After paid and shipped (DR123): status "vyřízená", "Odkazy ke stažení jsme poslali na váš e-mail.", tracking number and "Sledovat zásilku"; payment box gone | Pass |
+| Second order (tee only, cash on delivery): total 658 Kč, order page "Zaplatíte při převzetí zásilky." | Pass |
+| Wrong token: "Objednávka nenalezena. Zkontrolujte prosím odkaz." | Pass |
+| `/obchodni-podminky` renders the CMS page with key `obchodni-podminky` | Pass |
+| 360px (iframe): shop, product, cart, checkout, order and terms pages have no horizontal scroll | Pass |
+| Console errors | None |
+| Payment QR scanned with a banking app | Not scanned yet (PNG rendered, waiting for the scan) |
