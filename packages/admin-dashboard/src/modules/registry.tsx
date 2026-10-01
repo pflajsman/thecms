@@ -39,6 +39,7 @@ import { ProductsListPage } from '@/features/commerce/pages/ProductsListPage'
 import { ProductPage } from '@/features/commerce/pages/ProductPage'
 import { ShippingPage } from '@/features/commerce/pages/ShippingPage'
 import { OrdersListPage } from '@/features/commerce/pages/OrdersListPage'
+import { OrderPage } from '@/features/commerce/pages/OrderPage'
 import { useOrdersNeedingAction } from '@/features/commerce/orders-queries'
 import { ShippingMethodPage } from '@/features/commerce/pages/ShippingMethodPage'
 
@@ -97,7 +98,10 @@ export const modules: AppModule[] = [
     group: 'commerce',
     path: '/commerce/orders',
     useBadge: useOrdersNeedingAction,
-    routes: [{ path: 'commerce/orders', element: <OrdersListPage /> }],
+    routes: [
+      { path: 'commerce/orders', element: <OrdersListPage /> },
+      { path: 'commerce/orders/:id', element: <OrderPage /> },
+    ],
   },
   {
     id: 'products',
