@@ -12,6 +12,7 @@ import { providers, type PaymentInstructions } from './payments';
 import type { OrderInput } from './checkout.schema';
 import { resolveLanguage } from '../public/public-content.service';
 import { emitOrderEvent } from './order-events';
+import { notify } from './order-emails';
 import { WebhookEvent } from '../../models/webhook.model';
 
 export async function nextOrderNumber(date = new Date()): Promise<string> {
@@ -47,6 +48,7 @@ export async function releaseStock(lines: { variantId: string; quantity: number 
 
 /** Called after an order is saved: webhook now, emails in the order emails module. */
 export function onOrderPlaced(order: IOrder): void {
+  void notify(order, 'confirmation');
   emitOrderEvent(WebhookEvent.ORDER_PLACED, order);
 }
 

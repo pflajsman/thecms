@@ -23,6 +23,22 @@ export class EmailService {
     console.log('✅ Email service initialized (Brevo)');
   }
 
+  static isReady(): boolean {
+    return EmailService.initialized;
+  }
+
+  /** Send one email; throws when email is not configured or Brevo refuses it. */
+  static async send(options: { to: string; subject: string; html: string; attachments?: { name: string; content: string }[] }): Promise<void> {
+    if (!EmailService.initialized) throw new Error('email is not configured');
+    const email = new SendSmtpEmail();
+    email.sender = { email: process.env.BREVO_FROM_EMAIL || 'noreply@thecms.app', name: process.env.BREVO_FROM_NAME || 'TheCMS' };
+    email.to = [{ email: options.to }];
+    email.subject = options.subject;
+    email.htmlContent = options.html;
+    if (options.attachments?.length) email.attachment = options.attachments;
+    await EmailService.apiInstance.sendTransacEmail(email);
+  }
+
   /**
    * Send a form submission notification email
    */
