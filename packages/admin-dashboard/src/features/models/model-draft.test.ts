@@ -127,7 +127,7 @@ describe('payload and diff', () => {
     d = setFieldKey(d, d.fields[1].cid, 'gpxUrl')
     const added = addField(d, 'TEXT')
     d = setFieldLabel(added.draft, added.cid, 'Summary')
-    expect(diffKeys(d)).toEqual({ renamed: [{ from: 'gpxurl', to: 'gpxUrl' }], removed: [] })
+    expect(diffKeys(d)).toEqual({ renamed: [{ from: 'gpxurl', to: 'gpxUrl' }], removed: [], unified: [] })
     d = removeField(d, d.fields[0].cid)
     expect(diffKeys(d).removed).toEqual(['title'])
   })
@@ -139,7 +139,7 @@ describe('templates', () => {
       const d = draftFromTemplate(t)
       expect(validateModel(d)).toEqual({})
       expect(toModelPayload(d).titleField).toBe(t.titleField)
-      expect(diffKeys(d)).toEqual({ renamed: [], removed: [] })
+      expect(diffKeys(d)).toEqual({ renamed: [], removed: [], unified: [] })
     }
   })
 })
@@ -167,4 +167,29 @@ it('explains model errors in Czech', async () => {
   expect(errors.name).toBe('Název musí mít alespoň 2 znaky')
   expect(errors.slug).toBe('Použijte malá písmena, číslice a pomlčky')
   expect(errors.fields).toBe('Přidejte alespoň jedno pole')
+})
+
+describe('Translated setting', () => {
+  it('keeps each field’s Translated setting when saving, including untouched fields', () => {
+    const draft = draftFromType({
+      ...trip,
+      fields: [
+        { name: 'title', label: 'Title', type: 'TEXT', required: true, localized: false },
+        { name: 'km', label: 'Distance', type: 'NUMBER', required: false, localized: true },
+        { name: 'body', label: 'Body', type: 'RICH_TEXT', required: false },
+      ],
+    })
+    expect(toModelPayload(draft).fields.map((f) => [f.name, f.localized])).toEqual([
+      ['title', false],
+      ['km', true],
+      ['body', undefined],
+    ])
+  })
+
+  it('lists saved fields that turn from translated to shared', () => {
+    const draft = draftFromType({ ...trip, fields: [{ name: 'body', label: 'Body', type: 'RICH_TEXT', required: false }] })
+    const changed = updateField(draft, draft.fields[0].cid, { localized: false })
+    expect(diffKeys(changed).unified).toEqual(['body'])
+    expect(diffKeys(updateField(changed, draft.fields[0].cid, { localized: true })).unified).toEqual([])
+  })
 })

@@ -7,6 +7,7 @@ import type { ContentType } from '@/types'
 import * as contentApi from '@/features/content/content-api'
 import * as modelsApi from '../models-api'
 import { ModelBuilderPage } from './ModelBuilderPage'
+import * as languagesApi from '@/features/languages/languages-api'
 
 vi.mock('@/features/content/content-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/features/content/content-api')>()
@@ -16,6 +17,14 @@ vi.mock('../models-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../models-api')>()
   return { ...actual, createModel: vi.fn(), updateModel: vi.fn(), deleteModel: vi.fn(), getEntryCount: vi.fn() }
 })
+
+vi.mock('@/features/languages/languages-api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/languages/languages-api')>()),
+  listLanguages: vi.fn(),
+}))
+
+const en = { id: 'l1', code: 'en', name: 'English', isDefault: true, order: 0 }
+const cs = { id: 'l2', code: 'cs', name: 'Čeština', isDefault: false, order: 1 }
 
 const trip: ContentType = {
   id: 't1',
@@ -40,6 +49,7 @@ beforeEach(() => {
   vi.mocked(contentApi.listContentTypes).mockResolvedValue([trip])
   vi.mocked(contentApi.getContentType).mockResolvedValue(trip)
   vi.mocked(modelsApi.getEntryCount).mockResolvedValue(8)
+  vi.mocked(languagesApi.listLanguages).mockResolvedValue([en])
 })
 
 describe('new model', () => {
@@ -174,4 +184,33 @@ it('explains entry usage in the rename confirmation in natural Czech', async () 
   expect(i18n.t('models:builder.usedBy', { count: 1 })).toBe('Tento model má 1 položku.')
   expect(i18n.t('models:builder.usedBy', { count: 3 })).toBe('Tento model má 3 položky.')
   expect(i18n.t('models:builder.usedBy', { count: 5 })).toBe('Tento model má 5 položek.')
+})
+
+describe('Translated setting', () => {
+  it('switches a field to shared and warns before saving when the model has entries', async () => {
+    vi.mocked(languagesApi.listLanguages).mockResolvedValue([en, cs])
+    vi.mocked(modelsApi.updateModel).mockImplementation(async (_id, body) => ({ ...trip, ...body }) as ContentType)
+    renderRoutes(routes, { route: '/models/t1' })
+    await userEvent.click(await screen.findByRole('button', { name: /^Title/ }))
+    const inspector = screen.getByRole('complementary', { name: 'Field settings' })
+    const translated = await within(inspector).findByRole('switch', { name: 'Translated' })
+    expect(translated).toBeChecked()
+    await userEvent.click(translated)
+    expect(within(inspector).getByText('The same value in every language.')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Save model' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Make fields the same in every language?' })
+    expect(dialog).toHaveTextContent('title')
+    expect(modelsApi.updateModel).not.toHaveBeenCalled()
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save changes' }))
+    expect(modelsApi.updateModel).toHaveBeenCalledWith('t1', expect.objectContaining({
+      fields: expect.arrayContaining([expect.objectContaining({ name: 'title', localized: false })]),
+    }))
+  })
+
+  it('hides the Translated switch with one language', async () => {
+    renderRoutes(routes, { route: '/models/t1' })
+    await userEvent.click(await screen.findByRole('button', { name: /^Title/ }))
+    const inspector = screen.getByRole('complementary', { name: 'Field settings' })
+    expect(within(inspector).queryByRole('switch', { name: 'Translated' })).not.toBeInTheDocument()
+  })
 })

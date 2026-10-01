@@ -118,7 +118,9 @@
     "deleteWithEntries_one": "This also deletes its {{count}} entry. This cannot be undone.",
     "deleteWithEntries_other": "This also deletes its {{count}} entries. This cannot be undone.",
     "cannotUndo": "This cannot be undone.",
-    "slugHint": "Your site loads entries at /content/{{slug}}."
+    "slugHint": "Your site loads entries at /content/{{slug}}.",
+    "unifyTitle": "Make fields the same in every language?",
+    "unifyText": "Each entry keeps the value from its default-language version in these fields:"
   },
   "inspector": {
     "label": "Label",
@@ -146,6 +148,9 @@
     "anyFile": "None selected means any supported file.",
     "entriesFrom": "Entries from",
     "anyModel": "Any content model",
-    "remove": "Remove field"
+    "remove": "Remove field",
+    "translated": "Translated",
+    "translatedHint": "Each language has its own value.",
+    "sharedHint": "The same value in every language."
   }
 }

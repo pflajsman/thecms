@@ -3,13 +3,15 @@ import type { ContentType, Field, FieldType, ValidationRules } from '@/types'
 import { apiKeyError, toApiKey, toSlug, uniqueKey } from '@/features/builder/api-key'
 import type { ModelTemplate } from './templates'
 import type { ModelPayload } from './models-api'
+import { isLocalized } from '@/lib/localized'
 
 /** Palette and inspector name of a field type, in the current language. */
 export function fieldTypeLabel(type: FieldType): string {
   return i18n.t(`models:palette.${type}`)
 }
 
-export type DraftField = Field & { cid: string; originalName?: string; keyTouched: boolean }
+/** originalLocalized: whether the saved field was translated (used to warn before it becomes shared). */
+export type DraftField = Field & { cid: string; originalName?: string; keyTouched: boolean; originalLocalized?: boolean }
 
 export interface ModelDraft {
   name: string
@@ -32,7 +34,7 @@ export function emptyDraft(): ModelDraft {
 }
 
 export function draftFromType(ct: ContentType): ModelDraft {
-  const fields = ct.fields.map((f) => ({ ...f, cid: nextCid(), originalName: f.name, keyTouched: true }))
+  const fields = ct.fields.map((f) => ({ ...f, cid: nextCid(), originalName: f.name, keyTouched: true, originalLocalized: isLocalized(f) }))
   return {
     name: ct.name,
     slug: ct.slug,
@@ -165,6 +167,7 @@ export function toModelPayload(d: ModelDraft): ModelPayload {
       const field: Field = { name: f.name, label: f.label.trim(), type: f.type, required: !!f.required }
       if (f.description?.trim()) field.description = f.description.trim()
       if (f.defaultValue !== undefined) field.defaultValue = f.defaultValue
+      if (f.localized !== undefined) field.localized = f.localized
       const clean = cleanValidation(f.validation)
       if (clean) field.validation = clean
       return field
@@ -172,9 +175,10 @@ export function toModelPayload(d: ModelDraft): ModelPayload {
   }
 }
 
-export function diffKeys(d: ModelDraft): { renamed: { from: string; to: string }[]; removed: string[] } {
+export function diffKeys(d: ModelDraft): { renamed: { from: string; to: string }[]; removed: string[]; unified: string[] } {
   const renamed = d.fields.filter((f) => f.originalName && f.originalName !== f.name).map((f) => ({ from: f.originalName!, to: f.name }))
   const kept = new Set(d.fields.map((f) => f.originalName).filter(Boolean))
   const removed = d.originalNames.filter((n) => !kept.has(n))
-  return { renamed, removed }
+  const unified = d.fields.filter((f) => f.originalLocalized === true && !isLocalized(f)).map((f) => f.name)
+  return { renamed, removed, unified }
 }

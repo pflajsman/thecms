@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { fieldTypeLabel, type DraftField } from '../model-draft'
+import { isLocalized } from '@/lib/localized'
 
 interface ModelFieldInspectorProps {
   field: DraftField
@@ -21,6 +22,8 @@ interface ModelFieldInspectorProps {
   onChange: (patch: Partial<Field>) => void
   onMakeTitle: () => void
   onRemove: () => void
+  /** Shows the Translated switch when there is more than one content language. */
+  multilingual: boolean
 }
 
 const FILE_CHOICES = [
@@ -36,7 +39,7 @@ function num(value: string): number | undefined {
   return Number.isFinite(n) ? n : undefined
 }
 
-export function ModelFieldInspector({ field, isTitle, locked, errors, models, onLabel, onKey, onChange, onMakeTitle, onRemove }: ModelFieldInspectorProps) {
+export function ModelFieldInspector({ field, isTitle, locked, errors, models, onLabel, onKey, onChange, onMakeTitle, onRemove, multilingual }: ModelFieldInspectorProps) {
   const { t } = useTranslation('models')
   const v: ValidationRules = field.validation ?? {}
   const setRule = (patch: Partial<ValidationRules>) => onChange({ validation: { ...v, ...patch } })
@@ -77,6 +80,15 @@ export function ModelFieldInspector({ field, isTitle, locked, errors, models, on
         <Label htmlFor="fi-required">{t('inspector.required')}</Label>
         <Switch id="fi-required" checked={!!field.required} onCheckedChange={(checked) => onChange({ required: checked })} />
       </div>
+      {multilingual && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="fi-localized">{t('inspector.translated')}</Label>
+            <Switch id="fi-localized" checked={isLocalized(field)} onCheckedChange={(checked) => onChange({ localized: checked })} />
+          </div>
+          <p className="text-sm text-muted-foreground">{isLocalized(field) ? t('inspector.translatedHint') : t('inspector.sharedHint')}</p>
+        </div>
+      )}
 
       {field.type === 'TEXT' && (
         <>

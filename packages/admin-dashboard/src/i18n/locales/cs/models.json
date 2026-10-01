@@ -122,7 +122,9 @@
     "deleteWithEntries_few": "Smažou se také jeho {{count}} položky. Nelze to vrátit.",
     "deleteWithEntries_other": "Smaže se také jeho {{count}} položek. Nelze to vrátit.",
     "cannotUndo": "Nelze to vrátit.",
-    "slugHint": "Web načítá položky z adresy /content/{{slug}}."
+    "slugHint": "Web načítá položky z adresy /content/{{slug}}.",
+    "unifyTitle": "Sjednotit pole ve všech jazycích?",
+    "unifyText": "Každá položka si v těchto polích ponechá hodnotu z verze ve výchozím jazyce:"
   },
   "inspector": {
     "label": "Popisek",
@@ -150,6 +152,9 @@
     "anyFile": "Když nic nevyberete, povolí se jakýkoli podporovaný soubor.",
     "entriesFrom": "Položky z modelu",
     "anyModel": "Jakýkoli model obsahu",
-    "remove": "Odebrat pole"
+    "remove": "Odebrat pole",
+    "translated": "Překládá se",
+    "translatedHint": "Každý jazyk má vlastní hodnotu.",
+    "sharedHint": "Ve všech jazycích stejná hodnota."
   }
 }

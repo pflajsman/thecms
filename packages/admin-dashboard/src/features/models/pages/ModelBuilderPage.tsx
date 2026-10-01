@@ -41,6 +41,7 @@ import {
 import { getModelTemplates } from '../templates'
 import { TemplateChooser } from '../components/TemplateChooser'
 import { ModelFieldInspector } from '../components/ModelFieldInspector'
+import { useLanguages } from '@/features/languages/languages-queries'
 
 const PALETTE: FieldType[] = ['TEXT', 'RICH_TEXT', 'NUMBER', 'DATE', 'BOOLEAN', 'MEDIA', 'RELATION']
 
@@ -92,6 +93,8 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
   // Unknown count (loading or failed) is treated as "may have entries" for the key guardrail.
   const countKnown = entryCount.isSuccess
   const diff = diffKeys(draft)
+  const multilingual = (useLanguages().data?.length ?? 0) > 1
+  const keysChanged = diff.renamed.length > 0 || diff.removed.length > 0
   const selectedField = draft.fields.find((f) => f.cid === selected)
 
   const save = async () => {
@@ -123,7 +126,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
       toast.error(tr('builder.fixFields'))
       return
     }
-    if (model && (!countKnown || count > 0) && (diff.renamed.length || diff.removed.length)) {
+    if (model && (!countKnown || count > 0) && (keysChanged || diff.unified.length)) {
       setConfirm('save')
       return
     }
@@ -233,6 +236,7 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
               onKey={(key) => setDraft(setFieldKey(draft, selectedField.cid, key))}
               onChange={(patch) => setDraft(updateField(draft, selectedField.cid, patch))}
               onMakeTitle={() => setDraft(setTitleField(draft, selectedField.cid))}
+              multilingual={multilingual}
               onRemove={() => {
                 setDraft(removeField(draft, selectedField.cid))
                 setSelected(undefined)
@@ -246,15 +250,25 @@ function ModelBuilder({ model, initial }: { model?: ContentType; initial: ModelD
       <ConfirmDialog
         open={confirm === 'save'}
         onOpenChange={(o) => !o && setConfirm(null)}
-        title={tr('builder.renameTitle')}
+        title={keysChanged ? tr('builder.renameTitle') : tr('builder.unifyTitle')}
         description={
           <span className="block space-y-2">
-            <span className="block">
-              {countKnown ? tr('builder.usedBy', { count }) : tr('builder.mayHaveEntries')} {tr('builder.renameConsequence')}
-            </span>
-            <span className="block font-mono text-xs">
-              {[...diff.renamed.map((r) => `${r.from} → ${r.to}`), ...diff.removed.map((r) => tr('builder.removedKey', { key: r }))].join(', ')}
-            </span>
+            {keysChanged && (
+              <>
+                <span className="block">
+                  {countKnown ? tr('builder.usedBy', { count }) : tr('builder.mayHaveEntries')} {tr('builder.renameConsequence')}
+                </span>
+                <span className="block font-mono text-xs">
+                  {[...diff.renamed.map((r) => `${r.from} → ${r.to}`), ...diff.removed.map((r) => tr('builder.removedKey', { key: r }))].join(', ')}
+                </span>
+              </>
+            )}
+            {diff.unified.length > 0 && (
+              <>
+                <span className="block">{tr('builder.unifyText')}</span>
+                <span className="block font-mono text-xs">{diff.unified.join(', ')}</span>
+              </>
+            )}
           </span>
         }
         confirmLabel={tr('builder.saveChanges')}
