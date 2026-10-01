@@ -129,3 +129,22 @@ it('renders in Czech', async () => {
   expect(screen.getByRole('textbox', { name: 'Cena CZK, S' })).toHaveValue('490,00')
   await expectNoA11yViolations(container)
 })
+
+it('derives keys for new options and values from their labels when applied', async () => {
+  const simple = { ...detail, product: { ...detail.product, options: [] }, variants: [{ ...variant('v1', 's', 'TEE'), optionValues: {} }] }
+  renderRoutes(routes(simple), { route: '/commerce/products/p1' })
+  const options = await screen.findByRole('region', { name: 'Options' })
+  await userEvent.click(within(options).getByRole('button', { name: 'Add option' }))
+  const name = within(options).getByRole('textbox', { name: 'Option name (English)' })
+  await userEvent.clear(name)
+  await userEvent.type(name, 'Colour')
+  const value = within(options).getAllByRole('textbox', { name: 'Value (English)' })[0]
+  await userEvent.clear(value)
+  await userEvent.type(value, 'Dark red')
+  await userEvent.click(within(options).getByRole('button', { name: 'Apply options' }))
+  await waitFor(() =>
+    expect(apiClient.put).toHaveBeenCalledWith('/commerce/products/p1', {
+      options: [{ key: 'colour', labels: { en: 'Colour' }, values: [{ key: 'dark-red', labels: { en: 'Dark red' } }] }],
+    }),
+  )
+})

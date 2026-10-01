@@ -38,6 +38,22 @@ export function OptionsEditor({ productId, options, variants, languages, onDirty
   useEffect(() => onDirty(dirty), [dirty, onDirty])
   useEffect(() => setDraft(options), [options])
 
+  // Saved keys never change (sites read them); new options and values take their key from the label.
+  const withKeys = (list: ProductOption[]): ProductOption[] => {
+    const keyed: ProductOption[] = []
+    for (const o of list) {
+      const saved = options.find((s) => s.key === o.key)
+      const key = saved ? o.key : optionKey(o.labels[defaultCode] ?? o.key, [...keyed.map((k) => k.key), ...list.filter((x) => x !== o && options.some((s) => s.key === x.key)).map((x) => x.key)])
+      const values: ProductOption['values'] = []
+      for (const v of o.values) {
+        const savedValue = saved?.values.some((s) => s.key === v.key)
+        values.push({ ...v, key: savedValue ? v.key : optionKey(v.labels[defaultCode] ?? v.key, [...values.map((x) => x.key), ...o.values.filter((x) => x !== v && saved?.values.some((s) => s.key === x.key)).map((x) => x.key)]) })
+      }
+      keyed.push({ ...o, key, values })
+    }
+    return keyed
+  }
+
   const setOption = (i: number, next: ProductOption) => setDraft(draft.map((o, j) => (j === i ? next : o)))
 
   const validate = (): string | null => {
@@ -53,7 +69,7 @@ export function OptionsEditor({ productId, options, variants, languages, onDirty
     setConfirm(null)
     setPending(true)
     try {
-      await writes.update(productId, { options: cleaned })
+      await writes.update(productId, { options: withKeys(cleaned) })
       toast.success(t('options.applied'))
     } catch (err) {
       setError(apiErrorMessage(err))
@@ -66,7 +82,7 @@ export function OptionsEditor({ productId, options, variants, languages, onDirty
     const problem = validate()
     setError(problem)
     if (problem) return
-    const removed = removedByOptions(variants, cleaned)
+    const removed = removedByOptions(variants, withKeys(cleaned))
     if (removed.length) setConfirm(removed)
     else void apply()
   }
