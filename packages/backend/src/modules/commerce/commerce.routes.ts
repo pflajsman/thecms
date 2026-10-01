@@ -1,4 +1,7 @@
-import { Router, type IRouter } from 'express';
+import { Router, type IRouter, type NextFunction, type Request, type Response } from 'express';
+import multer from 'multer';
+import { digitalUpload } from '../../config/upload';
+import { AppError } from '../../middleware/error.middleware';
 import { authMiddleware } from '../../middleware/auth.middleware';
 import { validate } from '../../middleware/validation.middleware';
 import { commerceController } from './commerce.controller';
@@ -17,5 +20,15 @@ router.get('/products/:id', (req, res, next) => commerceController.getProduct(re
 router.put('/products/:id', validate(updateProductSchema), (req, res, next) => commerceController.updateProduct(req, res, next));
 router.delete('/products/:id', (req, res, next) => commerceController.deleteProduct(req, res, next));
 router.put('/products/:id/variants', validate(variantsSchema), (req, res, next) => commerceController.replaceVariants(req, res, next));
+router.post(
+  '/products/:id/file',
+  (req: Request, res: Response, next: NextFunction) =>
+    digitalUpload.single('file')(req, res, (err: unknown) => {
+      if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') return next(new AppError('Files up to 500 MB', 400));
+      if (err) return next(err);
+      next();
+    }),
+  (req, res, next) => commerceController.uploadFile(req, res, next)
+);
 
 export default router;

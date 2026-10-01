@@ -6,6 +6,8 @@ import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 export interface StorageConfig {
   connectionString: string;
   containerName: string;
+  /** Private container for digital product files; never publicly readable. */
+  privateContainerName: string;
   cdnUrl?: string;
 }
 
@@ -18,11 +20,13 @@ export function getStorageConfig(): StorageConfig {
     'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;';
 
   const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'media';
+  const privateContainerName = process.env.AZURE_STORAGE_PRIVATE_CONTAINER_NAME || 'downloads';
   const cdnUrl = process.env.AZURE_CDN_URL;
 
   return {
     connectionString,
     containerName,
+    privateContainerName,
     cdnUrl,
   };
 }
@@ -33,6 +37,7 @@ export function getStorageConfig(): StorageConfig {
 class StorageService {
   private blobServiceClient: BlobServiceClient | null = null;
   private containerClient: ContainerClient | null = null;
+  private privateContainerClient: ContainerClient | null = null;
   private config: StorageConfig;
 
   constructor() {
@@ -62,6 +67,13 @@ class StorageService {
       } else {
         console.log(`✅ Blob container already exists: ${this.config.containerName}`);
       }
+
+      // Private container: created without public access.
+      this.privateContainerClient = this.blobServiceClient.getContainerClient(this.config.privateContainerName);
+      if (!(await this.privateContainerClient.exists())) {
+        await this.privateContainerClient.create();
+        console.log(`✅ Created private blob container: ${this.config.privateContainerName}`);
+      }
     } catch (error) {
       console.error('❌ Failed to initialize Azure Blob Storage:', error);
       throw error;
@@ -76,6 +88,24 @@ class StorageService {
       throw new Error('Storage service not initialized. Call initialize() first.');
     }
     return this.containerClient;
+  }
+
+  getPrivateContainerClient(): ContainerClient {
+    if (!this.privateContainerClient) {
+      throw new Error('Storage service not initialized. Call initialize() first.');
+    }
+    return this.privateContainerClient;
+  }
+
+  /** Stream a file from disk into the private container. */
+  async uploadPrivateFile(blobName: string, filePath: string, mimeType: string): Promise<void> {
+    const blob = this.getPrivateContainerClient().getBlockBlobClient(blobName);
+    await blob.uploadFile(filePath, { blobHTTPHeaders: { blobContentType: mimeType } });
+  }
+
+  async deletePrivateFile(blobName: string): Promise<boolean> {
+    await this.getPrivateContainerClient().getBlockBlobClient(blobName).deleteIfExists();
+    return true;
   }
 
   /**

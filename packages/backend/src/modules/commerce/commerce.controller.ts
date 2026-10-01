@@ -3,6 +3,8 @@ import { SettingsService } from './settings.service';
 import { ProductsService } from './products.service';
 import { VariantsService } from './variants.service';
 import { listProductsSchema } from './commerce.schema';
+import { uploadDigitalFile } from './digital-files';
+import { AppError } from '../../middleware/error.middleware';
 
 const userId = (req: Request): string | undefined => (req as { user?: { userId?: string } }).user?.userId;
 
@@ -69,6 +71,15 @@ export const commerceController = {
   async replaceVariants(req: Request, res: Response, next: NextFunction) {
     try {
       res.json({ success: true, data: await VariantsService.replaceAll(req.params.id, req.body.variants) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async uploadFile(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.file) throw new AppError('Choose a file to upload', 400);
+      res.json({ success: true, data: await uploadDigitalFile(req.params.id, req.file) });
     } catch (error) {
       next(error);
     }

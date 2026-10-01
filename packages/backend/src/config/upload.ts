@@ -1,4 +1,5 @@
 import multer from 'multer';
+import os from 'os';
 import { Request } from 'express';
 import { AppError } from '../middleware/error.middleware';
 
@@ -220,3 +221,11 @@ export function getFileCategory(mimeType: string): 'image' | 'document' | 'video
   }
   return 'other';
 }
+
+export const MAX_DIGITAL_FILE_SIZE = 500 * 1024 * 1024;
+
+/** Digital products: streamed from disk to the private container, never held in memory. */
+export const digitalUpload = multer({
+  storage: multer.diskStorage({ destination: os.tmpdir() }),
+  limits: { fileSize: MAX_DIGITAL_FILE_SIZE },
+});
