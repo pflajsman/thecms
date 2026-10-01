@@ -19,7 +19,7 @@ export function TopBar({ modules }: { modules: AppModule[] }) {
       <Button variant="ghost" size="icon" aria-label={t('search.button')} onClick={() => setOpen(true)}>
         <Search aria-hidden />
       </Button>
-      <UserMenu variant="compact" setupModules={groupModules(modules).setup} />
+      <UserMenu variant="compact" setupModules={[...groupModules(modules).commerce, ...groupModules(modules).setup]} />
     </header>
   )
 }

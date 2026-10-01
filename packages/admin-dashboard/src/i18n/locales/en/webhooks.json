@@ -2,7 +2,8 @@
   "groups": {
     "entries": "Entries",
     "models": "Content models",
-    "media": "Media"
+    "media": "Media",
+    "commerce": "Commerce"
   },
   "events": {
     "entry_created": "Entry created",
@@ -15,7 +16,10 @@
     "content_type_updated": "Model updated",
     "content_type_deleted": "Model deleted",
     "media_uploaded": "Media uploaded",
-    "media_deleted": "Media deleted"
+    "media_deleted": "Media deleted",
+    "product_updated": "Product updated",
+    "product_deleted": "Product deleted",
+    "stock_changed": "Stock changed"
   },
   "list": {
     "title": "Webhooks",

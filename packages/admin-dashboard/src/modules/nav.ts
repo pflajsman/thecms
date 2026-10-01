@@ -15,9 +15,10 @@ export function findActiveModule<T extends Pick<AppModule, 'path' | 'matches'>>(
   return modules.find((m) => isModuleActive(m, pathname))
 }
 
-export function groupModules<T extends Pick<AppModule, 'group'>>(modules: T[]): { workspace: T[]; setup: T[] } {
+export function groupModules<T extends Pick<AppModule, 'group'>>(modules: T[]): { workspace: T[]; commerce: T[]; setup: T[] } {
   return {
     workspace: modules.filter((m) => m.group === 'workspace'),
+    commerce: modules.filter((m) => m.group === 'commerce'),
     setup: modules.filter((m) => m.group === 'setup'),
   }
 }

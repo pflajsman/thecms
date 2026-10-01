@@ -24,10 +24,13 @@
     "forms": "Forms",
     "sites": "Sites & API keys",
     "webhooks": "Webhooks",
-    "languages": "Languages"
+    "languages": "Languages",
+    "products": "Products",
+    "shopSettings": "Shop settings"
   },
   "groups": {
     "workspace": "Workspace",
+    "commerce": "Commerce",
     "setup": "Setup"
   },
   "create": {

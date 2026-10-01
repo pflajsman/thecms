@@ -4,6 +4,7 @@ const GROUPS = [
   { key: 'entries', events: ['entry.created', 'entry.updated', 'entry.deleted', 'entry.published', 'entry.unpublished', 'entry.archived'] },
   { key: 'models', events: ['content_type.created', 'content_type.updated', 'content_type.deleted'] },
   { key: 'media', events: ['media.uploaded', 'media.deleted'] },
+  { key: 'commerce', events: ['product.updated', 'product.deleted', 'stock.changed'] },
 ] as const
 
 const KNOWN = new Set<string>(GROUPS.flatMap((g) => g.events))

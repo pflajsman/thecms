@@ -39,8 +39,9 @@ describe('isModuleActive / findActiveModule', () => {
 
 describe('grouping', () => {
   it('splits by group preserving order', () => {
-    const { workspace, setup } = groupModules(all)
+    const { workspace, commerce, setup } = groupModules(all)
     expect(workspace.map((m) => m.id)).toEqual(['home', 'content'])
+    expect(commerce).toEqual([])
     expect(setup.map((m) => m.id)).toEqual(['models'])
   })
   it('selects mobile tabs', () => {

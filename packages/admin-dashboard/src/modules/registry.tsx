@@ -8,6 +8,8 @@ import {
   KeyRound,
   Languages,
   Plus,
+  ShoppingBag,
+  Store,
   Upload,
   Webhook,
 } from 'lucide-react'
@@ -30,6 +32,7 @@ import { SiteFormPage } from '@/features/sites/pages/SiteFormPage'
 import { WebhooksListPage } from '@/features/webhooks/pages/WebhooksListPage'
 import { WebhookFormPage } from '@/features/webhooks/pages/WebhookFormPage'
 import { LanguagesPage } from '@/features/languages/pages/LanguagesPage'
+import { ComingSoon } from '@/features/commerce/ComingSoon'
 
 export const modules: AppModule[] = [
   {
@@ -78,6 +81,26 @@ export const modules: AppModule[] = [
       { path: 'inbox', element: <InboxPage /> },
       { path: 'inbox/:submissionId', element: <InboxPage /> },
     ],
+  },
+  {
+    id: 'products',
+    labelKey: 'nav.products',
+    icon: ShoppingBag,
+    group: 'commerce',
+    path: '/commerce/products',
+    routes: [
+      { path: 'commerce/products', element: <ComingSoon /> },
+      { path: 'commerce/products/:id', element: <ComingSoon /> },
+      { path: 'commerce/products/:id/content/:versionId', element: <ComingSoon /> },
+    ],
+  },
+  {
+    id: 'shop-settings',
+    labelKey: 'nav.shopSettings',
+    icon: Store,
+    group: 'commerce',
+    path: '/commerce/settings',
+    routes: [{ path: 'commerce/settings', element: <ComingSoon /> }],
   },
   {
     id: 'models',

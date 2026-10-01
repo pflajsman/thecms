@@ -15,7 +15,7 @@ interface SidebarProps {
 export function Sidebar({ modules }: SidebarProps) {
   const { pathname } = useLocation()
   const { setOpen } = useCommandPalette()
-  const { workspace, setup } = groupModules(modules)
+  const { workspace, commerce, setup } = groupModules(modules)
   const { t } = useTranslation('shell')
 
   return (
@@ -36,6 +36,7 @@ export function Sidebar({ modules }: SidebarProps) {
       </button>
       <nav aria-label={t('sidebar.mainNav')} className="flex flex-1 flex-col gap-5 overflow-y-auto">
         <NavGroup label={t('groups.workspace')} modules={workspace} pathname={pathname} />
+        <NavGroup label={t('groups.commerce')} modules={commerce} pathname={pathname} />
         <NavGroup label={t('groups.setup')} modules={setup} pathname={pathname} />
       </nav>
       <UserMenu variant="sidebar" />

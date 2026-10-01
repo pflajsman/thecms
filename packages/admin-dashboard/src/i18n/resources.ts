@@ -24,10 +24,12 @@ import csWebhooks from './locales/cs/webhooks.json'
 import csBuilder from './locales/cs/builder.json'
 import enLanguages from './locales/en/languages.json'
 import csLanguages from './locales/cs/languages.json'
+import enCommerce from './locales/en/commerce.json'
+import csCommerce from './locales/cs/commerce.json'
 
-export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages'] as const
+export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages', 'commerce'] as const
 
 export const resources = {
-  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages },
-  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages },
+  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages, commerce: enCommerce },
+  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages, commerce: csCommerce },
 } as const

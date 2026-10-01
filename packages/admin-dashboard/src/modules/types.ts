@@ -5,7 +5,7 @@ import type shellEn from '@/i18n/locales/en/shell.json'
 export type NavLabelKey = `nav.${keyof typeof shellEn.nav & string}`
 export type CreateLabelKey = `create.${keyof typeof shellEn.create & string}`
 
-export type ModuleGroup = 'workspace' | 'setup'
+export type ModuleGroup = 'workspace' | 'commerce' | 'setup'
 
 export interface AppModule {
   id: string

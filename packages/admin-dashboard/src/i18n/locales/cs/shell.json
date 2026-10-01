@@ -24,10 +24,13 @@
     "forms": "Formuláře",
     "sites": "Weby a API klíče",
     "webhooks": "Webhooky",
-    "languages": "Jazyky"
+    "languages": "Jazyky",
+    "products": "Produkty",
+    "shopSettings": "Nastavení obchodu"
   },
   "groups": {
     "workspace": "Práce",
+    "commerce": "Obchod",
     "setup": "Nastavení"
   },
   "create": {
