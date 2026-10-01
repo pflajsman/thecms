@@ -433,3 +433,23 @@ Environment: local mongod and Azurite; backend, admin and example site from the 
 | Home counts: `/stats` entries total 27 with 28 versions | Pass |
 | Example site with `contentLanguage: "cs"`: the trip with a published Czech version shows its Czech title and shared distance; the others fall back to English | Pass |
 | Change language dialog, rename and make default | Covered by unit tests only (browser tool could not click inside open menus reliably; keyboard used elsewhere) |
+
+## E-shop catalogue Plan 1 verification (2026-10-01)
+
+Environment: local mongod and Azurite, backend from the Plan 1 worktree on a throwaway copy of the local database (dropped afterwards).
+
+| Check | Result |
+|---|---|
+| Backend tests (123), build | Pass |
+| Startup creates the private `downloads` container and the system Product model (`slug: product`, title field `name`) | Pass |
+| Settings: CZK (default) and EUR, Standard 21 % | Pass |
+| New product "Bike T-shirt": draft entry, inactive product, variant `BIKE-T-SHIRT` | Pass |
+| Adding a Size option S/M keeps the existing variant as S and adds M | Pass (after fix in this plan: the existing variant was deleted and recreated, losing its SKU and stock) |
+| Variants saved with CZK and EUR for S, CZK only for M, tracked stock 3 and 0 | Pass |
+| Public list in CZK: one product, price range 490 to 520 CZK, M `available: false` | Pass |
+| Public list in EUR: only S, price range 20 EUR | Pass |
+| `language=cs`: Czech name and option label "Velikost" | Pass |
+| One product by entry id; `currency=USD` returns 400 listing CZK, EUR | Pass |
+| Digital product: GPX upload stored in `downloads`; anonymous GET of the blob returns 403 | Pass |
+| Deleting Czech while products exist only in Czech: 409 "2 products have content only in cs" | Pass |
+| Deleting products removes product, variants and entry | Pass |
