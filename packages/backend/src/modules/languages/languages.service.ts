@@ -9,7 +9,8 @@ export class LanguagesService {
   }
 
   static async codes(): Promise<string[]> {
-    return (await LanguageModel.find().select('code').lean()).map((l) => l.code);
+    // Sorted by order so error messages and lists are stable.
+    return (await LanguageModel.find().sort({ order: 1 }).select('code').lean()).map((l) => l.code);
   }
 
   static async defaultCode(): Promise<string> {
