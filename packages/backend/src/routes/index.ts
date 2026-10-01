@@ -10,6 +10,7 @@ import contactFormsRoutes from '../modules/contact-forms/contact-forms.routes';
 import statsRoutes from '../modules/stats/stats.routes';
 import submissionsRoutes from '../modules/contact-forms/submissions.routes';
 import languagesRoutes from '../modules/languages/languages.routes';
+import commerceRoutes from '../modules/commerce/commerce.routes';
 
 const router: IRouter = Router();
 
@@ -25,5 +26,6 @@ router.use('/contact-forms', contactFormsRoutes);
 router.use('/stats', statsRoutes);
 router.use('/submissions', submissionsRoutes);
 router.use('/languages', languagesRoutes);
+router.use('/commerce', commerceRoutes);
 
 export { router as apiRoutes };
