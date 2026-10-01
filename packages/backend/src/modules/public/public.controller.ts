@@ -5,6 +5,8 @@ import { ContentStatus } from '../../models/content-entry.model';
 import { ContactFormsService } from '../contact-forms/contact-forms.service';
 import { MediaService } from '../media/media.service';
 import { getPublished, listPublished, onePerItem, resolveLanguage } from './public-content.service';
+import { getShopProduct, listShopProducts, resolveCurrency } from '../commerce/public-shop.service';
+import { SettingsService } from '../commerce/settings.service';
 
 /**
  * Public API Controller
@@ -293,6 +295,56 @@ export class PublicController {
         });
         return;
       }
+      next(error);
+    }
+  }
+
+  /**
+   * Shop currencies
+   * GET /api/v1/public/shop/settings
+   */
+  async getShopSettings(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const settings = await SettingsService.get();
+      res.status(200).json({ success: true, data: { currencies: settings.toJSON().currencies, defaultCurrency: settings.defaultCurrency } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Products for sale
+   * GET /api/v1/public/shop/products
+   */
+  async listShopProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { language, defaultLanguage } = await resolveLanguage(req.query.language);
+      const currency = await resolveCurrency(req.query.currency);
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+      const ids = typeof req.query.ids === 'string' ? req.query.ids.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 100) : undefined;
+      const result = await listShopProducts({ currency, language, defaultLanguage, page, limit, ids });
+      res.status(200).json({ success: true, data: result.products, pagination: result.pagination });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * One product for sale, by product id or entry id
+   * GET /api/v1/public/shop/products/:id
+   */
+  async getShopProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { language, defaultLanguage } = await resolveLanguage(req.query.language);
+      const currency = await resolveCurrency(req.query.currency);
+      const product = await getShopProduct(req.params.id, currency, language, defaultLanguage);
+      if (!product) {
+        res.status(404).json({ success: false, error: 'Product not found' });
+        return;
+      }
+      res.status(200).json({ success: true, data: product });
+    } catch (error) {
       next(error);
     }
   }

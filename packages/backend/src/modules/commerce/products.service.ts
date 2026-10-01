@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { ProductModel, ProductType, type IProduct, type ProductOption } from '../../models/product.model';
-import { VariantModel, type IVariant } from '../../models/variant.model';
+import { ProductModel, ProductType, type DigitalFile, type IProduct, type ProductOption } from '../../models/product.model';
+import { VariantModel } from '../../models/variant.model';
 import { ContentEntryModel, ContentStatus } from '../../models/content-entry.model';
 import { AppError } from '../../middleware/error.middleware';
 import { escapeRegex } from '../../utils/regex';
@@ -11,9 +11,32 @@ import { productContentTypeId } from './product-model';
 import { deleteDigitalFile } from './digital-files';
 import { assertOptions, combinations, sameCombo, skuFromName } from './product-rules';
 
+export interface ProductJSON {
+  id: string;
+  itemId: string;
+  type: ProductType;
+  vatRateId: string;
+  active: boolean;
+  options: ProductOption[];
+  digitalFile?: DigitalFile;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VariantJSON {
+  id: string;
+  productId: string;
+  sku: string;
+  optionValues: Record<string, string>;
+  prices: Record<string, number>;
+  weightGrams: number;
+  stock: { tracked: boolean; quantity: number };
+  active: boolean;
+}
+
 export interface ProductDetail {
-  product: ReturnType<IProduct['toJSON']>;
-  variants: ReturnType<IVariant['toJSON']>[];
+  product: ProductJSON;
+  variants: VariantJSON[];
   entry: { itemId: string; defaultVersionId: string | null; name: string };
   removedVariantIds?: string[];
 }
@@ -105,8 +128,8 @@ export class ProductsService {
     const variants = await VariantModel.find({ productId: product._id }).sort({ createdAt: 1 }).exec();
     const named = (await names([product.itemId])).get(String(product.itemId));
     return {
-      product: product.toJSON(),
-      variants: variants.map((v) => v.toJSON()),
+      product: product.toJSON() as unknown as ProductJSON,
+      variants: variants.map((v) => v.toJSON() as unknown as VariantJSON),
       entry: { itemId: String(product.itemId), defaultVersionId: named?.id ?? null, name: named?.name ?? '' },
     };
   }

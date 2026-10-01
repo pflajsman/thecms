@@ -12,6 +12,10 @@ import { ContentEntryModel } from '../models/content-entry.model';
 import { FormSubmissionModel } from '../models/form-submission.model';
 import { LanguageModel } from '../models/language.model';
 import { LanguagesService } from '../modules/languages/languages.service';
+import { ProductModel } from '../models/product.model';
+import { VariantModel } from '../models/variant.model';
+import { ProductsService } from '../modules/commerce/products.service';
+import { listShopProducts } from '../modules/commerce/public-shop.service';
 
 useTestDb();
 
@@ -77,4 +81,25 @@ it.each([{ language: 'en' }, { missing: 'cs' }])('entry list filtered by %o is s
   const sorts = await captureSorts(ContentEntryModel.collection.name, () => ContentEntriesService.listAllEntries(filter));
   expect(sorts).toHaveLength(1);
   expect({ sort: sorts[0], served: servedByIndex(sorts[0], ContentEntryModel) }).toEqual({ sort: sorts[0], served: true });
+});
+
+it.each(['createdAt', 'updatedAt'] as const)('admin products list sorted by %s is served by a declared index', async (sortBy) => {
+  const sorts = await captureSorts(ProductModel.collection.name, () => ProductsService.list({ sortBy }));
+  expect(sorts).toHaveLength(1);
+  expect({ sort: sorts[0], served: servedByIndex(sorts[0], ProductModel) }).toEqual({ sort: sorts[0], served: true });
+});
+
+it('public shop list is served by a declared index', async () => {
+  const sorts = await captureSorts(ProductModel.collection.name, () =>
+    listShopProducts({ currency: 'CZK', language: 'en', defaultLanguage: 'en', page: 1, limit: 20 }),
+  );
+  expect(sorts).toHaveLength(1);
+  expect({ sort: sorts[0], served: servedByIndex(sorts[0], ProductModel) }).toEqual({ sort: sorts[0], served: true });
+});
+
+it('variants of a product are listed by a declared index', async () => {
+  const sorts = await captureSorts(VariantModel.collection.name, () =>
+    listShopProducts({ currency: 'CZK', language: 'en', defaultLanguage: 'en', page: 1, limit: 20 }),
+  );
+  for (const sort of sorts) expect({ sort, served: servedByIndex(sort, VariantModel) }).toEqual({ sort, served: true });
 });

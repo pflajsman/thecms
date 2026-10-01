@@ -59,6 +59,58 @@ router.get('/content-types/:slug', (req, res, next) =>
 
 /**
  * @swagger
+ * /api/v1/public/shop/settings:
+ *   get:
+ *     summary: Shop currencies
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Currencies and the default currency
+ */
+router.get('/shop/settings', (req, res, next) => publicController.getShopSettings(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/public/shop/products:
+ *   get:
+ *     summary: Products for sale, with prices in one currency and content in one language
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     parameters:
+ *       - { in: query, name: currency, schema: { type: string } }
+ *       - { in: query, name: language, schema: { type: string } }
+ *       - { in: query, name: ids, schema: { type: string }, description: Comma-separated product or entry ids }
+ *       - { in: query, name: page, schema: { type: integer, default: 1 } }
+ *       - { in: query, name: limit, schema: { type: integer, default: 20, maximum: 100 } }
+ *     responses:
+ *       200:
+ *         description: Products for sale
+ *       400:
+ *         description: Unknown currency or language
+ */
+router.get('/shop/products', (req, res, next) => publicController.listShopProducts(req, res, next));
+
+/**
+ * @swagger
+ * /api/v1/public/shop/products/{id}:
+ *   get:
+ *     summary: One product for sale, by product id or entry id
+ *     tags: [Public API]
+ *     security:
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Product
+ *       404:
+ *         description: Not for sale
+ */
+router.get('/shop/products/:id', (req, res, next) => publicController.getShopProduct(req, res, next));
+
+/**
+ * @swagger
  * /api/v1/public/content/{contentTypeSlug}:
  *   get:
  *     summary: List published entries for a content type
