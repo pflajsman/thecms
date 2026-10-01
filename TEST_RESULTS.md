@@ -415,3 +415,21 @@ Environment: local mongod and Azurite, backend from the Plan 1 worktree on a thr
 | Text index language override: a MongoDB text index read the entry `language` field as its stemming language and rejected `cs`; the migration now rebuilds text indexes with `language_override: textSearchLanguage` | Fixed in this plan (unit test) |
 
 **After deploy to Azure Cosmos DB:** request `GET /api/v1/public/content/<type>?language=<non-default code>` once. It uses an aggregation (`$group`, then `$sort` on the grouped result) that local MongoDB accepts but Cosmos DB has not been checked with. If Cosmos DB rejects it, sort before grouping on a single-field index.
+
+## Content languages Plan 2 verification (2026-10-01)
+
+Environment: local mongod and Azurite; backend, admin and example site from the Plan 2 worktree on a throwaway copy of the local database (dropped afterwards). The real local database was not touched.
+
+| Check | Result |
+|---|---|
+| Admin tests (615), `pnpm lint` (0 problems), build; example site build | Pass |
+| Languages page: English default; add Čeština through the dialog; Setup nav shows Languages | Pass |
+| Content list: Language and Missing translation filters, `EN` badges; Czech at phone width: "EN · Také: CS", filters wrap, no horizontal scroll, `<html lang="cs">` | Pass |
+| Editor: language button `EN`; Translate to Čeština opens the new Czech draft; side panel lists English (Published) and Čeština (Draft); shared fields show "Same in all languages" | Pass |
+| Shared field saved in Czech (distance 155), then English opened: English shows 155, title unchanged | Pass (after fix in this plan: the English copy cached by the admin was shown until reload) |
+| Unsaved edit, then choose another language: the leave dialog appears | Pass |
+| Model builder: Translated switch on fields; turning Title to shared on a model with entries shows "Make fields the same in every language?" listing `title` | Pass (cancelled, nothing saved) |
+| Delete Čeština: "This also deletes 1 entry version in Čeština", Delete disabled until `cs` is typed | Pass (cancelled) |
+| Home counts: `/stats` entries total 27 with 28 versions | Pass |
+| Example site with `contentLanguage: "cs"`: the trip with a published Czech version shows its Czech title and shared distance; the others fall back to English | Pass |
+| Change language dialog, rename and make default | Covered by unit tests only (browser tool could not click inside open menus reliably; keyboard used elsewhere) |
