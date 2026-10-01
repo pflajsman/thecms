@@ -26,7 +26,8 @@
     "webhooks": "Webhooks",
     "languages": "Languages",
     "products": "Products",
-    "shopSettings": "Shop settings"
+    "shopSettings": "Shop settings",
+    "shipping": "Shipping"
   },
   "groups": {
     "workspace": "Workspace",

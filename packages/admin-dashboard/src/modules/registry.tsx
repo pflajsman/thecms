@@ -10,6 +10,7 @@ import {
   Plus,
   ShoppingBag,
   Store,
+  Truck,
   Upload,
   Webhook,
 } from 'lucide-react'
@@ -35,6 +36,7 @@ import { LanguagesPage } from '@/features/languages/pages/LanguagesPage'
 import { ShopSettingsPage } from '@/features/commerce/pages/ShopSettingsPage'
 import { ProductsListPage } from '@/features/commerce/pages/ProductsListPage'
 import { ProductPage } from '@/features/commerce/pages/ProductPage'
+import { ShippingPage } from '@/features/commerce/pages/ShippingPage'
 
 export const modules: AppModule[] = [
   {
@@ -95,6 +97,14 @@ export const modules: AppModule[] = [
       { path: 'commerce/products/:id', element: <ProductPage /> },
       { path: 'commerce/products/:id/content/:versionId', element: <ProductPage /> },
     ],
+  },
+  {
+    id: 'shipping',
+    labelKey: 'nav.shipping',
+    icon: Truck,
+    group: 'commerce',
+    path: '/commerce/shipping',
+    routes: [{ path: 'commerce/shipping', element: <ShippingPage /> }],
   },
   {
     id: 'shop-settings',

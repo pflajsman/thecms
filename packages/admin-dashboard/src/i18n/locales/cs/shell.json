@@ -26,7 +26,8 @@
     "webhooks": "Webhooky",
     "languages": "Jazyky",
     "products": "Produkty",
-    "shopSettings": "Nastavení obchodu"
+    "shopSettings": "Nastavení obchodu",
+    "shipping": "Doprava"
   },
   "groups": {
     "workspace": "Práce",

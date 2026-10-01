@@ -1,0 +1,48 @@
+{
+  "page": {
+    "title": "Doprava",
+    "description": "Kam, jak a za kolik posíláte.",
+    "loadError": "Dopravu se nepodařilo načíst."
+  },
+  "zones": {
+    "title": "Zóny",
+    "hint": "Země patří do jedné zóny. Zóna pro zbytek světa pokrývá všechny ostatní země.",
+    "add": "Přidat zónu",
+    "edit": "Upravit {{name}}",
+    "remove": "Smazat {{name}}",
+    "rest": "Zbytek světa",
+    "empty": "Zatím žádné zóny. Přidejte země, kam posíláte.",
+    "removeTitle": "Smazat zónu {{name}}?",
+    "removeText": "Zóna se smaže. Zónu, kterou používá způsob dopravy, smazat nelze.",
+    "removed": "Zóna smazána",
+    "saved": "Zóna uložena"
+  },
+  "zoneDialog": {
+    "titleNew": "Nová zóna",
+    "titleEdit": "Upravit zónu",
+    "name": "Název",
+    "countries": "Země",
+    "countriesHint": "Dvoupísmenné kódy oddělené čárkou, například CZ, SK",
+    "rest": "Zbytek světa",
+    "restHint": "Pokrývá všechny země, které nejsou v jiné zóně",
+    "save": "Uložit zónu",
+    "nameRequired": "Zadejte název o délce nejvýše 50 znaků",
+    "countriesInvalid": "Použijte dvoupísmenné kódy jako CZ: {{codes}}",
+    "countriesRequired": "Přidejte alespoň jednu zemi nebo zvolte zbytek světa"
+  },
+  "methods": {
+    "title": "Způsoby dopravy",
+    "add": "Nový způsob",
+    "empty": "Zatím žádné způsoby dopravy.",
+    "needsZone": "Nejdřív přidejte zónu.",
+    "tableLabel": "Způsoby dopravy",
+    "summary": "{{zones}} · {{payment}}",
+    "active": "Aktivní",
+    "inactive": "Neaktivní",
+    "untitled": "Způsob bez názvu"
+  },
+  "payment": {
+    "BANK_TRANSFER": "Bankovní převod",
+    "CASH_ON_DELIVERY": "Dobírka"
+  }
+}

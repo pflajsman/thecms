@@ -1,0 +1,48 @@
+{
+  "page": {
+    "title": "Shipping",
+    "description": "Where you ship, how and for how much.",
+    "loadError": "Could not load shipping."
+  },
+  "zones": {
+    "title": "Zones",
+    "hint": "A country belongs to one zone. The zone for everywhere else covers all other countries.",
+    "add": "Add zone",
+    "edit": "Edit {{name}}",
+    "remove": "Delete {{name}}",
+    "rest": "Everywhere else",
+    "empty": "No zones yet. Add the countries you ship to.",
+    "removeTitle": "Delete zone {{name}}?",
+    "removeText": "The zone is deleted. A zone that a shipping method uses cannot be deleted.",
+    "removed": "Zone deleted",
+    "saved": "Zone saved"
+  },
+  "zoneDialog": {
+    "titleNew": "New zone",
+    "titleEdit": "Edit zone",
+    "name": "Name",
+    "countries": "Countries",
+    "countriesHint": "Two-letter codes separated by commas, for example CZ, SK",
+    "rest": "Everywhere else",
+    "restHint": "Covers every country that is not in another zone",
+    "save": "Save zone",
+    "nameRequired": "Enter a name of up to 50 characters",
+    "countriesInvalid": "Use two-letter codes such as CZ: {{codes}}",
+    "countriesRequired": "Add at least one country or choose everywhere else"
+  },
+  "methods": {
+    "title": "Methods",
+    "add": "New method",
+    "empty": "No shipping methods yet.",
+    "needsZone": "Add a zone first.",
+    "tableLabel": "Shipping methods",
+    "summary": "{{zones}} · {{payment}}",
+    "active": "Active",
+    "inactive": "Inactive",
+    "untitled": "Untitled method"
+  },
+  "payment": {
+    "BANK_TRANSFER": "Bank transfer",
+    "CASH_ON_DELIVERY": "Cash on delivery"
+  }
+}
