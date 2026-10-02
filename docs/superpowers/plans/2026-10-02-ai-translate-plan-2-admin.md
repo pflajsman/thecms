@@ -329,7 +329,6 @@ function sse(events: string[], hold?: Promise<void>) {
     { status: 200 },
   )
 }
-afterEach(() => setTestLanguage('en'))
 const start = 'event: start\ndata: {"fields":[{"name":"perex","label":"Perex"},{"name":"body","label":"Body"}]}\n\n'
 const field = (name: string, index: number) => `event: field\ndata: {"name":"${name}","index":${index},"total":2}\n\n`
 const done = 'event: done\ndata: {"versionId":"v1","inputTokens":1,"outputTokens":1}\n\n'
@@ -424,7 +423,7 @@ it('offers to open a version created meanwhile', async () => {
 })
 
 it('speaks Czech', async () => {
-  setTestLanguage('cs')
+  await setTestLanguage('cs')
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(sse([start, field('perex', 1)], new Promise(() => {})))
   renderDialog()
   expect(await screen.findByRole('dialog', { name: 'Překládám do jazyka Deutsch' })).toBeInTheDocument()
@@ -433,7 +432,7 @@ it('speaks Czech', async () => {
 })
 ```
 
-The `afterEach` resets the admin language after the Czech test.
+The test setup resets the admin language to English after each test.
 
 - [ ] **Step 3: Run the tests to verify they fail**
 
