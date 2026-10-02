@@ -29,3 +29,6 @@ export const generateBody = z
   })
   .refine((b) => (b.action !== 'draft' && b.action !== 'custom') || !!b.instruction, { message: 'This action needs an instruction', path: ['instruction'] });
 export const generateSchema = z.object({ body: generateBody });
+
+export const translateBody = z.object({ entryId: z.string().trim().min(1).max(100), language: z.string().trim().min(1).max(20) });
+export const translateSchema = z.object({ body: translateBody });

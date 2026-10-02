@@ -16,7 +16,7 @@ export interface AiProvider {
   stream(prompt: PromptInput, signal: AbortSignal, onText: (text: string) => void): Promise<Usage>;
 }
 
-export type AiErrorCode = 'AUTH' | 'RATE_LIMIT' | 'UNREACHABLE' | 'TOO_LONG' | 'PROVIDER';
+export type AiErrorCode = 'AUTH' | 'RATE_LIMIT' | 'UNREACHABLE' | 'TOO_LONG' | 'PROVIDER' | 'TIMEOUT' | 'TRUNCATED';
 
 export class AiProviderError extends Error {
   code: AiErrorCode;
