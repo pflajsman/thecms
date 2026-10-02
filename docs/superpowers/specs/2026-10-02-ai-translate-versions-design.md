@@ -15,7 +15,7 @@ In the entry editor, a missing language can be created as an AI translation of t
 |---|---|
 | Where | Language switcher, missing language: "Translate to <language> with AI" next to the existing copy action |
 | Who runs it | One backend call (`POST /ai/translate`) that streams progress and creates the version at the end |
-| What is translated | The title and every translated (`localized`) TEXT and RICH_TEXT field with text; empty fields stay empty; shared fields are copied as today |
+| What is translated | The title field and every other translated (`localized`) TEXT and RICH_TEXT field with text; empty fields stay empty; shared fields are copied as today |
 | Source | The saved version; unsaved edits are saved first after the user agrees |
 | Result | A DRAFT version; never published automatically |
 | Limits | Counts as one request against the 20 per minute limit; tokens are summed into the month's usage |
@@ -41,7 +41,7 @@ The answer is `text/event-stream`:
 
 | Event | Data |
 |---|---|
-| `start` | `{ fields: [{ name, label }] }`, in translation order; the title comes first as `{ name: 'title', label: 'Title' }` |
+| `start` | `{ fields: [{ name, label }] }`, in translation order; the title field (the content type's resolved title field) comes first under its own name and label |
 | `field` | `{ name, index, total }` when a field starts (`index` from 1) |
 | `done` | `{ versionId, inputTokens, outputTokens }` |
 | `error` | `{ code, message, field? }`; `field` is the field `name` when one field caused it |
@@ -51,11 +51,11 @@ Error codes in the stream: the provider codes from project 1 (`AUTH`, `RATE_LIMI
 ### 3.2 Behaviour
 
 1. Load the source version, its content type and both language names (from `languages`).
-2. List the fields to translate: the title, then the content type's fields in their order where `type` is TEXT or RICH_TEXT, `localized` resolves to true (spec of language versions, 3.3) and the value is a non-empty string.
+2. List the fields to translate: the title field first, then the content type's other fields in their order, where `type` is TEXT or RICH_TEXT, `localized` resolves to true (spec of language versions, 3.3) and the value is a non-empty string.
 3. Refuse any listed field longer than 16,000 characters with `TOO_LONG` before calling the provider.
 4. Translate the fields one at a time with the user's connection. Each call has a 60 second timeout and an output cap of 8,000 tokens. A stop at the cap fails with `TRUNCATED`.
 5. Clean RICH_TEXT output on the backend with the same allowed tags and link rule as the admin (`p, h2, h3, strong, em, u, s, a, ul, ol, li, blockquote, br`; `href` only `http:`, `https:` or `mailto:`), and strip tags from TEXT output. Remove Markdown code fences around an answer.
-6. After the last field, create the version through `createVersion` in `entry-versions.service.ts`, extended with an optional `overrides: { title?: string; data?: Record<string, unknown> }` that replaces the copied values. It keeps the existing `409` race check and `entry.created` webhook.
+6. After the last field, create the version through `createVersion` in `entry-versions.service.ts`, extended with an optional `overrides: { data?: Record<string, unknown> }` merged over the copied data; the version title is computed from the merged data as for any save. It keeps the existing `409` race check and `entry.created` webhook.
 7. Record one request and the summed tokens in `aiusage`.
 
 When the client disconnects, the running provider call is aborted and nothing is created. No prompts, field text or replies are stored or logged.
