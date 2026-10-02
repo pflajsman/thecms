@@ -16,6 +16,7 @@
     "migrate:languages": "tsx src/scripts/migrate-languages.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@azure/msal-node": "^2.5.1",
     "@azure/storage-blob": "^12.17.0",
     "@getbrevo/brevo": "^3.0.1",
