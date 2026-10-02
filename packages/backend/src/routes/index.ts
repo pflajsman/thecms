@@ -12,6 +12,7 @@ import submissionsRoutes from '../modules/contact-forms/submissions.routes';
 import languagesRoutes from '../modules/languages/languages.routes';
 import commerceRoutes from '../modules/commerce/commerce.routes';
 import aiRoutes from '../modules/ai/ai.routes';
+import tokensRoutes from '../modules/tokens/tokens.routes';
 
 const router: IRouter = Router();
 
@@ -29,5 +30,6 @@ router.use('/submissions', submissionsRoutes);
 router.use('/languages', languagesRoutes);
 router.use('/commerce', commerceRoutes);
 router.use('/ai', aiRoutes);
+router.use('/tokens', tokensRoutes);
 
 export { router as apiRoutes };
