@@ -590,3 +590,17 @@ Environment: local mongod; worktree backend (port 3100) on a throwaway copy of t
 | Czech: page "AI asistent", panel "Návrh AI pro Title" with Použít, Znovu, Zahodit | Pass |
 | 360px (iframe) in English and Czech: AI page and editor with an open panel have no horizontal scroll | Pass |
 | Console | Only the earlier nested-form warning (fixed) and a key warning for the editor's field list that also appears on main |
+
+## AI translate Plan 1 verification (2026-10-02)
+
+Environment: local mongod; worktree backend (port 3100) on a throwaway copy of the local database (`thecms_translatecheck`, dropped afterwards) with a generated `AI_KEY_SECRET`; a fake OpenAI-compatible service on port 11500 that answers `[EN] <text>`, and for HTML adds `[EN]` to each paragraph plus a `<script>`.
+
+| Check | Result |
+|---|---|
+| Backend tests (48 suites, 265 tests), build | Pass |
+| Backend lint | Not run: `eslint src` finds no configuration in `packages/backend` (same on main) |
+| Content type with a TEXT title, RICH_TEXT body with a link and a NUMBER; a `cs` entry; connected to the fake service | Pass |
+| `POST /ai/translate` to `en`: `start` lists Title and Body, two `field` events, `done` with a version id, 40 input and 10 output tokens | Pass |
+| New version: `en`, `DRAFT`, same item, title `[EN] Šumava`, body `<p>[EN] Les a <a href="https://sumava.cz">park</a></p>` (script removed, link kept), number 12 copied | Pass |
+| Second call: `409` with `reason: VERSION_EXISTS` | Pass |
+| Usage: 1 request, 40 input, 10 output tokens | Pass |
