@@ -58,6 +58,8 @@ Error codes in the stream: the provider codes from project 1 (`AUTH`, `RATE_LIMI
 6. After the last field, create the version through `createVersion` in `entry-versions.service.ts`, extended with an optional `overrides: { data?: Record<string, unknown> }` merged over the copied data; the version title is computed from the merged data as for any save. It keeps the existing `409` race check and `entry.created` webhook.
 7. Record one request and the summed tokens in `aiusage`.
 
+The translated values are not checked against field rules (length, pattern) when the version is created: it is a draft for review, and the editor reports a broken rule on the first save.
+
 When the client disconnects, the running provider call is aborted and nothing is created. No prompts, field text or replies are stored or logged.
 
 ### 3.3 Prompt (`translate` in `prompts.ts`)

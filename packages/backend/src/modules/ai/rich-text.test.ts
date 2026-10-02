@@ -55,6 +55,11 @@ describe('toPlainText', () => {
     expect(toPlainText('1 < 2')).toBe('1 < 2');
   });
 
+  it('never turns entities or an unclosed tag into a real tag', () => {
+    expect(toPlainText('&lt;img src=x onerror=alert(1)&gt;Hi')).toBe('Hi');
+    expect(toPlainText('Hi <img src=x onerror=alert(1)//')).toBe('Hi');
+  });
+
   it('removes a code fence', () => {
     expect(toPlainText('```\n<b>We</b> were there.\n```')).toBe('We were there.');
   });

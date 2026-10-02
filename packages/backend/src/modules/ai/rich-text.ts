@@ -63,11 +63,21 @@ export function cleanRichText(raw: string): string {
   return (out + escapeText(html.slice(last))).trim();
 }
 
+/** Decoding can rebuild a tag (`&lt;img&gt;`), and a tag without `>` is never matched: strip until none is left. */
+function stripTags(text: string): string {
+  let out = text;
+  for (let before = ''; before !== out; ) {
+    before = out;
+    out = out.replace(TAG, '');
+  }
+  return out.replace(/<[a-zA-Z!/][^<>]*$/, '');
+}
+
 export function toPlainText(raw: string): string {
   const text = dropBlocks(unfence(raw))
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(?:p|div|h[1-6]|li|blockquote)\s*>/gi, '\n')
     .replace(TAG, '')
     .replace(/&(?:lt|gt|quot|#39|nbsp|amp);/g, (entity) => ENTITIES[entity]);
-  return text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  return stripTags(text).replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
