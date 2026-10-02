@@ -20,7 +20,7 @@ import { UnsavedChangesDialog } from './UnsavedChangesDialog'
 import { FieldControl } from './fields/FieldControl'
 import { FieldAddonSlot } from './fields/FieldShell'
 import { AiField } from '@/features/ai/components/AiField'
-import { toPlainText } from '@/features/ai/rich-text-clean'
+import { aiContextFields } from '@/features/ai/ai-context'
 import { useLanguages } from '@/features/languages/languages-queries'
 import { isLocalized } from '@/lib/localized'
 import { useVersions } from '../queries'
@@ -306,14 +306,7 @@ export function EntryEditor({ contentType, entry: initialEntry, embedded }: Entr
 
   // Context for AI help: the other text fields of this version, the model name and the version language.
   const aiContext = useCallback(
-    (fieldName: string) => ({
-      contentType: contentType.name,
-      language,
-      fields: fields
-        .filter((f) => f.name !== fieldName && (f.type === 'TEXT' || f.type === 'RICH_TEXT'))
-        .map((f) => ({ label: f.label || f.name, value: toPlainText(typeof form.values[f.name] === 'string' ? (form.values[f.name] as string) : '') }))
-        .filter((f) => f.value),
-    }),
+    (fieldName: string) => ({ contentType: contentType.name, language, fields: aiContextFields(fields, form.values, fieldName) }),
     [contentType.name, language, fields, form.values],
   )
 

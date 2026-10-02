@@ -40,11 +40,23 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
   const [panel, setPanel] = useState<Panel | null>(null)
   const [version, setVersion] = useState(0)
   const request = useRef<AbortController | null>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
+  const focusField = useRef(false)
+  const focusBrief = useRef(false)
   // Leaving the editor stops a running answer.
   useEffect(() => () => request.current?.abort(), [])
+  // After Use the field has remounted; put focus back into it.
+  useEffect(() => {
+    if (!focusField.current) return
+    focusField.current = false
+    const target = document.getElementById(`field-${field.name}`)
+    const focusable = target?.matches('input, textarea, [contenteditable="true"]') ? target : target?.querySelector<HTMLElement>('input, textarea, [contenteditable="true"]')
+    focusable?.focus()
+  }, [version, field.name])
 
   const supported = field.type === 'TEXT' || field.type === 'RICH_TEXT'
-  if (!ready || !supported || disabled) return <>{children(version)}</>
+  // The field is always rendered in the same place, so it keeps its state when AI becomes ready.
+  const active = ready && supported && !disabled
 
   const label = field.label || field.name
   const current = typeof value === 'string' ? value : ''
@@ -74,30 +86,43 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
     request.current?.abort()
     request.current = null
     setPanel(null)
+    trigger.current?.focus()
   }
 
   const apply = (mode: typeof REPLACE | typeof APPEND) => {
     if (!panel || panel.kind !== 'done') return
     const cleaned = rich ? cleanRichText(panel.text) : toPlainText(panel.text)
     onApply(mode === APPEND ? `${current}${cleaned}` : cleaned)
+    focusField.current = true
     setVersion((v) => v + 1)
     setPanel(null)
   }
 
   const pick = (action: AiAction) => {
-    if (action === 'draft' || action === 'custom') setPanel({ kind: 'instruction', action, instruction: '' })
-    else void run(action)
+    if (action === 'draft' || action === 'custom') {
+      request.current?.abort()
+      request.current = null
+      focusBrief.current = true
+      setPanel({ kind: 'instruction', action, instruction: '' })
+    } else void run(action)
   }
 
+  const instructionId = `ai-instruction-${field.name}`
   const menu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" aria-label={t('menu.open', { field: label })}>
+        <Button ref={trigger} type="button" variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" aria-label={t('menu.open', { field: label })}>
           <Sparkles aria-hidden className="size-3.5" />
           {t('menu.short')}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" onCloseAutoFocus={(e) => {
+          // The menu would return focus to its button; the brief box takes it instead.
+          if (!focusBrief.current) return
+          focusBrief.current = false
+          e.preventDefault()
+          document.getElementById(instructionId)?.focus()
+        }}>
         {empty ? (
           <DropdownMenuItem onSelect={() => pick(DRAFT)}>{t('menu.draft')}</DropdownMenuItem>
         ) : (
@@ -110,8 +135,6 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
     </DropdownMenu>
   )
 
-  const panelId = `ai-panel-${field.name}`
-  const instructionId = `ai-instruction-${field.name}`
   let content: ReactNode = null
   if (panel?.kind === 'instruction') {
     content = (
@@ -120,6 +143,7 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
         <Label htmlFor={instructionId}>{panel.action === 'draft' ? t('panel.instructionDraft') : t('panel.instructionCustom')}</Label>
         <Textarea
           id={instructionId}
+          autoFocus
           value={panel.instruction}
           maxLength={1000}
           onChange={(e) => setPanel({ ...panel, instruction: e.target.value })}
@@ -139,6 +163,8 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
     )
   } else if (panel) {
     const shown = rich ? cleanRichText(panel.text) : toPlainText(panel.text)
+    // Use replaces the whole field, and AI answers carry no images, so it would drop them.
+    const keepsImages = rich && /<img\b/i.test(current)
     content = (
       <div className="space-y-3">
         {panel.kind === 'running' && !shown && <p className="text-sm text-muted-foreground">{t('panel.writing')}</p>}
@@ -150,6 +176,7 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
           ))}
         {panel.kind === 'done' && !shown && <p className="text-sm text-muted-foreground">{t('panel.empty')}</p>}
         {panel.kind === 'done' && panel.truncated && <p className="text-sm text-amber-700 dark:text-amber-400">{t('panel.truncated')}</p>}
+        {panel.kind === 'done' && shown && keepsImages && <p className="text-sm text-muted-foreground">{t('panel.keepsImages')}</p>}
         {panel.kind === 'error' && panel.error && (
           <div role="alert" className="space-y-1 text-sm text-destructive">
             <p>{panel.error.key ? t(`errors.${panel.error.key}`) : panel.error.message}</p>
@@ -159,7 +186,7 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
           </div>
         )}
         <div className="flex flex-wrap gap-2">
-          {panel.kind === 'done' && shown && (
+          {panel.kind === 'done' && shown && !keepsImages && (
             <Button type="button" size="sm" onClick={() => apply(REPLACE)}>{t('panel.use')}</Button>
           )}
           {panel.kind === 'done' && shown && rich && (
@@ -175,10 +202,10 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
   }
 
   return (
-    <FieldAddonContext.Provider value={menu}>
+    <FieldAddonContext.Provider value={active ? menu : null}>
       {children(version)}
-      {panel && (
-        <section id={panelId} aria-label={t('panel.title', { field: label })} aria-busy={panel.kind === 'running'} className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+      {active && panel && (
+        <section aria-label={t('panel.title', { field: label })} aria-busy={panel.kind === 'running'} className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
           {content}
         </section>
       )}

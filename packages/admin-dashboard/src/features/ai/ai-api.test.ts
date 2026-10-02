@@ -1,4 +1,7 @@
-import { AiRequestError, streamGenerate, type GenerateRequest } from './ai-api'
+import apiClient from '@/lib/api'
+import { AiRequestError, getAiStatus, streamGenerate, type GenerateRequest } from './ai-api'
+
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
 
 const body: GenerateRequest = {
   action: 'rewrite',
@@ -63,4 +66,16 @@ it('passes the abort signal and rethrows an abort as is', async () => {
     throw new DOMException('aborted', 'AbortError')
   })
   await expect(streamGenerate(body, { signal: controller.signal, onText: () => {} })).rejects.toMatchObject({ name: 'AbortError' })
+})
+
+it('reports a too long request as TOO_LONG', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ success: false, error: 'Validation failed', details: [{ path: 'body.field.value', message: 'String must contain at most 100000 character(s)' }] }), { status: 400 }))
+  await expect(streamGenerate(body, { onText: () => {} })).rejects.toMatchObject({ code: 'TOO_LONG' })
+})
+
+it('treats only a refusal as "no AI" and lets other failures fail', async () => {
+  vi.mocked(apiClient.get).mockRejectedValueOnce(Object.assign(new Error('403'), { isAxiosError: true, response: { status: 403 } }))
+  expect(await getAiStatus()).toBeNull()
+  vi.mocked(apiClient.get).mockRejectedValueOnce(Object.assign(new Error('500'), { isAxiosError: true, response: { status: 500 } }))
+  await expect(getAiStatus()).rejects.toThrow('500')
 })

@@ -190,6 +190,7 @@ export function AiSettingsPage() {
   const [confirmDisconnect, setConfirmDisconnect] = useState(false)
 
   if (status.isPending) return <Skeleton className="h-40 w-full" />
+  if (status.isError && !status.data) return <ErrorState message={t('settings.loadError')} onRetry={() => void status.refetch()} />
   if (!status.data) return <ErrorState message={t('settings.noAccess')} />
   const s = status.data
   const providerName = (c: AiConnection) => (c.provider === 'anthropic' ? t('settings.providerAnthropic') : t('settings.providerOpenAi'))

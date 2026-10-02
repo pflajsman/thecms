@@ -42,7 +42,8 @@
       "keyRequired": "Enter the API key",
       "baseUrlInvalid": "Enter an http or https address",
       "modelRequired": "Enter the model name"
-    }
+    },
+    "loadError": "Could not load the AI assistant settings."
   },
   "models": {
     "sonnet": "Claude Sonnet 5 (balanced, recommended)",
@@ -86,6 +87,7 @@
     "discard": "Discard",
     "truncated": "The answer was cut off at the length limit.",
     "empty": "The AI returned no text.",
-    "openSettings": "AI assistant settings"
+    "openSettings": "AI assistant settings",
+    "keepsImages": "Use would remove the images in this field, so you can insert the text below instead."
   }
 }

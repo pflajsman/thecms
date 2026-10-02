@@ -43,7 +43,8 @@
       "keyRequired": "Zadejte API klíč",
       "baseUrlInvalid": "Zadejte adresu začínající http nebo https",
       "modelRequired": "Zadejte název modelu"
-    }
+    },
+    "loadError": "Nastavení AI asistenta se nepodařilo načíst."
   },
   "models": {
     "sonnet": "Claude Sonnet 5 (vyvážený, doporučený)",
@@ -87,6 +88,7 @@
     "discard": "Zahodit",
     "truncated": "Odpověď byla useknuta na limitu délky.",
     "empty": "AI nevrátila žádný text.",
-    "openSettings": "Nastavení AI asistenta"
+    "openSettings": "Nastavení AI asistenta",
+    "keepsImages": "Použít by z pole odstranilo obrázky, proto můžete text vložit pod něj."
   }
 }

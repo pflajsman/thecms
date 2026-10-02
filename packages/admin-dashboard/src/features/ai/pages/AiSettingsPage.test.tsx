@@ -125,3 +125,11 @@ it('renders in Czech', async () => {
   expect(screen.getByRole('switch', { name: 'Povolit AI funkce pro všechny' })).toBeInTheDocument()
   await expectNoA11yViolations(container)
 })
+
+it('offers a retry when the status cannot be loaded', async () => {
+  vi.mocked(apiClient.get).mockRejectedValueOnce(Object.assign(new Error('500'), { isAxiosError: true, response: { status: 500 } })).mockResolvedValue({ data: { success: true, data: status() } })
+  renderRoutes(routes, { route: '/account/ai' })
+  expect(await screen.findByText('Could not load the AI assistant settings.')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+  expect(await screen.findByRole('button', { name: 'Connect' })).toBeInTheDocument()
+})

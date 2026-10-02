@@ -177,3 +177,64 @@ it('never submits the surrounding editor form from the instruction box', async (
   expect(submitted).not.toHaveBeenCalled()
   expect(screen.getByRole('region', { name: 'AI suggestion for Perex' }).querySelector('form')).toBeNull()
 })
+
+it('offers only Insert below when replacing would drop images from a rich-text field', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(sse([delta('<p>Delší text</p>'), done()]))
+  renderWithProviders(<Harness field={body} initial='<p>Text</p><img src="https://cdn.test/a.jpg">' />)
+  await userEvent.click(await screen.findByRole('button', { name: 'AI for Body' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Expand' }))
+  const panel = await screen.findByRole('region', { name: 'AI suggestion for Body' })
+  await within(panel).findByText('Delší text')
+  expect(within(panel).queryByRole('button', { name: 'Use' })).not.toBeInTheDocument()
+  expect(within(panel).getByRole('button', { name: 'Insert below' })).toBeInTheDocument()
+  expect(within(panel).getByText('Use would remove the images in this field, so you can insert the text below instead.')).toBeInTheDocument()
+})
+
+it('stops a running answer when another action is picked, keeping the typed instruction', async () => {
+  let release: () => void = () => {}
+  const hold = new Promise<void>((resolve) => (release = resolve))
+  let signal: AbortSignal | undefined
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    signal = init?.signal ?? undefined
+    return sse([delta('Běží')], hold)
+  })
+  renderWithProviders(<Harness field={perex} initial="Byli jsme tam." />)
+  await userEvent.click(await screen.findByRole('button', { name: 'AI for Perex' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Rewrite more clearly' }))
+  await screen.findByText('Běží')
+  await userEvent.click(screen.getByRole('button', { name: 'AI for Perex' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Own instruction' }))
+  expect(signal?.aborted).toBe(true)
+  await userEvent.type(screen.getByLabelText('Instruction'), 'Přátelštěji')
+  release()
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  expect(screen.getByLabelText('Instruction')).toHaveValue('Přátelštěji')
+})
+
+it('keeps the field mounted when AI becomes ready', async () => {
+  let answer: (v: unknown) => void = () => {}
+  vi.mocked(apiClient.get).mockReturnValue(new Promise((resolve) => (answer = resolve)) as never)
+  renderWithProviders(<Harness field={perex} initial="x" />)
+  const before = screen.getByLabelText('Perex')
+  answer({ data: { success: true, data: ready } })
+  await screen.findByRole('button', { name: 'AI for Perex' })
+  expect(screen.getByLabelText('Perex')).toBe(before)
+})
+
+it('moves focus to the field after Use, to the AI button after Discard, and into the brief box when it opens', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(sse([delta('Nový'), done()]))
+  renderWithProviders(<Harness field={perex} initial="Byli jsme tam." />)
+  await userEvent.click(await screen.findByRole('button', { name: 'AI for Perex' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Shorten' }))
+  let panel = await screen.findByRole('region', { name: 'AI suggestion for Perex' })
+  await userEvent.click(await within(panel).findByRole('button', { name: 'Use' }))
+  await waitFor(() => expect(screen.getByLabelText('Perex')).toHaveFocus())
+  await userEvent.click(screen.getByRole('button', { name: 'AI for Perex' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Shorten' }))
+  panel = await screen.findByRole('region', { name: 'AI suggestion for Perex' })
+  await userEvent.click(await within(panel).findByRole('button', { name: 'Discard' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'AI for Perex' })).toHaveFocus())
+  await userEvent.click(screen.getByRole('button', { name: 'AI for Perex' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Own instruction' }))
+  await waitFor(() => expect(screen.getByLabelText('Instruction')).toHaveFocus())
+})

@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios'
 import apiClient from '@/lib/api'
 import { API_BASE_URL, authorizationHeader } from '@/lib/auth-header'
 import type { ApiResponse } from '@/types'
@@ -50,12 +51,13 @@ export class AiRequestError extends Error {
   }
 }
 
-/** The user's AI status, or null when the user may not use AI (Viewer) or the server cannot be asked. */
+/** The user's AI status, or null when the user may not use AI (Viewer). Other failures throw, so the last good status is kept. */
 export async function getAiStatus(): Promise<AiStatus | null> {
   try {
     return (await apiClient.get<ApiResponse<AiStatus>>('/ai/connection')).data.data ?? null
-  } catch {
-    return null
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 403) return null
+    throw error
   }
 }
 
@@ -71,8 +73,10 @@ export async function saveAiSettings(enabled: boolean): Promise<AiStatus> {
   return (await apiClient.put<ApiResponse<AiStatus>>('/ai/settings', { enabled })).data.data
 }
 
-function refusedCode(status: number, reason: unknown): string {
+function refusedCode(status: number, reason: unknown, details: unknown): string {
   if (typeof reason === 'string') return reason
+  // The request schema refuses an over-long field value.
+  if (status === 400 && Array.isArray(details) && details.some((d) => /value/.test(String((d as { path?: unknown }).path)))) return 'TOO_LONG'
   if (status === 429) return 'AI_RATE_LIMIT'
   if (status === 413) return 'TOO_LONG'
   return 'PROVIDER'
@@ -97,8 +101,8 @@ export async function streamGenerate(body: GenerateRequest, options: { signal?: 
     throw new AiRequestError('NETWORK', 'The server cannot be reached')
   }
   if (!res.ok || !res.body) {
-    const data = (await res.json().catch(() => ({}))) as { error?: unknown; reason?: unknown }
-    throw new AiRequestError(refusedCode(res.status, data.reason), typeof data.error === 'string' ? data.error : `HTTP ${res.status}`)
+    const data = (await res.json().catch(() => ({}))) as { error?: unknown; reason?: unknown; details?: unknown }
+    throw new AiRequestError(refusedCode(res.status, data.reason, data.details), typeof data.error === 'string' ? data.error : `HTTP ${res.status}`)
   }
 
   const reader = res.body.getReader()
