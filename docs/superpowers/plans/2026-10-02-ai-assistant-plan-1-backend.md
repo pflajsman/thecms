@@ -787,9 +787,12 @@ it('keeps content from closing the data blocks', () => {
 
 it('trims the context before the field text and stays within the input budget', () => {
   const big = 'a'.repeat(30_000);
-  const p = buildPrompt({ ...base, field: { ...base.field, value: big }, context: { ...base.context, fields: [{ label: 'Body', value: big }] } });
+  const many = Array.from({ length: 10 }, (_, i) => ({ label: `F${i}`, value: big }));
+  const p = buildPrompt({ ...base, field: { ...base.field, value: big }, context: { ...base.context, fields: many } });
   expect(p.user.length).toBeLessThanOrEqual(MAX_INPUT_CHARS + 500);
-  expect(p.user).not.toContain('Body:');
+  expect(p.user).toContain('a'.repeat(16_000) + '…');
+  expect(p.user).toContain('F0: ');
+  expect(p.user).not.toContain('F9: ');
   const small = buildPrompt({ ...base, context: { ...base.context, fields: [{ label: 'Body', value: big }] } });
   expect(small.user).toContain('Body: ' + 'a'.repeat(1000) + '…');
 });
