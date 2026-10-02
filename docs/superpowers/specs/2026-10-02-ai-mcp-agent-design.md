@@ -70,7 +70,7 @@ Stateless Streamable HTTP: each `POST /mcp` creates a server and transport for t
 | `list_languages` | none | `[{ code, name, isDefault }]` |
 | `search_entries` | `{ contentType?, language?, status?, query?, page?, pageSize? }` (`contentType` is a slug or id; `pageSize` 1 to 50, default 20) | `{ items: [{ id, itemId, contentType, title, language, status, updatedAt }], page, total }` |
 | `get_entry` | `{ id }` | `{ id, itemId, contentType, language, status, title, data, updatedAt, versions: [{ id, language, status }] }` |
-| `list_media` | `{ query?, page? }` | `{ items: [{ id, url, name, mimeType, alt? }], page, total }` |
+| `list_media` | `{ query?, page? }` | `{ items: [{ id, url, name, mimeType, altText? }], page, total }` (`url` is the CDN URL when set, else the blob URL; `name` is the original file name) |
 
 ### 4.2 Write tools (Editor and Admin)
 
