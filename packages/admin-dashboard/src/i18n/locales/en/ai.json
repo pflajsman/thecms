@@ -89,5 +89,23 @@
     "empty": "The AI returned no text.",
     "openSettings": "AI assistant settings",
     "keepsImages": "Use would remove the images in this field, so you can insert the text below instead."
+  },
+  "translate": {
+    "title": "Translating to {{language}}",
+    "description": "The saved version is translated field by field. Nothing is created until every field is done.",
+    "starting": "Starting…",
+    "progress": "Translating {{field}} ({{index}} of {{total}})",
+    "stateDone": "Done",
+    "stateCurrent": "Translating",
+    "stateWaiting": "Waiting",
+    "stateFailed": "Failed",
+    "tooLong": "{{field}} is too long to translate. Shorten it or translate it by hand.",
+    "truncated": "The translation of {{field}} was cut off. Shorten the field or translate it by hand.",
+    "exists": "A {{language}} version was created in the meantime.",
+    "openExisting": "Open the {{language}} version",
+    "stoppedAt": "Stopped at {{field}}.",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "close": "Close"
   }
 }

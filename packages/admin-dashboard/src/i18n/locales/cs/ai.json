@@ -90,5 +90,23 @@
     "empty": "AI nevrátila žádný text.",
     "openSettings": "Nastavení AI asistenta",
     "keepsImages": "Použít by z pole odstranilo obrázky, proto můžete text vložit pod něj."
+  },
+  "translate": {
+    "title": "Překládám do jazyka {{language}}",
+    "description": "Uložená verze se překládá pole po poli. Nic se nevytvoří, dokud nejsou hotová všechna pole.",
+    "starting": "Začínám…",
+    "progress": "Překládám {{field}} ({{index}} z {{total}})",
+    "stateDone": "Hotovo",
+    "stateCurrent": "Překládám",
+    "stateWaiting": "Čeká",
+    "stateFailed": "Selhalo",
+    "tooLong": "Pole {{field}} je příliš dlouhé na překlad. Zkraťte ho nebo ho přeložte ručně.",
+    "truncated": "Překlad pole {{field}} se nevešel celý. Zkraťte pole nebo ho přeložte ručně.",
+    "exists": "Verze v jazyce {{language}} mezitím vznikla.",
+    "openExisting": "Otevřít verzi {{language}}",
+    "stoppedAt": "Zastaveno u pole {{field}}.",
+    "cancel": "Zrušit",
+    "retry": "Zkusit znovu",
+    "close": "Zavřít"
   }
 }
