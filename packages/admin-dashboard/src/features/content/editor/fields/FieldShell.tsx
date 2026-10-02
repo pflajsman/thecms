@@ -3,6 +3,11 @@ import type { Field } from '@/types'
 import { Label } from '@/components/ui/label'
 import { FieldAddonContext } from './field-addon'
 
+/** Renders the controls a wrapper put in FieldAddonContext (the AI menu), for label rows outside FieldShell. */
+export function FieldAddonSlot() {
+  return <>{useContext(FieldAddonContext)}</>
+}
+
 export function FieldShell({ field, id, error, counter, children }: { field: Field; id: string; error?: string; counter?: ReactNode; children: ReactNode }) {
   const addon = useContext(FieldAddonContext)
   return (

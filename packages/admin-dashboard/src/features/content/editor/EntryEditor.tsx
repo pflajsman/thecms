@@ -18,6 +18,9 @@ import { EditorTopBar } from './EditorTopBar'
 import { EditorSidePanel } from './EditorSidePanel'
 import { UnsavedChangesDialog } from './UnsavedChangesDialog'
 import { FieldControl } from './fields/FieldControl'
+import { FieldAddonSlot } from './fields/FieldShell'
+import { AiField } from '@/features/ai/components/AiField'
+import { toPlainText } from '@/features/ai/rich-text-clean'
 import { useLanguages } from '@/features/languages/languages-queries'
 import { isLocalized } from '@/lib/localized'
 import { useVersions } from '../queries'
@@ -301,22 +304,40 @@ export function EntryEditor({ contentType, entry: initialEntry, embedded }: Entr
     return t('save.saved')
   }, [saveState, form.isDirty, form.isValid, status, errorCount, isNew, t])
 
+  // Context for AI help: the other text fields of this version, the model name and the version language.
+  const aiContext = useCallback(
+    (fieldName: string) => ({
+      contentType: contentType.name,
+      language,
+      fields: fields
+        .filter((f) => f.name !== fieldName && (f.type === 'TEXT' || f.type === 'RICH_TEXT'))
+        .map((f) => ({ label: f.label || f.name, value: toPlainText(typeof form.values[f.name] === 'string' ? (form.values[f.name] as string) : '') }))
+        .filter((f) => f.value),
+    }),
+    [contentType.name, language, fields, form.values],
+  )
+
   const renderField = (fieldName: string, className?: string) => {
     const field = fields.find((f) => f.name === fieldName)!
     return (
       <div className={className}>
-        <FieldControl
-          field={field}
-          id={`field-${field.name}`}
-          value={form.values[field.name]}
-          onChange={(v) => form.setValue(field.name, v)}
-          onBlur={() => {
-            form.touch(field.name)
-            autosave.flush()
-          }}
-          error={form.visibleErrors[field.name]}
-          disabled={readOnly}
-        />
+        <AiField field={field} value={form.values[field.name]} onApply={(v) => form.setValue(field.name, v)} getContext={aiContext} disabled={readOnly}>
+          {(version) => (
+            <FieldControl
+              key={version}
+              field={field}
+              id={`field-${field.name}`}
+              value={form.values[field.name]}
+              onChange={(v) => form.setValue(field.name, v)}
+              onBlur={() => {
+                form.touch(field.name)
+                autosave.flush()
+              }}
+              error={form.visibleErrors[field.name]}
+              disabled={readOnly}
+            />
+          )}
+        </AiField>
         {sharedHint(field)}
       </div>
     )
@@ -379,29 +400,36 @@ export function EntryEditor({ contentType, entry: initialEntry, embedded }: Entr
         >
           <fieldset key={resetCount} disabled={readOnly} className="contents">
             {titleKey && (
-              <div>
-                <label htmlFor={`field-${titleKey}`} className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {fields.find((f) => f.name === titleKey)?.label ?? t('titleFallback')}
-                </label>
-                <input
-                  id={`field-${titleKey}`}
-                  value={typeof titleValue === 'string' ? titleValue : ''}
-                  onChange={(e) => form.setValue(titleKey, e.target.value)}
-                  onBlur={() => {
-                    form.touch(titleKey)
-                    autosave.flush()
-                  }}
-                  placeholder={t('titlePlaceholder')}
-                  aria-invalid={titleError ? true : undefined}
-                  aria-describedby={titleError ? `field-${titleKey}-error` : undefined}
-                  className={cn(
-                    'mt-1 w-full border-0 border-b bg-transparent pb-1 font-serif text-3xl font-semibold outline-none placeholder:text-muted-foreground/60 focus:border-ring',
-                    titleError && 'border-destructive',
-                  )}
-                />
-                {titleError && <p id={`field-${titleKey}-error`} className="mt-1 text-sm text-destructive">{titleError}</p>}
-                {sharedHint(fields.find((f) => f.name === titleKey)!)}
-              </div>
+              <AiField field={fields.find((f) => f.name === titleKey)!} value={titleValue} onApply={(v) => form.setValue(titleKey, v)} getContext={aiContext} disabled={readOnly}>
+                {() => (
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <label htmlFor={`field-${titleKey}`} className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {fields.find((f) => f.name === titleKey)?.label ?? t('titleFallback')}
+                      </label>
+                      <FieldAddonSlot />
+                    </div>
+                    <input
+                      id={`field-${titleKey}`}
+                      value={typeof titleValue === 'string' ? titleValue : ''}
+                      onChange={(e) => form.setValue(titleKey, e.target.value)}
+                      onBlur={() => {
+                        form.touch(titleKey)
+                        autosave.flush()
+                      }}
+                      placeholder={t('titlePlaceholder')}
+                      aria-invalid={titleError ? true : undefined}
+                      aria-describedby={titleError ? `field-${titleKey}-error` : undefined}
+                      className={cn(
+                        'mt-1 w-full border-0 border-b bg-transparent pb-1 font-serif text-3xl font-semibold outline-none placeholder:text-muted-foreground/60 focus:border-ring',
+                        titleError && 'border-destructive',
+                      )}
+                    />
+                    {titleError && <p id={`field-${titleKey}-error`} className="mt-1 text-sm text-destructive">{titleError}</p>}
+                    {sharedHint(fields.find((f) => f.name === titleKey)!)}
+                  </div>
+                )}
+              </AiField>
             )}
             <div className="grid gap-6 sm:grid-cols-2">
               {bodyFields.map((f) =>
