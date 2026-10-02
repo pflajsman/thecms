@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { LogOut, Monitor, Moon, Sun } from 'lucide-react'
+import { LogOut, Monitor, Moon, Sparkles, Sun } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAiStatus } from '@/features/ai/ai-queries'
 import { useTheme } from '@/app/theme/useTheme'
 import type { ThemePreference } from '@/app/theme/theme-utils'
 import type { AppModule } from '@/modules/types'
@@ -38,6 +39,7 @@ export function UserMenu({ variant, setupModules }: UserMenuProps) {
   const { preference, setPreference } = useTheme()
   const { t } = useTranslation('shell')
   const { language, setLanguage } = useLanguage()
+  const aiStatus = useAiStatus()
   const name = user?.name || user?.email || t('userMenu.account')
 
   return (
@@ -71,6 +73,17 @@ export function UserMenu({ variant, setupModules }: UserMenuProps) {
                 </Link>
               </DropdownMenuItem>
             ))}
+          </>
+        )}
+        {aiStatus.data && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/account/ai">
+                <Sparkles aria-hidden />
+                {t('userMenu.aiAssistant')}
+              </Link>
+            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuSeparator />

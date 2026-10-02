@@ -8,7 +8,8 @@
     "themeDark": "Tmavý",
     "themeSystem": "Podle systému",
     "language": "Jazyk",
-    "signOut": "Odhlásit se"
+    "signOut": "Odhlásit se",
+    "aiAssistant": "AI asistent"
   },
   "signIn": {
     "title": "Vítejte v TheCMS",

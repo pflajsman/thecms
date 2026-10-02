@@ -30,10 +30,12 @@ import enShipping from './locales/en/shipping.json'
 import csShipping from './locales/cs/shipping.json'
 import enOrders from './locales/en/orders.json'
 import csOrders from './locales/cs/orders.json'
+import enAi from './locales/en/ai.json'
+import csAi from './locales/cs/ai.json'
 
-export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages', 'commerce', 'shipping', 'orders'] as const
+export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages', 'commerce', 'shipping', 'orders', 'ai'] as const
 
 export const resources = {
-  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages, commerce: enCommerce, shipping: enShipping, orders: enOrders },
-  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages, commerce: csCommerce, shipping: csShipping, orders: csOrders },
+  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages, commerce: enCommerce, shipping: enShipping, orders: enOrders, ai: enAi },
+  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages, commerce: csCommerce, shipping: csShipping, orders: csOrders, ai: csAi },
 } as const
