@@ -32,10 +32,12 @@ import enOrders from './locales/en/orders.json'
 import csOrders from './locales/cs/orders.json'
 import enAi from './locales/en/ai.json'
 import csAi from './locales/cs/ai.json'
+import enTokens from './locales/en/tokens.json'
+import csTokens from './locales/cs/tokens.json'
 
-export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages', 'commerce', 'shipping', 'orders', 'ai'] as const
+export const NAMESPACES = ['common', 'shell', 'home', 'content', 'editor', 'media', 'inbox', 'models', 'forms', 'sites', 'webhooks', 'builder', 'languages', 'commerce', 'shipping', 'orders', 'ai', 'tokens'] as const
 
 export const resources = {
-  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages, commerce: enCommerce, shipping: enShipping, orders: enOrders, ai: enAi },
-  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages, commerce: csCommerce, shipping: csShipping, orders: csOrders, ai: csAi },
+  en: { common: enCommon, shell: enShell, home: enHome, content: enContent, editor: enEditor, media: enMedia, inbox: enInbox, models: enModels, forms: enForms, sites: enSites, webhooks: enWebhooks, builder: enBuilder, languages: enLanguages, commerce: enCommerce, shipping: enShipping, orders: enOrders, ai: enAi, tokens: enTokens },
+  cs: { common: csCommon, shell: csShell, home: csHome, content: csContent, editor: csEditor, media: csMedia, inbox: csInbox, models: csModels, forms: csForms, sites: csSites, webhooks: csWebhooks, builder: csBuilder, languages: csLanguages, commerce: csCommerce, shipping: csShipping, orders: csOrders, ai: csAi, tokens: csTokens },
 } as const

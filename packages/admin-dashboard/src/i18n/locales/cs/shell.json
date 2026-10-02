@@ -9,7 +9,8 @@
     "themeSystem": "Podle systému",
     "language": "Jazyk",
     "signOut": "Odhlásit se",
-    "aiAssistant": "AI asistent"
+    "aiAssistant": "AI asistent",
+    "accessTokens": "Přístupové tokeny"
   },
   "signIn": {
     "title": "Vítejte v TheCMS",

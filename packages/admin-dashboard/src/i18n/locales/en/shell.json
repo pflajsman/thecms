@@ -9,7 +9,8 @@
     "themeSystem": "System",
     "language": "Language",
     "signOut": "Sign out",
-    "aiAssistant": "AI assistant"
+    "aiAssistant": "AI assistant",
+    "accessTokens": "Access tokens"
   },
   "signIn": {
     "title": "Welcome to TheCMS",

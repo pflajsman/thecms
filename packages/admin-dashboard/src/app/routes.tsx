@@ -4,6 +4,7 @@ import { RouteError } from './RouteError'
 import { collectRoutes } from '@/modules/nav'
 import { modules } from '@/modules/registry'
 import { AiSettingsPage } from '@/features/ai/pages/AiSettingsPage'
+import { TokensPage } from '@/features/tokens/pages/TokensPage'
 
 export const routes: RouteObject[] = [
   {
@@ -13,7 +14,7 @@ export const routes: RouteObject[] = [
       {
         // Page errors render here, inside the shell, so navigation stays available.
         errorElement: <RouteError />,
-        children: [...collectRoutes(modules), { path: 'account/ai', element: <AiSettingsPage /> }, { path: '*', element: <Navigate to="/" replace /> }],
+        children: [...collectRoutes(modules), { path: 'account/ai', element: <AiSettingsPage /> }, { path: 'account/tokens', element: <TokensPage /> }, { path: '*', element: <Navigate to="/" replace /> }],
       },
     ],
   },

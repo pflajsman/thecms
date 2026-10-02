@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { LogOut, Monitor, Moon, Sparkles, Sun } from 'lucide-react'
+import { KeyRound, LogOut, Monitor, Moon, Sparkles, Sun } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiStatus } from '@/features/ai/ai-queries'
 import { useTheme } from '@/app/theme/useTheme'
@@ -86,6 +86,13 @@ export function UserMenu({ variant, setupModules }: UserMenuProps) {
             </DropdownMenuItem>
           </>
         )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/account/tokens">
+            <KeyRound aria-hidden />
+            {t('userMenu.accessTokens')}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs text-muted-foreground">{t('userMenu.theme')}</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={preference} onValueChange={(v) => setPreference(v as ThemePreference)}>

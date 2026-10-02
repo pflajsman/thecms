@@ -142,6 +142,12 @@ describe('AppShell', () => {
 })
 
 describe('UserMenu language', () => {
+  it('links to the access tokens page for every user', async () => {
+    auth.value = { ...auth.value, isAuthenticated: true, isLoading: false }
+    renderWithProviders(<UserMenu variant="sidebar" />)
+    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }))
+    expect(await screen.findByRole('menuitem', { name: 'Access tokens' })).toHaveAttribute('href', '/account/tokens')
+  })
   it('switches language from the account menu', async () => {
     auth.value = { ...auth.value, isAuthenticated: true, isLoading: false }
     renderWithProviders(<UserMenu variant="sidebar" />)
