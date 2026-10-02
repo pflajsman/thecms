@@ -60,7 +60,7 @@ Tokens cannot be used to call these endpoints (they accept only the admin login)
 
 ## 4. MCP server
 
-Stateless Streamable HTTP: each `POST /mcp` creates a server and transport for that request (no sessions). `GET` and `DELETE /mcp` answer `405`. The tools call the existing services, so validation, titles, shared-field sync between language versions and webhooks behave as in the admin.
+Stateless Streamable HTTP: each `POST /mcp` creates a server and transport for that request (no sessions). `GET` and `DELETE /mcp` answer `405`. The tools call the existing services, so validation, titles, shared-field sync between language versions and webhooks behave as in the admin. Because a saved shared field is copied to every language version, `update_draft` refuses to change a shared field while another version of the entry is published or archived, and `create_language_version` always keeps the source's shared values; field names the content type does not have are refused.
 
 ### 4.1 Read tools
 

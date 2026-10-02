@@ -10,6 +10,7 @@ import { ContentTypeModel } from '../../models/content-type.model';
 import { ContentEntryModel, ContentStatus } from '../../models/content-entry.model';
 import { FieldType } from '../../types/field-types';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
+import { createVersion } from '../content-entries/entry-versions.service';
 import { TokensService } from '../tokens/tokens.service';
 
 useTestDb();
@@ -114,5 +115,47 @@ it('creates a language version with translated fields and shared values copied',
   expect(again.isError).toBe(true);
   expect(JSON.stringify(again.content)).toContain('already exists');
   expect((await ContentEntryModel.findById(en._id).lean())?.status).toBe(ContentStatus.PUBLISHED);
+  await close();
+});
+
+it('never changes a published version through a shared field', async () => {
+  const { token, type } = await setup();
+  const en = await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'Ridge walk', km: 12 } });
+  await ContentEntriesService.publishEntry(String(en._id));
+  const cs = await createVersion(String(en._id), 'cs');
+  const { client, close } = await connectMcp(token);
+  const shared = await client.callTool({ name: 'update_draft', arguments: { id: String(cs._id), data: { km: 99 } } });
+  expect(shared.isError).toBe(true);
+  expect(JSON.stringify(shared.content)).toContain('Distance is shared by all language versions');
+  expect((await ContentEntryModel.findById(en._id).lean())?.data).toEqual({ title: 'Ridge walk', km: 12 });
+  expect((await ContentEntryModel.findById(cs._id).lean())?.data).toEqual({ title: 'Ridge walk', km: 12 });
+  const translated = await client.callTool({ name: 'update_draft', arguments: { id: String(cs._id), data: { title: 'Hřebenovka', km: 12 } } });
+  expect(translated.isError).toBeFalsy();
+  expect((await ContentEntryModel.findById(en._id).lean())?.data).toEqual({ title: 'Ridge walk', km: 12 });
+  await close();
+});
+
+it('keeps shared values when creating a language version', async () => {
+  const { token, type } = await setup();
+  const en = await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'Ridge walk', km: 12 } });
+  const { client, close } = await connectMcp(token);
+  const call = await client.callTool({ name: 'create_language_version', arguments: { id: String(en._id), language: 'cs', data: { title: 'Hřebenovka', km: 99 } } });
+  expect(call.isError).toBe(true);
+  expect(JSON.stringify(call.content)).toContain('Distance is shared by all language versions');
+  expect(await ContentEntryModel.countDocuments({ language: 'cs' })).toBe(0);
+  await close();
+});
+
+it('refuses field names the content type does not have', async () => {
+  const { token, type } = await setup();
+  const draft = await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'Ridge' } });
+  const { client, close } = await connectMcp(token);
+  const update = await client.callTool({ name: 'update_draft', arguments: { id: String(draft._id), data: { titel: 'Ridge walk' } } });
+  expect(update.isError).toBe(true);
+  expect(JSON.stringify(update.content)).toContain("Unknown field 'titel'");
+  expect((await ContentEntryModel.findById(draft._id).lean())?.data).toEqual({ title: 'Ridge' });
+  const create = await client.callTool({ name: 'create_entry', arguments: { contentType: 'trip', data: { title: 'X', colour: 'red' } } });
+  expect(create.isError).toBe(true);
+  expect(JSON.stringify(create.content)).toContain("Unknown field 'colour'");
   await close();
 });

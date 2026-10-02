@@ -96,3 +96,15 @@ it('limits requests per token', async () => {
     delete process.env.MCP_REQUESTS_PER_MINUTE;
   }
 });
+
+it('refuses JSON-RPC batches, so one request is one call', async () => {
+  const token = await userWithToken();
+  const call = (id: number) => ({ jsonrpc: '2.0', id, method: 'tools/call', params: { name: 'list_languages', arguments: {} } });
+  const res = await request(app)
+    .post('/api/v1/mcp')
+    .set('Accept', 'application/json, text/event-stream')
+    .set('Authorization', `Bearer ${token}`)
+    .send([call(1), call(2)]);
+  expect(res.status).toBe(400);
+  expect(res.body).toMatchObject({ jsonrpc: '2.0', error: { code: -32600 }, id: null });
+});

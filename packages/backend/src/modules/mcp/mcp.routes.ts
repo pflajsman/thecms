@@ -1,4 +1,4 @@
-import { Router, type IRouter } from 'express';
+import { Router, type IRouter, type RequestHandler } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { mcpLimiter } from '../../middleware/rateLimit.middleware';
 import { mcpAuth, rpcError, type McpRequest } from './mcp-auth';
@@ -6,8 +6,17 @@ import { createMcpServer } from './mcp-server';
 
 const router: IRouter = Router();
 
+// One request is one call: a JSON-RPC batch (up to 100 calls in the SDK) would slip past the per-request limit.
+const refuseBatch: RequestHandler = (req, res, next) => {
+  if (Array.isArray(req.body)) {
+    res.status(400).json(rpcError(-32600, 'Batch requests are not supported; send one request at a time'));
+    return;
+  }
+  next();
+};
+
 // Stateless: every POST gets its own server and transport, so no session survives between requests.
-router.post('/', mcpAuth, mcpLimiter, async (req, res, next) => {
+router.post('/', refuseBatch, mcpAuth, mcpLimiter, async (req, res, next) => {
   const { mcp } = req as McpRequest;
   try {
     const server = createMcpServer({ tokenPrefix: mcp!.prefix, user: mcp!.user });

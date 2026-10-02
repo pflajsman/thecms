@@ -25,4 +25,6 @@ Other MCP clients that can send a header to a Streamable HTTP server work the sa
 | `update_draft` | Editor, Admin | Change fields of a draft |
 | `create_language_version` | Editor, Admin | New draft in a missing language |
 
+Shared fields (the same in every language version, such as numbers or images) can only be changed through MCP while no other version of the entry is published or archived, because a change is copied to every version; a new language version always keeps the source's shared values. Field names the content type does not have are refused.
+
 Viewers get the read tools only. Requests are limited to 120 per minute per token.
