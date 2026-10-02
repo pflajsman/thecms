@@ -104,6 +104,8 @@ export function useEntryWrites() {
       archive: (id: string) => done(archiveEntry(id)),
       translate: (entryId: string, language: string) => done(createVersion(entryId, language)),
       changeLanguage: (entryId: string, language: string) => done(changeEntryLanguage(entryId, language)),
+      /** After a version was created elsewhere (AI translation): refresh lists, stats and versions. */
+      refreshVersions: () => refresh(),
       remove: async (id: string) => {
         await deleteEntry(id)
         queryClient.removeQueries({ queryKey: contentKeys.entry(id) })

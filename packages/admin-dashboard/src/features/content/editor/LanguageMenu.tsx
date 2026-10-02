@@ -1,5 +1,6 @@
+import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, Languages as LanguagesIcon, Plus } from 'lucide-react'
+import { ChevronDown, Languages as LanguagesIcon, Plus, Sparkles } from 'lucide-react'
 import type { EntryVersion } from '@/types'
 import type { Language } from '@/features/languages/languages-api'
 import { Button } from '@/components/ui/button'
@@ -14,9 +15,11 @@ interface LanguageMenuProps {
   busy: boolean
   onOpen: (id: string) => void
   onTranslate: (code: string) => void
+  /** Present when AI is ready: offers an AI translation next to each copy. */
+  onTranslateAi?: (code: string) => void
 }
 
-export function LanguageMenu({ languages, versions, current, canTranslate, busy, onOpen, onTranslate }: LanguageMenuProps) {
+export function LanguageMenu({ languages, versions, current, canTranslate, busy, onOpen, onTranslate, onTranslateAi }: LanguageMenuProps) {
   const { t } = useTranslation('editor')
   const name = (code: string) => languages.find((l) => l.code === code)?.name ?? code
   const byLanguage = new Map(versions.map((v) => [v.language, v]))
@@ -47,10 +50,18 @@ export function LanguageMenu({ languages, versions, current, canTranslate, busy,
               {canTranslate ? t('languages.missing') : t('languages.saveFirst')}
             </DropdownMenuLabel>
             {missing.map((l) => (
-              <DropdownMenuItem key={l.code} disabled={!canTranslate || busy} onSelect={() => onTranslate(l.code)}>
-                <Plus aria-hidden />
-                {t('languages.translateTo', { language: l.name })}
-              </DropdownMenuItem>
+              <Fragment key={l.code}>
+                <DropdownMenuItem disabled={!canTranslate || busy} onSelect={() => onTranslate(l.code)}>
+                  <Plus aria-hidden />
+                  {t('languages.translateTo', { language: l.name })}
+                </DropdownMenuItem>
+                {onTranslateAi && (
+                  <DropdownMenuItem disabled={!canTranslate || busy} onSelect={() => onTranslateAi(l.code)}>
+                    <Sparkles aria-hidden />
+                    {t('languages.translateWithAi', { language: l.name })}
+                  </DropdownMenuItem>
+                )}
+              </Fragment>
             ))}
           </>
         )}

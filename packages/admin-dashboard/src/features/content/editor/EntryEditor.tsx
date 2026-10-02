@@ -27,6 +27,9 @@ import { useVersions } from '../queries'
 import { LanguageMenu } from './LanguageMenu'
 import { LanguagesSection } from './LanguagesSection'
 import { ChangeLanguageDialog } from './ChangeLanguageDialog'
+import { TranslateDialog } from '@/features/ai/components/TranslateDialog'
+import { useAiReady } from '@/features/ai/ai-queries'
+import { listVersions } from '../content-api'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -255,6 +258,24 @@ export function EntryEditor({ contentType, entry: initialEntry, embedded }: Entr
     }
   }
 
+  const aiReady = useAiReady()
+  const [aiTarget, setAiTarget] = useState<string | null>(null)
+
+  const aiTranslated = (versionId: string) => {
+    setAiTarget(null)
+    writes.refreshVersions()
+    toast.success(t('languages.aiTranslated'))
+    navigate(versionPath(versionId))
+  }
+
+  // The language was created by someone else meanwhile: open that version.
+  const openExisting = async (code: string) => {
+    setAiTarget(null)
+    writes.refreshVersions()
+    const found = (await listVersions(entryIdRef.current!)).find((v) => v.language === code)
+    if (found) navigate(versionPath(found.id))
+  }
+
   const changeLanguage = async (code: string) => {
     setBusy(true)
     try {
@@ -376,6 +397,7 @@ export function EntryEditor({ contentType, entry: initialEntry, embedded }: Entr
               busy={busy}
               onOpen={(id) => void openVersion(id)}
               onTranslate={(code) => void translate(code)}
+              onTranslateAi={aiReady ? (code) => setAiTarget(code) : undefined}
             />
           ) : undefined
         }
@@ -444,6 +466,15 @@ export function EntryEditor({ contentType, entry: initialEntry, embedded }: Entr
         </SheetContent>
       </Sheet>
       <UnsavedChangesDialog blocker={blocker} />
+      {aiTarget && entryIdRef.current && (
+        <TranslateDialog
+          entryId={entryIdRef.current}
+          language={{ code: aiTarget, name: languageName(aiTarget) }}
+          onDone={aiTranslated}
+          onExists={() => void openExisting(aiTarget)}
+          onClose={() => setAiTarget(null)}
+        />
+      )}
       <ChangeLanguageDialog
         open={changeOpen}
         onOpenChange={setChangeOpen}

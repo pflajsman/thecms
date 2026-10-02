@@ -185,6 +185,8 @@
     "noDefaultWarning": "Po této změně položka nebude mít verzi ve výchozím jazyce ({{language}}). Weby, které si o jazyk neřeknou, ji nezobrazí.",
     "sharedHint": "Stejné ve všech jazycích",
     "translated": "Verze {{language}} je vytvořená",
-    "changed": "Přesunuto do jazyka {{language}}"
+    "changed": "Přesunuto do jazyka {{language}}",
+    "translateWithAi": "Přeložit pomocí AI: {{language}}",
+    "aiTranslated": "Přeložený koncept je vytvořený. Před publikováním ho zkontrolujte."
   }
 }

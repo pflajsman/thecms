@@ -74,7 +74,7 @@ When the client disconnects, the running provider call is aborted and nothing is
 
 For a missing language, when `useAiReady()` is true, a second item "Translate to <language> with AI" ("Přeložit do <jazyk> pomocí AI") follows the existing "Translate to <language>". Otherwise the switcher is unchanged.
 
-If the editor has unsaved changes, a dialog explains that the saved version is translated and offers "Save and translate" and "Cancel". Save errors stop the flow and show as usual.
+While the editor has unsaved changes, both translate items are disabled with the existing note "Save your changes before translating", so the saved version is what gets translated.
 
 ### 4.2 Progress dialog
 

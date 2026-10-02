@@ -181,6 +181,8 @@
     "noDefaultWarning": "After this change the entry has no version in {{language}}, the default language. Sites that do not ask for a language will not show it.",
     "sharedHint": "Same in all languages",
     "translated": "Created the {{language}} version",
-    "changed": "Moved to {{language}}"
+    "changed": "Moved to {{language}}",
+    "translateWithAi": "Translate to {{language}} with AI",
+    "aiTranslated": "Translated draft created. Review it before publishing."
   }
 }
