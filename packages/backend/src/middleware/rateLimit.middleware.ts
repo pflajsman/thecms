@@ -1,3 +1,4 @@
+import type { AuthRequest } from './auth.middleware';
 import rateLimit from 'express-rate-limit';
 
 /**
@@ -84,5 +85,21 @@ export const orderLimiter = rateLimit({
   skip: () => process.env.NODE_ENV === 'test',
   handler: (_req, res) => {
     res.status(429).json({ success: false, error: 'Too many orders. Please try again in a minute.' });
+  },
+});
+
+/**
+ * AI generation per user (20 per minute by default; AI_REQUESTS_PER_MINUTE overrides, also in tests)
+ */
+export const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: () => Number(process.env.AI_REQUESTS_PER_MINUTE) || 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => (req as AuthRequest).user?.entraId ?? req.ip ?? 'unknown',
+  // Tests call the AI endpoints many times; only the limit test sets AI_REQUESTS_PER_MINUTE.
+  skip: () => process.env.NODE_ENV === 'test' && !process.env.AI_REQUESTS_PER_MINUTE,
+  handler: (_req, res) => {
+    res.status(429).json({ success: false, error: 'Too many AI requests. Please wait a minute.', reason: 'AI_RATE_LIMIT' });
   },
 });
