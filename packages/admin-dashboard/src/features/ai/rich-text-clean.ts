@@ -38,5 +38,7 @@ export function cleanRichText(html: string): string {
 /** Text without any markup, for plain text fields. */
 export function toPlainText(text: string): string {
   const doc = new DOMParser().parseFromString(unfence(text), 'text/html')
+  // Script and style contents are code, not text.
+  doc.body.querySelectorAll([...DROP].join(',')).forEach((el) => el.remove())
   return (doc.body.textContent ?? '').trim()
 }

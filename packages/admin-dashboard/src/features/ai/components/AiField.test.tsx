@@ -160,3 +160,20 @@ it('renders in Czech', async () => {
   expect(within(panel).getByRole('button', { name: 'Použít' })).toBeInTheDocument()
   expect(within(panel).getByRole('button', { name: 'Zahodit' })).toBeInTheDocument()
 })
+
+it('never submits the surrounding editor form from the instruction box', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(sse([delta('Nový text'), done()]))
+  const submitted = vi.fn((e: { preventDefault: () => void }) => e.preventDefault())
+  renderWithProviders(
+    <form onSubmit={submitted}>
+      <Harness field={perex} initial="" />
+    </form>,
+  )
+  await userEvent.click(await screen.findByRole('button', { name: 'AI for Perex' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Write a draft' }))
+  await userEvent.type(screen.getByLabelText('What should AI write?'), 'o výletu')
+  await userEvent.click(screen.getByRole('button', { name: 'Create' }))
+  expect(await screen.findByText('Nový text')).toBeInTheDocument()
+  expect(submitted).not.toHaveBeenCalled()
+  expect(screen.getByRole('region', { name: 'AI suggestion for Perex' }).querySelector('form')).toBeNull()
+})

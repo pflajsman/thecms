@@ -115,20 +115,27 @@ export function AiField({ field, value, onApply, getContext, disabled, children 
   let content: ReactNode = null
   if (panel?.kind === 'instruction') {
     content = (
-      <form
-        className="space-y-2"
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (panel.instruction.trim()) void run(panel.action, panel.instruction.trim())
-        }}
-      >
+      // Not a <form>: the editor around this field is one, and a nested form would submit the page.
+      <div className="space-y-2">
         <Label htmlFor={instructionId}>{panel.action === 'draft' ? t('panel.instructionDraft') : t('panel.instructionCustom')}</Label>
-        <Textarea id={instructionId} value={panel.instruction} maxLength={1000} onChange={(e) => setPanel({ ...panel, instruction: e.target.value })} />
+        <Textarea
+          id={instructionId}
+          value={panel.instruction}
+          maxLength={1000}
+          onChange={(e) => setPanel({ ...panel, instruction: e.target.value })}
+          onKeyDown={(e) => {
+            // Ctrl or Cmd + Enter starts it, like a send button.
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && panel.instruction.trim()) {
+              e.preventDefault()
+              void run(panel.action, panel.instruction.trim())
+            }
+          }}
+        />
         <div className="flex flex-wrap gap-2">
-          <Button type="submit" size="sm" disabled={!panel.instruction.trim()}>{t('panel.run')}</Button>
+          <Button type="button" size="sm" disabled={!panel.instruction.trim()} onClick={() => void run(panel.action, panel.instruction.trim())}>{t('panel.run')}</Button>
           <Button type="button" size="sm" variant="outline" onClick={close}>{t('panel.discard')}</Button>
         </div>
-      </form>
+      </div>
     )
   } else if (panel) {
     const shown = rich ? cleanRichText(panel.text) : toPlainText(panel.text)

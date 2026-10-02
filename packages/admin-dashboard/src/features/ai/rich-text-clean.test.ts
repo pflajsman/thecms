@@ -18,3 +18,7 @@ it('turns any HTML into plain text for text fields', () => {
   expect(toPlainText('<p>Byli jsme <strong>tam</strong>.</p>')).toBe('Byli jsme tam.')
   expect(toPlainText('  Jen text  ')).toBe('Jen text')
 })
+
+it('leaves out script and style text when making plain text', () => {
+  expect(toPlainText('Druhý <strong>odstavec</strong>.<script>alert(1)</script><style>p{color:red}</style>')).toBe('Druhý odstavec.')
+})

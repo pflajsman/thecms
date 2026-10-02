@@ -571,3 +571,22 @@ Environment: local mongod; worktree backend (port 3100) on a throwaway copy of t
 | `DELETE /ai/connection`: `connection: null` | Pass |
 
 Production: add `AI_KEY_SECRET` (for example `openssl rand -base64 32`) to the App Service settings before AI can be used; without it the AI features stay off.
+
+## AI assistant Plan 2 verification (2026-10-02)
+
+Environment: local mongod; worktree backend (port 3100) on a throwaway copy of the local database (dropped afterwards) with a generated `AI_KEY_SECRET`; worktree admin (port 5175); a fake OpenAI-compatible service on port 11500 that streams plain text, or HTML with a `<script>` when the prompt asks for rich text. Ollama was not running; nothing was installed. For the Admin switch the dev user was made an Admin in the throwaway database.
+
+| Check | Result |
+|---|---|
+| Admin tests (781), lint (0 problems), build | Pass |
+| AI assistant page: OpenAI-compatible service, Ollama preset fills `http://localhost:11434/v1` and `llama3.2`; address changed to the fake service, model `fake`; connected, "No key", usage shown | Pass |
+| Blog post title: menu offers rewrite, shorten, expand, fix, own instruction; Rewrite streams into the panel; Use replaces the title and the entry shows "Unsaved changes" | Pass |
+| Shorten, then Discard while streaming: panel closes, title unchanged | Pass |
+| Plain-text field given an HTML answer with a script | Pass (after fix in this plan: the script's text ended up in the field) |
+| Body (rich text, only an image so far): Write a draft with a brief, preview shows `<p>Druhý <strong>odstavec</strong> z AI.</p>` without the script; Insert below adds it to the TipTap editor with bold kept | Pass (after fix in this plan: the brief box was a form nested in the editor form, so Create reloaded the page) |
+| Product Content tab: AI buttons on Name and Description | Pass |
+| Fake service stopped: "The AI service can't be reached. If you use Ollama, check that it is running."; Try again works after restarting it | Pass |
+| Admin switch: off hides every AI button in the editor and shows the note; on restores them | Pass |
+| Czech: page "AI asistent", panel "Návrh AI pro Title" with Použít, Znovu, Zahodit | Pass |
+| 360px (iframe) in English and Czech: AI page and editor with an open panel have no horizontal scroll | Pass |
+| Console | Only the earlier nested-form warning (fixed) and a key warning for the editor's field list that also appears on main |
