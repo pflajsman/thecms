@@ -620,3 +620,18 @@ Environment: local mongod; worktree backend (port 3100) on a throwaway copy of t
 | Fake service stopped: "The AI service can't be reached..." and "Stopped at Název.", the field marked Failed, Try again and Close | Pass |
 | Czech admin: "Přeložit pomocí AI: Deutsch", "Překládám do jazyka Deutsch", "Zastaveno u pole Název.", "Zkusit znovu" | Pass |
 | 360px frame: dialog from 24 to 336px, no element overflows, page width 360 | Pass |
+
+## AI MCP Plan 1 verification (2026-10-02)
+
+Environment: local mongod; worktree backend (port 3100) on a throwaway copy of the local database (`thecms_mcpcheck`, dropped afterwards); a script using the MCP SDK client (`StreamableHTTPClientTransport` with an `Authorization` header). The token was created with `POST /api/v1/tokens` as the dev user (an Editor) and deleted with the database. `claude mcp add` was not run, so the user's Claude Code configuration was not changed.
+
+| Check | Result |
+|---|---|
+| Backend tests (53 suites, 289 tests), build | Pass |
+| `listTools`: the 5 read tools and `create_entry`, `update_draft`, `create_language_version` | Pass |
+| `list_content_types`: 5 types; the check type's `title` translated, `km` shared; `search_entries`: 27 versions | Pass |
+| `create_entry`: DRAFT in `en`; `update_draft` changed the title and kept `km`; `get_entry` shows the change | Pass |
+| `update_draft` on a published version: "This version is published. Only drafts can be changed through MCP; ask a person to edit it in the admin." | Pass |
+| `create_language_version` to `cs`: DRAFT with the Czech title and `km` copied; the item has 2 versions | Pass |
+| Wrong token: `401` with JSON-RPC error `-32001` | Pass |
+| Server log: one line per tool call (`mcp <prefix> <tool> ok` or `error 409`); the full token does not appear | Pass |
