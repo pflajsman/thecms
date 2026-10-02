@@ -1,56 +1,22 @@
 import axios from 'axios';
-import { InteractionRequiredAuthError, PublicClientApplication } from '@azure/msal-browser';
-import { loginRequest, isEntraConfigured } from '../config/msalConfig';
+import { isEntraConfigured } from '../config/msalConfig';
+import { API_BASE_URL, authorizationHeader } from './auth-header';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+export { setMsalInstance } from './auth-header';
 
 // Create axios instance
 export const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Shared MSAL instance reference (set from App.tsx)
-let msalInstance: PublicClientApplication | null = null;
-
-export function setMsalInstance(instance: PublicClientApplication) {
-  msalInstance = instance;
-}
-
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   async (config) => {
-    if (isEntraConfigured() && msalInstance) {
-      // Use MSAL to get a fresh access token
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts.length > 0) {
-        try {
-          const response = await msalInstance.acquireTokenSilent({
-            ...loginRequest,
-            account: accounts[0],
-          });
-          config.headers.Authorization = `Bearer ${response.accessToken}`;
-        } catch (error) {
-          // If silent fails due to interaction required, try popup
-          if (error instanceof InteractionRequiredAuthError) {
-            try {
-              const response = await msalInstance.acquireTokenPopup(loginRequest);
-              config.headers.Authorization = `Bearer ${response.accessToken}`;
-            } catch {
-              // Popup also failed - request will go without token
-            }
-          }
-        }
-      }
-    } else {
-      // Dev mode: use token from localStorage
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
+    const authorization = await authorizationHeader();
+    if (authorization) config.headers.Authorization = authorization;
     return config;
   },
   (error) => {

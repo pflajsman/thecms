@@ -10,6 +10,8 @@ import type { ConnectionInput } from './ai.schema';
 export interface AiStatus {
   available: boolean;
   enabled: boolean;
+  /** The user may switch AI on or off for everyone (Admin). */
+  canManage: boolean;
   connection: { provider: string; model: string; baseUrl?: string; keyHint?: string; createdAt: Date } | null;
   usage: { month: string; requests: number; inputTokens: number; outputTokens: number };
 }
@@ -39,7 +41,7 @@ async function testCall(provider: AiProvider): Promise<void> {
 }
 
 export const AiService = {
-  async status(userId: string): Promise<AiStatus> {
+  async status(userId: string, canManage = false): Promise<AiStatus> {
     const [connection, usage, enabled] = await Promise.all([
       AiConnectionModel.findOne({ userId }).lean(),
       AiUsageModel.findOne({ userId, month: month() }).lean(),
@@ -48,6 +50,7 @@ export const AiService = {
     return {
       available: aiAvailable(),
       enabled,
+      canManage,
       connection: connection
         ? { provider: connection.provider, model: connection.model, baseUrl: connection.baseUrl, keyHint: connection.keyHint, createdAt: connection.createdAt }
         : null,

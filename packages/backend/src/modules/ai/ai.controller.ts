@@ -1,16 +1,18 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { AuthRequest } from '../../middleware/auth.middleware';
+import { UserRole } from '../../models/user.model';
 import { AiService } from './ai.service';
 import { connectionBody, generateBody, settingsBody } from './ai.schema';
 import { buildPrompt } from './prompts';
 import { AiProviderError, type Usage } from './providers';
 
 const userId = (req: Request) => (req as AuthRequest).user!.entraId;
+const canManage = (req: Request) => (req as AuthRequest).user?.role === UserRole.ADMIN;
 
 export const aiController = {
   async getConnection(req: Request, res: Response, next: NextFunction) {
     try {
-      res.json({ success: true, data: await AiService.status(userId(req)) });
+      res.json({ success: true, data: await AiService.status(userId(req), canManage(req)) });
     } catch (error) {
       next(error);
     }
@@ -18,7 +20,8 @@ export const aiController = {
 
   async saveConnection(req: Request, res: Response, next: NextFunction) {
     try {
-      res.json({ success: true, data: await AiService.saveConnection(userId(req), connectionBody.parse(req.body)) });
+      await AiService.saveConnection(userId(req), connectionBody.parse(req.body));
+      res.json({ success: true, data: await AiService.status(userId(req), canManage(req)) });
     } catch (error) {
       next(error);
     }
@@ -27,7 +30,7 @@ export const aiController = {
   async deleteConnection(req: Request, res: Response, next: NextFunction) {
     try {
       await AiService.deleteConnection(userId(req));
-      res.json({ success: true, data: await AiService.status(userId(req)) });
+      res.json({ success: true, data: await AiService.status(userId(req), canManage(req)) });
     } catch (error) {
       next(error);
     }
@@ -36,7 +39,7 @@ export const aiController = {
   async saveSettings(req: Request, res: Response, next: NextFunction) {
     try {
       await AiService.setEnabled(settingsBody.parse(req.body).enabled);
-      res.json({ success: true, data: await AiService.status(userId(req)) });
+      res.json({ success: true, data: await AiService.status(userId(req), canManage(req)) });
     } catch (error) {
       next(error);
     }

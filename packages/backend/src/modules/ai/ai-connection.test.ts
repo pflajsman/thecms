@@ -112,3 +112,8 @@ it('asks to connect again when the stored key cannot be read', async () => {
   expect(res.status).toBe(409);
   expect(res.body.reason).toBe('KEY_UNREADABLE');
 });
+
+it('tells the page whether the user may switch AI for everyone', async () => {
+  expect((await request(app).get('/ai/connection')).body.data.canManage).toBe(false);
+  expect((await request(app).get('/ai/connection').set('x-test-role', 'ADMIN')).body.data.canManage).toBe(true);
+});
