@@ -120,3 +120,13 @@ it('speaks Czech', async () => {
   expect(await screen.findByText('Překládám Perex (1 z 2)')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Zrušit' })).toBeInTheDocument()
 })
+
+it('explains a provider failure in the admin language, not with the server text', async () => {
+  await setTestLanguage('cs')
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(sse([start, field('perex', 1), error('PROVIDER', 'perex')]))
+  renderDialog()
+  const alert = await screen.findByRole('alert')
+  expect(alert).toHaveTextContent('Překlad se nepodařil. Zkuste to znovu.')
+  expect(alert).toHaveTextContent('Zastaveno u pole Perex.')
+  expect(alert).not.toHaveTextContent('Server text')
+})

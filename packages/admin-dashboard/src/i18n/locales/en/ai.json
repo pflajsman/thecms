@@ -106,6 +106,7 @@
     "stoppedAt": "Stopped at {{field}}.",
     "cancel": "Cancel",
     "retry": "Try again",
-    "close": "Close"
+    "close": "Close",
+    "failed": "The translation failed. Try again."
   }
 }

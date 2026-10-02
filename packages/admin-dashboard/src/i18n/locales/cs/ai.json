@@ -107,6 +107,7 @@
     "stoppedAt": "Zastaveno u pole {{field}}.",
     "cancel": "Zrušit",
     "retry": "Zkusit znovu",
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "failed": "Překlad se nepodařil. Zkuste to znovu."
   }
 }

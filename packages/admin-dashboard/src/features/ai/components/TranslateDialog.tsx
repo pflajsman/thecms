@@ -82,7 +82,8 @@ export function TranslateDialog({ entryId, language, onDone, onExists, onClose }
     if (e.code === 'TRUNCATED' && field) return t('translate.truncated', { field })
     if (e.code === 'VERSION_EXISTS') return t('translate.exists', { language: language.name })
     const key = aiErrorKey(e.code)
-    return key ? t(`errors.${key}`) : e.message
+    // Server texts are English: a failure without its own explanation gets the general one.
+    return key ? t(`errors.${key}`) : t('translate.failed')
   }
   const canRetry = !!error && (RETRY_CODES.includes(error.code) || !NO_RETRY_CODES.includes(error.code))
   const settingsKey = error ? aiErrorKey(error.code) : null
