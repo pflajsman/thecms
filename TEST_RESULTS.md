@@ -553,3 +553,21 @@ Environment: local mongod and Azurite; worktree backend (port 3100) on a throwaw
 | 360px (iframe): shop, product, cart, checkout, order and terms pages have no horizontal scroll | Pass |
 | Console errors | None |
 | Payment QR scanned with a banking app | Not scanned yet (PNG rendered, waiting for the scan) |
+
+## AI assistant Plan 1 verification (2026-10-02)
+
+Environment: local mongod; worktree backend (port 3100) on a throwaway copy of the local database (dropped afterwards) with a generated `AI_KEY_SECRET`; a small fake OpenAI-compatible service on port 11500 that streams four chunks and a usage chunk. Ollama was not running on the machine, so no real local model was tried; nothing was installed.
+
+| Check | Result |
+|---|---|
+| Backend tests (222), type check | Pass |
+| `GET /ai/connection` before connecting: `available: true`, `enabled: true`, `connection: null` | Pass |
+| Connect `openai-compatible` with `http://localhost:11500/v1/` (no key): test call made, saved as `http://localhost:11500/v1`, no key hint | Pass |
+| `POST /ai/generate` (rewrite, Czech): four `delta` events arrive about 150 ms apart, then `done` with 42 input and 4 output tokens | Pass |
+| Connect Claude with a made-up key: Anthropic refused it, answer `400 AUTH` "The AI service refused the key", nothing saved; the key does not appear in the server log | Pass |
+| `ftp://` base URL: `400 BASE_URL` | Pass |
+| Fake service stopped: `event: error` with `UNREACHABLE` | Pass |
+| Usage after two requests: 2 requests, 42 input, 4 output tokens | Pass |
+| `DELETE /ai/connection`: `connection: null` | Pass |
+
+Production: add `AI_KEY_SECRET` (for example `openssl rand -base64 32`) to the App Service settings before AI can be used; without it the AI features stay off.
