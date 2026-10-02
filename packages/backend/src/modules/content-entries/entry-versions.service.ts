@@ -7,7 +7,7 @@ import { WebhookService } from '../../services/webhook.service';
 import { AppError } from '../../middleware/error.middleware';
 import { LanguagesService } from '../languages/languages.service';
 import { sharedFieldNames } from '../../utils/localized';
-import { resolveTitleField } from '../../utils/entryTitle';
+import { computeEntryTitle, resolveTitleField } from '../../utils/entryTitle';
 import type { FieldDefinition } from '../../types/field-types';
 
 /**
@@ -122,17 +122,29 @@ export async function listVersions(entryId: string): Promise<EntryVersionSummary
     .sort((a, b) => (order.get(a.language) ?? Number.MAX_SAFE_INTEGER) - (order.get(b.language) ?? Number.MAX_SAFE_INTEGER));
 }
 
-/** New DRAFT version in `language`, copied from the given version. */
-export async function createVersion(entryId: string, language: string, userId?: string): Promise<IContentEntry> {
+/** New DRAFT version in `language`, copied from the given version; `overrides.data` replaces copied values (a translation). */
+export async function createVersion(
+  entryId: string,
+  language: string,
+  userId?: string,
+  overrides?: { data?: Record<string, unknown> }
+): Promise<IContentEntry> {
   const source = await loadVersion(entryId);
   await LanguagesService.assertExists(language);
   await assertLanguageFree(source.itemId, language);
+  let data = source.data;
+  let title = source.title;
+  if (overrides?.data) {
+    data = { ...source.data, ...overrides.data };
+    const type = await ContentTypeModel.findById(source.contentTypeId).select('fields titleField').lean();
+    if (type) title = computeEntryTitle(data, type.fields, type.titleField);
+  }
   const version = await ContentEntryModel.create({
     contentTypeId: source.contentTypeId,
     itemId: source.itemId,
     language,
-    data: source.data,
-    title: source.title,
+    data,
+    title,
     status: ContentStatus.DRAFT,
     createdBy: userId,
     updatedBy: userId,

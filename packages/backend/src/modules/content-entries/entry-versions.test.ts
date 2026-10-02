@@ -4,7 +4,7 @@ jest.mock('../../services/webhook.service', () => ({
 
 import { useTestDb } from '../../test/db';
 import { ContentTypeModel } from '../../models/content-type.model';
-import { ContentEntryModel } from '../../models/content-entry.model';
+import { ContentEntryModel, ContentStatus } from '../../models/content-entry.model';
 import { LanguageModel } from '../../models/language.model';
 import { FieldType } from '../../types/field-types';
 import { ContentEntriesService } from './content-entries.service';
@@ -114,4 +114,14 @@ describe('review fixes', () => {
     const found = await ContentEntriesService.getEntryById(String(en.itemId));
     expect(String(found?._id)).toBe(String(cs._id));
   });
+});
+
+it('a new version can take translated values in place of the copied ones', async () => {
+  const { en } = await twoVersions();
+  await LanguageModel.create({ code: 'de', name: 'Deutsch', isDefault: false, order: 2 });
+  const de = await createVersion(String(en._id), 'de', undefined, { data: { title: 'Über die Hügel' } });
+  expect(de.data).toEqual({ title: 'Über die Hügel', km: 10 });
+  expect(de.title).toBe('Über die Hügel');
+  expect(de.status).toBe(ContentStatus.DRAFT);
+  expect((await ContentEntryModel.findById(en._id).lean())?.title).toBe('Over the hills');
 });
