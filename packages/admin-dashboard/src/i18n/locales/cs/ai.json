@@ -64,5 +64,29 @@
     "AI_RATE_LIMIT": "Příliš mnoho AI požadavků. Počkejte minutu.",
     "BASE_URL": "Tato adresa není povolená.",
     "NETWORK": "Server není dostupný. Zkontrolujte připojení."
+  },
+  "menu": {
+    "open": "AI pro {{field}}",
+    "draft": "Napsat návrh",
+    "rewrite": "Přepsat srozumitelněji",
+    "shorten": "Zkrátit",
+    "expand": "Rozvést",
+    "fix": "Opravit pravopis a gramatiku",
+    "custom": "Vlastní pokyn",
+    "short": "AI"
+  },
+  "panel": {
+    "title": "Návrh AI pro {{field}}",
+    "writing": "Píšu…",
+    "instructionDraft": "Co má AI napsat?",
+    "instructionCustom": "Pokyn",
+    "run": "Vytvořit",
+    "use": "Použít",
+    "insertBelow": "Vložit pod",
+    "retry": "Znovu",
+    "discard": "Zahodit",
+    "truncated": "Odpověď byla useknuta na limitu délky.",
+    "empty": "AI nevrátila žádný text.",
+    "openSettings": "Nastavení AI asistenta"
   }
 }

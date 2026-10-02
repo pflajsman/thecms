@@ -63,5 +63,29 @@
     "AI_RATE_LIMIT": "Too many AI requests. Wait a minute.",
     "BASE_URL": "This address is not allowed.",
     "NETWORK": "Can't reach the server. Check your connection."
+  },
+  "menu": {
+    "open": "AI for {{field}}",
+    "draft": "Write a draft",
+    "rewrite": "Rewrite more clearly",
+    "shorten": "Shorten",
+    "expand": "Expand",
+    "fix": "Fix spelling and grammar",
+    "custom": "Own instruction",
+    "short": "AI"
+  },
+  "panel": {
+    "title": "AI suggestion for {{field}}",
+    "writing": "Writing…",
+    "instructionDraft": "What should AI write?",
+    "instructionCustom": "Instruction",
+    "run": "Create",
+    "use": "Use",
+    "insertBelow": "Insert below",
+    "retry": "Try again",
+    "discard": "Discard",
+    "truncated": "The answer was cut off at the length limit.",
+    "empty": "The AI returned no text.",
+    "openSettings": "AI assistant settings"
   }
 }
