@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api'
-import { AiRequestError, getAiStatus, streamGenerate, type GenerateRequest } from './ai-api'
+import { AiRequestError, getAiStatus, streamGenerate, streamTranslate, type GenerateRequest } from './ai-api'
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
 
@@ -78,4 +78,39 @@ it('treats only a refusal as "no AI" and lets other failures fail', async () => 
   expect(await getAiStatus()).toBeNull()
   vi.mocked(apiClient.get).mockRejectedValueOnce(Object.assign(new Error('500'), { isAxiosError: true, response: { status: 500 } }))
   await expect(getAiStatus()).rejects.toThrow('500')
+})
+
+describe('streamTranslate', () => {
+  const start = 'event: start\ndata: {"fields":[{"name":"title","label":"Title"},{"name":"body","label":"Body"}]}\n\n'
+  const field = (name: string, index: number) => `event: field\ndata: {"name":"${name}","index":${index},"total":2}\n\n`
+
+  it('reports the fields and progress, then resolves with the new version', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      stream([start, field('title', 1), field('bo', 0).slice(0, 10), field('body', 2).slice(10), 'event: done\ndata: {"versionId":"v1","inputTokens":40,"outputTokens":10}\n\n']),
+    )
+    const onStart = vi.fn()
+    const onField = vi.fn()
+    await expect(streamTranslate({ entryId: 'e1', language: 'en' }, { onStart, onField })).resolves.toEqual({ versionId: 'v1', inputTokens: 40, outputTokens: 10 })
+    expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/ai\/translate$/)
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ entryId: 'e1', language: 'en' })
+    expect(onStart).toHaveBeenCalledWith([{ name: 'title', label: 'Title' }, { name: 'body', label: 'Body' }])
+    expect(onField.mock.calls).toEqual([['title', 1], ['body', 2]])
+  })
+
+  it('rejects with the code and field of an error event', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(stream([start, 'event: error\ndata: {"code":"TOO_LONG","message":"Perex is too long","field":"perex"}\n\n']))
+    const error = await streamTranslate({ entryId: 'e1', language: 'en' }, { onStart: vi.fn(), onField: vi.fn() }).catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(AiRequestError)
+    expect(error).toMatchObject({ code: 'TOO_LONG', field: 'perex' })
+  })
+
+  it('uses the reason of a refused request', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ success: false, error: 'exists', reason: 'VERSION_EXISTS' }), { status: 409 }))
+    await expect(streamTranslate({ entryId: 'e1', language: 'en' }, { onStart: vi.fn(), onField: vi.fn() })).rejects.toMatchObject({ code: 'VERSION_EXISTS' })
+  })
+
+  it('rejects when the stream ends early', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(stream([start, field('title', 1)]))
+    await expect(streamTranslate({ entryId: 'e1', language: 'en' }, { onStart: vi.fn(), onField: vi.fn() })).rejects.toMatchObject({ code: 'PROVIDER' })
+  })
 })

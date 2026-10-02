@@ -41,13 +41,32 @@ export interface GenerateResult {
   truncated?: boolean
 }
 
+export interface TranslateRequest {
+  entryId: string
+  language: string
+}
+
+export interface TranslateField {
+  name: string
+  label: string
+}
+
+export interface TranslateResult {
+  versionId: string
+  inputTokens: number
+  outputTokens: number
+}
+
 export class AiRequestError extends Error {
   code: string
+  /** The field an error event named, when one caused it. */
+  field?: string
 
-  constructor(code: string, message: string) {
+  constructor(code: string, message: string, field?: string) {
     super(message)
     this.name = 'AiRequestError'
     this.code = code
+    this.field = field
   }
 }
 
@@ -82,33 +101,37 @@ function refusedCode(status: number, reason: unknown, details: unknown): string 
   return 'PROVIDER'
 }
 
-/**
- * Streams the answer of POST /ai/generate. `onText` gets the whole text so far after each piece.
- * Rejects with AiRequestError for refused requests and error events; an abort is rethrown as is.
- */
-export async function streamGenerate(body: GenerateRequest, options: { signal?: AbortSignal; onText: (text: string) => void }): Promise<GenerateResult> {
+type Payload = Record<string, unknown>
+const str = (value: unknown) => (typeof value === 'string' ? value : undefined)
+const num = (value: unknown) => (typeof value === 'number' ? value : 0)
+
+/** POSTs to an AI endpoint that answers with server-sent events; refused requests reject with AiRequestError. */
+async function postStream(path: string, body: unknown, signal?: AbortSignal): Promise<ReadableStream<Uint8Array>> {
   const authorization = await authorizationHeader()
   let res: Response
   try {
-    res = await fetch(`${API_BASE_URL}/ai/generate`, {
+    res = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
-      signal: options.signal,
+      signal,
       headers: { 'Content-Type': 'application/json', ...(authorization ? { Authorization: authorization } : {}) },
       body: JSON.stringify(body),
     })
   } catch (error) {
-    if (options.signal?.aborted) throw error
+    if (signal?.aborted) throw error
     throw new AiRequestError('NETWORK', 'The server cannot be reached')
   }
   if (!res.ok || !res.body) {
     const data = (await res.json().catch(() => ({}))) as { error?: unknown; reason?: unknown; details?: unknown }
     throw new AiRequestError(refusedCode(res.status, data.reason, data.details), typeof data.error === 'string' ? data.error : `HTTP ${res.status}`)
   }
+  return res.body
+}
 
-  const reader = res.body.getReader()
+/** Reads events until `onEvent` returns a result; an `error` event rejects with its code, message and field. */
+async function readEvents<T>(stream: ReadableStream<Uint8Array>, onEvent: (event: string, payload: Payload) => T | undefined): Promise<T> {
+  const reader = stream.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
-  let text = ''
   for (;;) {
     const { value, done } = await reader.read()
     if (done) break
@@ -121,16 +144,43 @@ export async function streamGenerate(body: GenerateRequest, options: { signal?: 
       const event = /^event: (.+)$/m.exec(block)?.[1]
       const data = /^data: (.+)$/m.exec(block)?.[1]
       if (!event || !data) continue
-      const payload = JSON.parse(data) as { text?: string; inputTokens?: number; outputTokens?: number; truncated?: boolean; code?: string; message?: string }
-      if (event === 'delta') {
-        text += payload.text ?? ''
-        options.onText(text)
-      } else if (event === 'done') {
-        return { text, inputTokens: payload.inputTokens ?? 0, outputTokens: payload.outputTokens ?? 0, ...(payload.truncated ? { truncated: true } : {}) }
-      } else if (event === 'error') {
-        throw new AiRequestError(payload.code ?? 'PROVIDER', payload.message ?? 'The AI request failed')
-      }
+      const payload = JSON.parse(data) as Payload
+      if (event === 'error') throw new AiRequestError(str(payload.code) ?? 'PROVIDER', str(payload.message) ?? 'The AI request failed', str(payload.field))
+      const result = onEvent(event, payload)
+      if (result !== undefined) return result
     }
   }
   throw new AiRequestError('PROVIDER', 'The answer ended early')
+}
+
+/**
+ * Streams the answer of POST /ai/generate. `onText` gets the whole text so far after each piece.
+ * Rejects with AiRequestError for refused requests and error events; an abort is rethrown as is.
+ */
+export async function streamGenerate(body: GenerateRequest, options: { signal?: AbortSignal; onText: (text: string) => void }): Promise<GenerateResult> {
+  const stream = await postStream('/ai/generate', body, options.signal)
+  let text = ''
+  return readEvents<GenerateResult>(stream, (event, payload) => {
+    if (event === 'delta') {
+      text += str(payload.text) ?? ''
+      options.onText(text)
+    } else if (event === 'done') {
+      return { text, inputTokens: num(payload.inputTokens), outputTokens: num(payload.outputTokens), ...(payload.truncated ? { truncated: true } : {}) }
+    }
+    return undefined
+  })
+}
+
+/** Streams POST /ai/translate: the field list, progress per field, then the new version's id. */
+export async function streamTranslate(
+  body: TranslateRequest,
+  options: { signal?: AbortSignal; onStart: (fields: TranslateField[]) => void; onField: (name: string, index: number) => void },
+): Promise<TranslateResult> {
+  const stream = await postStream('/ai/translate', body, options.signal)
+  return readEvents<TranslateResult>(stream, (event, payload) => {
+    if (event === 'start') options.onStart(Array.isArray(payload.fields) ? (payload.fields as TranslateField[]) : [])
+    else if (event === 'field') options.onField(str(payload.name) ?? '', num(payload.index))
+    else if (event === 'done') return { versionId: str(payload.versionId) ?? '', inputTokens: num(payload.inputTokens), outputTokens: num(payload.outputTokens) }
+    return undefined
+  })
 }
