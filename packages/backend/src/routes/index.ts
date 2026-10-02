@@ -13,6 +13,7 @@ import languagesRoutes from '../modules/languages/languages.routes';
 import commerceRoutes from '../modules/commerce/commerce.routes';
 import aiRoutes from '../modules/ai/ai.routes';
 import tokensRoutes from '../modules/tokens/tokens.routes';
+import mcpRoutes from '../modules/mcp/mcp.routes';
 
 const router: IRouter = Router();
 
@@ -31,5 +32,6 @@ router.use('/languages', languagesRoutes);
 router.use('/commerce', commerceRoutes);
 router.use('/ai', aiRoutes);
 router.use('/tokens', tokensRoutes);
+router.use('/mcp', mcpRoutes);
 
 export { router as apiRoutes };
