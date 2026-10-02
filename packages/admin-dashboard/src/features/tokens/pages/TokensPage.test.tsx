@@ -136,3 +136,20 @@ it('speaks Czech', async () => {
   expect(screen.getByRole('button', { name: 'Vytvořit token' })).toBeInTheDocument()
   expect(screen.getByText('Zatím nemáte žádný token.')).toBeInTheDocument()
 })
+
+it('moves focus to the new token so it is not missed', async () => {
+  renderRoutes(routes, { route: '/account/tokens' })
+  await userEvent.type(await screen.findByLabelText('Name'), 'Laptop')
+  await userEvent.click(screen.getByRole('button', { name: 'Create token' }))
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Your new token' })).toHaveFocus())
+})
+
+it('uses a Czech word for revoking that differs from Cancel', async () => {
+  await setTestLanguage('cs')
+  stored = [item({ id: 't1', name: 'Notebook' })]
+  renderRoutes(routes, { route: '/account/tokens' })
+  await userEvent.click(await screen.findByRole('button', { name: 'Odvolat Notebook' }))
+  const dialog = await screen.findByRole('alertdialog')
+  expect(within(dialog).getByRole('button', { name: 'Odvolat token' })).toBeInTheDocument()
+  expect(within(dialog).getByRole('heading')).toHaveTextContent('Odvolat tento token?')
+})

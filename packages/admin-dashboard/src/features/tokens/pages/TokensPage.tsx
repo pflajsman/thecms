@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { Copy, KeyRound } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -57,6 +57,11 @@ export function TokensPage() {
   const [created, setCreated] = useState<CreatedToken | null>(null)
   const [revoking, setRevoking] = useState<AccessToken | null>(null)
   const busy = useRef(false)
+  const createdHeading = useRef<HTMLHeadingElement>(null)
+  // The token is shown only once: move focus to it so keyboard and screen-reader users notice it.
+  useEffect(() => {
+    if (created) createdHeading.current?.focus()
+  }, [created])
 
   if (tokens.isPending) return <Skeleton className="h-40 w-full" />
   if (tokens.isError && !tokens.data) return <ErrorState message={t('loadError')} onRetry={() => void tokens.refetch()} />
@@ -100,7 +105,9 @@ export function TokensPage() {
 
       {created && (
         <section aria-label={t('created.title')} className="space-y-3 rounded-lg border border-primary/40 bg-primary/5 p-4">
-          <h2 className="font-medium">{t('created.title')}</h2>
+          <h2 ref={createdHeading} tabIndex={-1} className="font-medium outline-none">
+            {t('created.title')}
+          </h2>
           <p className="text-sm font-medium text-amber-700 dark:text-amber-400">{t('created.once')}</p>
           <CopyRow label={t('created.token')} value={created.token} />
           <CopyRow label={t('created.command')} value={mcpCommand(created.token)} multiline />
