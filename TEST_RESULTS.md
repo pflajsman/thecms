@@ -635,3 +635,16 @@ Environment: local mongod; worktree backend (port 3100) on a throwaway copy of t
 | `create_language_version` to `cs`: DRAFT with the Czech title and `km` copied; the item has 2 versions | Pass |
 | Wrong token: `401` with JSON-RPC error `-32001` | Pass |
 | Server log: one line per tool call (`mcp <prefix> <tool> ok` or `error 409`); the full token does not appear | Pass |
+
+## AI MCP Plan 2 verification (2026-10-02)
+
+Environment: local mongod; worktree backend (port 3100) on a throwaway copy of the local database (`thecms_mcpcheck`, dropped afterwards); worktree admin (port 5175). The Copy buttons were checked against a stand-in clipboard inside the page, so the real clipboard was not touched, and the token value was never printed. The MCP calls were made from the page with `fetch` (JSON-RPC `tools/call`). The window could not be resized, so the 360px check used a 360px frame of the same page.
+
+| Check | Result |
+|---|---|
+| Admin tests (828), lint (0 problems), build | Pass |
+| User menu "Access tokens" opens `/account/tokens`; what a token allows; "You have no tokens yet." | Pass |
+| Create "Live check", 30 days: token in the `tcms_pat_` format, command with `http://localhost:3100/api/v1/mcp`, both Copy buttons copy the right text, "It will not be shown again"; after Done the token is no longer in the page; the list shows the prefix, "Never used", "Expires 1 Nov 2026" | Pass |
+| The token calls `list_languages` on `/api/v1/mcp` (200); after a reload the list shows "Last used 2 Oct 2026" | Pass |
+| Revoke with confirmation ("Agents using "Live check" will lose access right away."): the token disappears; the same token now gets 401 | Pass |
+| Czech: "Přístupové tokeny", "Vytvořit token", "Váš nový token", "Znovu už se nezobrazí", "Kopírovat", "Hotovo"; at 360px the page is 345px wide with no horizontal scroll and the token box stays inside | Pass |
