@@ -604,3 +604,19 @@ Environment: local mongod; worktree backend (port 3100) on a throwaway copy of t
 | New version: `en`, `DRAFT`, same item, title `[EN] Šumava`, body `<p>[EN] Les a <a href="https://sumava.cz">park</a></p>` (script removed, link kept), number 12 copied | Pass |
 | Second call: `409` with `reason: VERSION_EXISTS` | Pass |
 | Usage: 1 request, 40 input, 10 output tokens | Pass |
+
+## AI translate Plan 2 verification (2026-10-02)
+
+Environment: local mongod; worktree backend (port 3100) on a throwaway copy of the local database (`thecms_translatecheck`, dropped afterwards) with a generated `AI_KEY_SECRET`; worktree admin (port 5175); a fake OpenAI-compatible service on port 11500 that answers `[EN] <text>` (for HTML it prefixes each paragraph and appends a `<script>`), later restarted with a 3 second delay per field. The browser's dev user was connected to the fake service with the same request the AI settings page sends. The window could not be resized, so the 360px check used a 360px frame of the same page.
+
+| Check | Result |
+|---|---|
+| Admin tests (809), lint (0 problems), build | Pass |
+| Czech entry (title, perex, rich text, number): the switcher lists "Translate to English", "Translate to English with AI" and the same for Deutsch | Pass |
+| AI item: dialog "Translating to English", progress "Translating Název (1 of 3)" up to 3 of 3, then the editor opens the new English draft with "Translated draft created. Review it before publishing." | Pass |
+| Draft content: `[EN] Přes Šumavu`, `[EN] Byli jsme na Šumavě.`, `<p>[EN] Les a <strong>jezero</strong>.</p>` (script removed, bold kept), distance 42 copied | Pass |
+| Unsaved change: both Deutsch items disabled, "Save your changes before translating" shown | Pass |
+| Cancel during the first field (slow fake service): dialog closes, the entry still has only `en` and `cs` | Pass |
+| Fake service stopped: "The AI service can't be reached..." and "Stopped at Název.", the field marked Failed, Try again and Close | Pass |
+| Czech admin: "Přeložit pomocí AI: Deutsch", "Překládám do jazyka Deutsch", "Zastaveno u pole Název.", "Zkusit znovu" | Pass |
+| 360px frame: dialog from 24 to 336px, no element overflows, page width 360 | Pass |
