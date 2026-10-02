@@ -96,10 +96,12 @@ export const AiService = {
     await requireEnabled();
     const connection = await AiConnectionModel.findOne({ userId });
     if (!connection) throw new AppError('Connect an AI service first', 409, { reason: 'NOT_CONNECTED' });
+    // Checked again on every use: the rule or the setting may have changed since the URL was saved.
+    const baseUrl = connection.provider === 'openai-compatible' ? await checkBaseUrl(connection.baseUrl ?? '') : undefined;
     return createProvider({
       provider: connection.provider,
       model: connection.model,
-      baseUrl: connection.baseUrl,
+      baseUrl,
       apiKey: connection.key ? decryptKey(connection.key) : undefined,
     });
   },

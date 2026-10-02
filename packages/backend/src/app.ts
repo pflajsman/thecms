@@ -26,6 +26,8 @@ app.use(cors({
 }));
 
 // Body parsing middleware
+// AI requests carry a whole article as context; the backend trims it, so allow more than the default 100 kB.
+app.use('/api/v1/ai/generate', express.json({ limit: '2mb' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

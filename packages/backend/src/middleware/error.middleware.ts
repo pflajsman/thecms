@@ -13,6 +13,11 @@ export const errorMiddleware = (
   res: Response,
   _next: NextFunction
 ) => {
+  // A request body over the parser limit.
+  if ((err as { type?: string }).type === 'entity.too.large') {
+    res.status(413).json({ success: false, error: 'The request is too large', reason: 'TOO_LONG', timestamp: new Date().toISOString() });
+    return;
+  }
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 

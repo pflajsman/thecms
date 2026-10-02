@@ -18,7 +18,11 @@ export function anthropic(options: Options): AiProvider {
         );
         stream.on('text', (text) => onText(text));
         const final = await stream.finalMessage();
-        return { inputTokens: final.usage.input_tokens, outputTokens: final.usage.output_tokens };
+        return {
+          inputTokens: final.usage.input_tokens,
+          outputTokens: final.usage.output_tokens,
+          ...(final.stop_reason === 'max_tokens' ? { truncated: true } : {}),
+        };
       } catch (error) {
         if (signal.aborted) throw error;
         if (error instanceof Anthropic.APIError && typeof error.status === 'number') throw errorForStatus(error.status, scrub(error.message, options.apiKey));

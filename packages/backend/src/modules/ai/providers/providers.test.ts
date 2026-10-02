@@ -64,6 +64,29 @@ describe('OpenAI-compatible adapter', () => {
   });
 });
 
+describe('OpenAI-compatible adapter, failures inside a stream', () => {
+  it('does not follow redirects', async () => {
+    const { fn, calls } = fakeFetch(new Response(null, { status: 302, headers: { Location: 'http://127.0.0.1/internal' } }));
+    const error = await openAiCompatible({ baseUrl: 'https://x.test/v1', model: 'm', fetch: fn }).stream(prompt, new AbortController().signal, () => {}).catch((e: unknown) => e);
+    expect(calls[0].init.redirect).toBe('manual');
+    expect(error).toMatchObject({ code: 'PROVIDER' });
+  });
+
+  it('fails on an error chunk instead of ending as if complete', async () => {
+    const { fn } = fakeFetch(sseResponse(['data: {"choices":[{"delta":{"content":"Půl"}}]}', '', 'data: {"error":{"message":"Upstream provider failed"}}', '']));
+    const texts: string[] = [];
+    const error = await openAiCompatible({ baseUrl: 'http://x/v1', model: 'm', fetch: fn }).stream(prompt, new AbortController().signal, (t) => texts.push(t)).catch((e: unknown) => e);
+    expect(texts).toEqual(['Půl']);
+    expect(error).toMatchObject({ code: 'PROVIDER', message: expect.stringContaining('Upstream provider failed') });
+  });
+
+  it('marks an answer cut off at the token cap', async () => {
+    const { fn } = fakeFetch(sseResponse(['data: {"choices":[{"delta":{"content":"Dlouhý"},"finish_reason":"length"}]}', '', 'data: [DONE]']));
+    const usage = await openAiCompatible({ baseUrl: 'http://x/v1', model: 'm', fetch: fn }).stream(prompt, new AbortController().signal, () => {});
+    expect(usage.truncated).toBe(true);
+  });
+});
+
 describe('Anthropic adapter', () => {
   it('streams text deltas and reports input and output tokens', async () => {
     const { fn, calls } = fakeFetch(
@@ -84,7 +107,7 @@ describe('Anthropic adapter', () => {
         'data: {"type":"content_block_stop","index":0}',
         '',
         'event: message_delta',
-        'data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":5}}',
+        `data: {"type":"message_delta","delta":{"stop_reason":"${'end_turn'}","stop_sequence":null},"usage":{"output_tokens":5}}`,
         '',
         'event: message_stop',
         'data: {"type":"message_stop"}',
@@ -108,5 +131,32 @@ describe('Anthropic adapter', () => {
       .catch((e: unknown) => e);
     expect(error).toMatchObject({ code: 'AUTH' });
     expect((error as Error).message).not.toContain('sk-ant-secret-1234');
+  });
+
+  it('marks an answer cut off at max_tokens', async () => {
+    const { fn } = fakeFetch(
+      sseResponse([
+        'event: message_start',
+        'data: {"type":"message_start","message":{"id":"m","type":"message","role":"assistant","model":"claude-sonnet-5","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":3,"output_tokens":1}}}',
+        '',
+        'event: content_block_start',
+        'data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}',
+        '',
+        'event: content_block_delta',
+        'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Dlouhý"}}',
+        '',
+        'event: content_block_stop',
+        'data: {"type":"content_block_stop","index":0}',
+        '',
+        'event: message_delta',
+        'data: {"type":"message_delta","delta":{"stop_reason":"max_tokens","stop_sequence":null},"usage":{"output_tokens":50}}',
+        '',
+        'event: message_stop',
+        'data: {"type":"message_stop"}',
+        '',
+      ])
+    );
+    const usage = await anthropic({ apiKey: 'k', model: 'claude-sonnet-5', fetch: fn }).stream(prompt, new AbortController().signal, () => {});
+    expect(usage).toEqual({ inputTokens: 3, outputTokens: 50, truncated: true });
   });
 });

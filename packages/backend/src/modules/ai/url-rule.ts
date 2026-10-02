@@ -6,15 +6,26 @@ const PRIVATE = 'Addresses on this machine or a private network are not allowed 
 
 const bad = (message: string) => new AppError(message, 400, { reason: 'BASE_URL' });
 
-/** Loopback, private, link-local, carrier-grade NAT and unique-local addresses. */
+// Addresses a base URL must not reach in production, written as the URL parser normalises them.
+// One list per family: a single BlockList also matches IPv4 addresses against the IPv6 rules.
+const blockedV4 = new net.BlockList();
+const blockedV6 = new net.BlockList();
+for (const [network, prefix] of [
+  ['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127.0.0.0', 8], ['169.254.0.0', 16], ['172.16.0.0', 12],
+  ['192.0.0.0', 24], ['192.168.0.0', 16], ['198.18.0.0', 15], ['224.0.0.0', 4], ['240.0.0.0', 4],
+] as const) blockedV4.addSubnet(network, prefix, 'ipv4');
+for (const [network, prefix] of [
+  ['::', 96], // unspecified, loopback and IPv4-compatible (::a.b.c.d)
+  ['::ffff:0:0', 96], // IPv4-mapped
+  ['64:ff9b::', 96], // NAT64
+  ['fc00::', 7], ['fe80::', 10], ['ff00::', 8],
+] as const) blockedV6.addSubnet(network, prefix, 'ipv6');
+
+/** Loopback, private, link-local, carrier-grade NAT, multicast, reserved, and their IPv6 mapped forms. */
 export function isPrivateAddress(ip: string): boolean {
-  if (net.isIPv4(ip)) {
-    const [a, b] = ip.split('.').map(Number);
-    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
-  }
-  const v6 = ip.toLowerCase();
-  if (v6.startsWith('::ffff:')) return isPrivateAddress(v6.slice(7));
-  return v6 === '::' || v6 === '::1' || /^f[cd]/.test(v6) || /^fe[89ab]/.test(v6);
+  if (net.isIPv4(ip)) return blockedV4.check(ip, 'ipv4');
+  if (net.isIPv6(ip)) return blockedV6.check(ip, 'ipv6');
+  return true;
 }
 
 type Lookup = (host: string) => Promise<{ address: string; family: number }[]>;

@@ -29,3 +29,9 @@ it('refuses localhost, private IPs and names resolving to private addresses in p
 it('allows private addresses in production when AI_ALLOW_PRIVATE_URLS is true', async () => {
   expect(await checkBaseUrl('http://10.0.0.5/v1', { NODE_ENV: 'production', AI_ALLOW_PRIVATE_URLS: 'true' } as NodeJS.ProcessEnv)).toBe('http://10.0.0.5/v1');
 });
+
+it('refuses mapped, compatible, NAT64, multicast and reserved forms as the URL parser writes them', async () => {
+  for (const url of ['http://[::ffff:127.0.0.1]/v1', 'http://[::ffff:169.254.169.254]/', 'http://[::127.0.0.1]/', 'http://[64:ff9b::a9fe:a9fe]/', 'http://224.0.0.1/', 'http://240.0.0.1/', 'http://198.18.0.1/', 'http://2130706433/']) {
+    await expect([url, await checkBaseUrl(url, prod).catch((e: { details?: unknown }) => e.details)]).toEqual([url, { reason: 'BASE_URL' }]);
+  }
+});

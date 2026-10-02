@@ -15,6 +15,7 @@ import request from 'supertest';
 import { useTestDb } from '../../test/db';
 import { errorMiddleware } from '../../middleware/error.middleware';
 import { AiProviderError, createProvider } from './providers';
+import { AiConnectionModel } from '../../models/ai-connection.model';
 import aiRoutes from './ai.routes';
 
 useTestDb();
@@ -127,4 +128,28 @@ it('aborts the provider call when the client goes away', async () => {
   await new Promise((resolve) => setTimeout(resolve, 50));
   server.close();
   expect((await request(app).get('/ai/connection')).body.data.usage.requests).toBe(1);
+});
+
+it('checks a stored base URL again before every request', async () => {
+  await AiConnectionModel.create({ userId: 'user-a', provider: 'openai-compatible', model: 'm', baseUrl: 'http://127.0.0.1:9/v1' });
+  const previous = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const res = await request(app).post('/ai/generate').send(body);
+    expect(res.status).toBe(400);
+    expect(res.body.reason).toBe('BASE_URL');
+    expect(streamMock).not.toHaveBeenCalled();
+  } finally {
+    process.env.NODE_ENV = previous;
+  }
+});
+
+it('tells the client when the answer was cut off', async () => {
+  await connect();
+  streamMock.mockImplementation(async (_p: unknown, _s: AbortSignal, onText: (t: string) => void) => {
+    onText('Dlouhý');
+    return { inputTokens: 1, outputTokens: 3000, truncated: true };
+  });
+  const res = await request(app).post('/ai/generate').send(body);
+  expect(events(res.text).at(-1)).toEqual({ event: 'done', data: { inputTokens: 1, outputTokens: 3000, truncated: true } });
 });

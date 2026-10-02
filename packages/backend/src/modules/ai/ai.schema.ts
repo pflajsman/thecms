@@ -23,7 +23,8 @@ export const generateBody = z
     context: z.object({
       contentType: z.string().max(200),
       language: z.string().max(20),
-      fields: z.array(z.object({ label: z.string().max(200), value: z.string().max(100_000) })).max(50),
+      // Context values are cut to 1,000 characters in the prompt; this keeps the whole body under the 2 MB parser limit.
+      fields: z.array(z.object({ label: z.string().max(200), value: z.string().max(20_000) })).max(50),
     }),
   })
   .refine((b) => (b.action !== 'draft' && b.action !== 'custom') || !!b.instruction, { message: 'This action needs an instruction', path: ['instruction'] });

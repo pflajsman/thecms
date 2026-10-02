@@ -7,6 +7,8 @@ export interface PromptInput {
 export interface Usage {
   inputTokens: number;
   outputTokens: number;
+  /** The answer stopped at the token cap. */
+  truncated?: boolean;
 }
 
 /** One AI service. `stream` calls `onText` for each piece of the answer and resolves with the token usage (0 when unknown). */
