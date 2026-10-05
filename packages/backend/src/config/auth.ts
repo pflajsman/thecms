@@ -42,3 +42,20 @@ export function getOpenIdConfigUrl(): string {
 export function isDevMode(): boolean {
   return isDev;
 }
+
+/**
+ * Superadmins from SUPERADMINS (comma separated). Each entry is an Entra subject id or an email address.
+ * Prefer subject ids in production: they cannot be claimed by another account.
+ */
+export function isSuperadminIdentity(identity: { sub: string; email?: string }): boolean {
+  const entries = (process.env.SUPERADMINS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return entries.includes(identity.sub.toLowerCase()) || (!!identity.email && entries.includes(identity.email.toLowerCase()));
+}
+
+/** Where the admin dashboard runs, for links in emails. */
+export function adminUrl(): string {
+  return (process.env.ADMIN_URL || 'http://localhost:5173').replace(/\/$/, '');
+}

@@ -1,8 +1,10 @@
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { Schema, type Document, type Types } from 'mongoose';
 
 /** A personal access token for MCP. Only the hash is stored; the token is shown once. */
 export interface IAccessToken extends Document {
   userId: string;
+  /** The project the token works in. */
+  projectId?: Types.ObjectId;
   name: string;
   hash: string;
   prefix: string;
@@ -14,6 +16,7 @@ export interface IAccessToken extends Document {
 const AccessTokenSchema = new Schema<IAccessToken>(
   {
     userId: { type: String, required: true, index: true },
+    projectId: { type: Schema.Types.ObjectId, ref: 'Project', index: true },
     name: { type: String, required: true, trim: true, maxlength: 100 },
     hash: { type: String, required: true, unique: true },
     prefix: { type: String, required: true },

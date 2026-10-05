@@ -10,7 +10,9 @@ export interface IUser extends Document {
   entraId: string;
   email: string;
   displayName?: string;
+  /** @deprecated Read only by the projects migration; access comes from project memberships. */
   role: UserRole;
+  isSuperadmin: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,8 +27,7 @@ const userSchema = new Schema<IUser>(
     },
     email: {
       type: String,
-      required: true,
-      unique: true,
+      // Not unique: the same person may sign in with Google and with an email code, as two Entra accounts.
       lowercase: true,
       trim: true,
       index: true
@@ -38,8 +39,12 @@ const userSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: Object.values(UserRole),
-      default: UserRole.EDITOR,
+      default: UserRole.VIEWER,
       required: true
+    },
+    isSuperadmin: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -52,9 +57,5 @@ const userSchema = new Schema<IUser>(
     }
   }
 );
-
-// Create indexes
-userSchema.index({ email: 1 });
-userSchema.index({ entraId: 1 });
 
 export const User = mongoose.model<IUser>('User', userSchema);

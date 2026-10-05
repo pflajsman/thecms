@@ -3,19 +3,23 @@ import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
 import { AppError } from './error.middleware';
 import { User, UserRole } from '../models/user.model';
-import { getAuthConfig, isDevMode } from '../config/auth';
+import { getAuthConfig, isDevMode, isSuperadminIdentity } from '../config/auth';
+
+export interface AuthUser {
+  entraId: string;
+  email: string;
+  displayName?: string;
+  /** @deprecated Global role from before projects; use req.project.role. */
+  role: UserRole;
+  isSuperadmin: boolean;
+}
 
 export interface AuthRequest extends Request {
-  user?: {
-    entraId: string;
-    email: string;
-    displayName?: string;
-    role: UserRole;
-  };
+  user?: AuthUser;
 }
 
 // In-memory user cache to avoid DB lookup on every request
-const userCache = new Map<string, { user: { entraId: string; email: string; displayName?: string; role: UserRole }; expiresAt: number }>();
+const userCache = new Map<string, { user: AuthUser; expiresAt: number }>();
 const USER_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // JWKS client - lazily initialized on first real token validation
@@ -128,23 +132,28 @@ export const authMiddleware = async (
       return next();
     }
 
-    // Find or create user in database
+    // Find or create user in database. Signing in grants nothing: access comes from project memberships.
+    const isSuperadmin = isSuperadminIdentity({ sub, email });
     let user = await User.findOne({ entraId: sub }).lean();
 
     if (!user) {
-      user = await User.create({
+      user = (await User.create({
         entraId: sub,
         email: email,
         displayName: displayName,
-        role: UserRole.EDITOR,
-      });
+        role: UserRole.VIEWER,
+        isSuperadmin,
+      })).toObject();
+    } else if (!!user.isSuperadmin !== isSuperadmin) {
+      await User.updateOne({ entraId: sub }, { $set: { isSuperadmin } });
     }
 
-    const userData = {
+    const userData: AuthUser = {
       entraId: user.entraId,
       email: user.email,
       displayName: user.displayName,
       role: user.role,
+      isSuperadmin,
     };
 
     // Cache user data

@@ -14,6 +14,7 @@ import commerceRoutes from '../modules/commerce/commerce.routes';
 import aiRoutes from '../modules/ai/ai.routes';
 import tokensRoutes from '../modules/tokens/tokens.routes';
 import mcpRoutes from '../modules/mcp/mcp.routes';
+import { currentProjectRouter, invitationsRouter, invitesRouter, membersRouter, projectsRouter } from '../modules/projects/projects.routes';
 
 const router: IRouter = Router();
 
@@ -33,5 +34,10 @@ router.use('/commerce', commerceRoutes);
 router.use('/ai', aiRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/mcp', mcpRoutes);
+router.use('/projects', projectsRouter);
+router.use('/project', currentProjectRouter);
+router.use('/members', membersRouter);
+router.use('/invitations', invitationsRouter);
+router.use('/invites', invitesRouter);
 
 export { router as apiRoutes };
