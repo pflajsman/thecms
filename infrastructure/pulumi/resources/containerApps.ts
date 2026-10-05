@@ -169,6 +169,15 @@ export function createContainerApp(args: ContainerAppArgs) {
               name: "AZURE_ENTRA_CLIENT_ID",
               value: entraClientId,
             },
+            // Projects: who may create projects, and where invitation links point
+            {
+              name: "SUPERADMINS",
+              value: config.get("superadmins") || "",
+            },
+            {
+              name: "ADMIN_URL",
+              value: args.staticWebAppUrl ?? "http://localhost:5173",
+            },
             {
               name: "CORS_ORIGINS",
               value:
