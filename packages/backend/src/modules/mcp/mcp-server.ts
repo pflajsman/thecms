@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { UserRole } from '../../models/user.model';
+import { ProjectRole, hasRole } from '../../models/project-member.model';
 import { registerReadTools } from './read-tools';
 import { registerWriteTools } from './write-tools';
 import type { McpContext } from './tool';
@@ -11,6 +11,6 @@ export function createMcpServer(ctx: McpContext): McpServer {
     { instructions: 'TheCMS content. You can read content and create or edit drafts. Publishing and deleting are done by people in the admin.' }
   );
   registerReadTools(server, ctx);
-  if (ctx.user.role !== UserRole.VIEWER) registerWriteTools(server, ctx);
+  if (hasRole(ctx.role, ProjectRole.EDITOR)) registerWriteTools(server, ctx);
   return server;
 }

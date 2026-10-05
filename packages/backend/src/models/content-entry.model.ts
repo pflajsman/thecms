@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Content Entry status enum
@@ -12,7 +13,7 @@ export enum ContentStatus {
 /**
  * Content Entry document interface for Mongoose
  */
-export interface IContentEntry extends Document {
+export interface IContentEntry extends Document, TenantFields {
   contentTypeId: mongoose.Types.ObjectId;
   language: string;
   itemId: mongoose.Types.ObjectId;
@@ -123,6 +124,8 @@ ContentEntrySchema.pre('save', function (next) {
 /**
  * Content Entry Model
  */
+ContentEntrySchema.plugin(tenantScoped);
+
 export const ContentEntryModel = mongoose.model<IContentEntry>(
   'ContentEntry',
   ContentEntrySchema

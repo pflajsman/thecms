@@ -1,9 +1,10 @@
 import mongoose, { Schema, Types } from 'mongoose';
 import { useTestDb } from '../../test/db';
 import { tenantScoped } from './tenant-scoped';
-import { NoProjectContextError, runInProject, withoutProject } from '../../utils/project-context';
+import { NoProjectContextError, runInProject, setTestDefaultProject, withoutProject } from '../../utils/project-context';
 
 useTestDb();
+setTestDefaultProject(null);
 
 const schema = new Schema({ name: String, n: Number });
 schema.plugin(tenantScoped);

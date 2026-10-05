@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { mediaController } from './media.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { projectMiddleware, writesNeed } from '../../middleware/project.middleware';
+import { ProjectRole } from '../../models/project-member.model';
 import { upload } from '../../config/upload';
 
 /**
@@ -9,7 +11,7 @@ import { upload } from '../../config/upload';
 const router: IRouter = Router();
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(authMiddleware, projectMiddleware, writesNeed(ProjectRole.EDITOR));
 
 /**
  * @swagger

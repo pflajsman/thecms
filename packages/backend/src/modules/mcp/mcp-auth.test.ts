@@ -2,10 +2,11 @@ import request from 'supertest';
 import { app } from '../../app';
 import { useTestDb } from '../../test/db';
 import { connectMcp, result } from '../../test/mcp-client';
-import { User, UserRole } from '../../models/user.model';
+import { User } from '../../models/user.model';
+import { ProjectRole } from '../../models/project-member.model';
+import { memberWithToken } from '../../test/projects';
 import { AccessTokenModel } from '../../models/access-token.model';
 import { LanguageModel } from '../../models/language.model';
-import { TokensService } from '../tokens/tokens.service';
 
 useTestDb();
 
@@ -15,10 +16,7 @@ const post = (auth?: string) => {
   return (auth ? r.set('Authorization', auth) : r).send(initialize);
 };
 
-async function userWithToken(role = UserRole.EDITOR, entraId = 'user-a') {
-  await User.create({ entraId, email: `${entraId}@test.cz`, role });
-  return (await TokensService.create(entraId, { name: 'Test' })).token;
-}
+const userWithToken = (role = ProjectRole.EDITOR, entraId = 'user-a') => memberWithToken(entraId, role);
 
 beforeEach(async () => {
   await LanguageModel.create({ code: 'en', name: 'English', isDefault: true, order: 0 });
@@ -50,7 +48,7 @@ it('refuses missing, malformed, unknown, expired, revoked tokens and deleted own
   await AccessTokenModel.updateOne({}, { $unset: { expiresAt: '' } });
   await User.deleteOne({ entraId: 'user-a' });
   await refused(`Bearer ${token}`);
-  await User.create({ entraId: 'user-a', email: 'user-a@test.cz', role: UserRole.EDITOR });
+  await User.create({ entraId: 'user-a', email: 'user-a@test.cz' });
   await AccessTokenModel.deleteMany({});
   await refused(`Bearer ${token}`);
 });
@@ -84,8 +82,8 @@ it('logs each tool call with the token prefix and no content', async () => {
 it('limits requests per token', async () => {
   process.env.MCP_REQUESTS_PER_MINUTE = '2';
   try {
-    const a = await userWithToken(UserRole.EDITOR, 'user-a');
-    const b = await userWithToken(UserRole.EDITOR, 'user-b');
+    const a = await userWithToken(ProjectRole.EDITOR, 'user-a');
+    const b = await userWithToken(ProjectRole.EDITOR, 'user-b');
     expect((await post(`Bearer ${a}`)).status).toBe(200);
     expect((await post(`Bearer ${a}`)).status).toBe(200);
     const limited = await post(`Bearer ${a}`);

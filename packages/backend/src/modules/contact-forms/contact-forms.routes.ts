@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { contactFormsController } from './contact-forms.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { projectMiddleware, requireProjectRole, writesNeed } from '../../middleware/project.middleware';
+import { ProjectRole } from '../../models/project-member.model';
 import { validate } from '../../middleware/validation.middleware';
 import {
   createContactFormSchema,
@@ -18,11 +20,12 @@ import {
 const router: IRouter = Router();
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(authMiddleware, projectMiddleware, writesNeed(ProjectRole.EDITOR));
 
 // Form CRUD
 router.post(
   '/',
+  requireProjectRole(ProjectRole.ADMIN),
   validate(createContactFormSchema),
   (req, res, next) => contactFormsController.createForm(req, res, next)
 );
@@ -41,12 +44,14 @@ router.get(
 
 router.put(
   '/:id',
+  requireProjectRole(ProjectRole.ADMIN),
   validate(updateContactFormSchema),
   (req, res, next) => contactFormsController.updateForm(req, res, next)
 );
 
 router.delete(
   '/:id',
+  requireProjectRole(ProjectRole.ADMIN),
   validate(deleteContactFormSchema),
   (req, res, next) => contactFormsController.deleteForm(req, res, next)
 );

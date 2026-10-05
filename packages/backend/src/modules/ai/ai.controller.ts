@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { AuthRequest } from '../../middleware/auth.middleware';
-import { UserRole } from '../../models/user.model';
+import type { ProjectRequest } from '../../middleware/project.middleware';
+import { ProjectRole, hasRole } from '../../models/project-member.model';
 import { AiService } from './ai.service';
 import { AppError } from '../../middleware/error.middleware';
 import { createVersion } from '../content-entries/entry-versions.service';
@@ -11,7 +12,7 @@ import { planTranslation } from './translate.service';
 import { AiProviderError, type Usage } from './providers';
 
 const userId = (req: Request) => (req as AuthRequest).user!.entraId;
-const canManage = (req: Request) => (req as AuthRequest).user?.role === UserRole.ADMIN;
+const canManage = (req: Request) => hasRole((req as ProjectRequest).project!.role, ProjectRole.ADMIN);
 
 const FIELD_TIMEOUT_MS = 60_000;
 

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { SitesService } from '../modules/sites/sites.service';
 import { isValidApiKeyFormat } from '../utils/apiKey';
+import { runInProject, withoutProject } from '../utils/project-context';
 
 /**
  * Extend Request to include site information
@@ -43,8 +44,8 @@ export async function apiKeyMiddleware(
       return;
     }
 
-    // Look up site by API key
-    const site = await SitesService.getSiteByApiKey(apiKey);
+    // Look up site by API key; the site then decides the project for the rest of the request
+    const site = await withoutProject(() => SitesService.getSiteByApiKey(apiKey));
 
     if (!site) {
       res.status(401).json({
@@ -69,12 +70,14 @@ export async function apiKeyMiddleware(
     // Attach site to request for use in controllers
     req.site = site;
 
-    // Increment request count (fire and forget)
-    SitesService.incrementRequestCount(site._id).catch((err) => {
-      console.error('Failed to increment request count:', err);
-    });
+    runInProject(site.projectId, () => {
+      // Increment request count (fire and forget)
+      SitesService.incrementRequestCount(site._id).catch((err) => {
+        console.error('Failed to increment request count:', err);
+      });
 
-    next();
+      next();
+    });
   } catch (error) {
     console.error('API key validation error:', error);
     res.status(500).json({

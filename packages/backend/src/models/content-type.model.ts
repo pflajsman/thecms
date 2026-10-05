@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { FieldType, FieldDefinition } from '../types/field-types';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Content Type document interface for Mongoose
  */
-export interface IContentType extends Document {
+export interface IContentType extends Document, TenantFields {
   name: string;
   slug: string;
   description?: string;
@@ -97,7 +98,6 @@ const ContentTypeSchema = new Schema<IContentType>(
     slug: {
       type: String,
       required: [true, 'Slug is required'],
-      unique: true,
       trim: true,
       lowercase: true,
       match: [/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'],
@@ -138,7 +138,8 @@ const ContentTypeSchema = new Schema<IContentType>(
 );
 
 // Indexes
-ContentTypeSchema.index({ slug: 1 }, { unique: true });
+// Unique per project, checked in the service: Cosmos DB cannot add a unique index to a filled collection.
+ContentTypeSchema.index({ projectId: 1, slug: 1 });
 ContentTypeSchema.index({ createdAt: -1 });
 
 // Validate field names are unique within a content type
@@ -157,4 +158,6 @@ ContentTypeSchema.pre('save', function (next) {
 /**
  * Content Type Model
  */
+ContentTypeSchema.plugin(tenantScoped);
+
 export const ContentTypeModel = mongoose.model<IContentType>('ContentType', ContentTypeSchema);

@@ -7,6 +7,7 @@ import { ContentTypeModel } from '../models/content-type.model';
 import { ContentEntryModel } from '../models/content-entry.model';
 import { FieldType } from '../types/field-types';
 import { backfillEntryTitles } from './backfill-entry-titles';
+import { getTestDefaultProject } from '../utils/project-context';
 
 useTestDb();
 
@@ -18,6 +19,7 @@ it('fills titles for entries created before titles existed', async () => {
   });
   // Simulate a legacy document: insert without the title field.
   await ContentEntryModel.collection.insertOne({
+    projectId: getTestDefaultProject()!,
     contentTypeId: type._id,
     data: { title: 'Legacy post' },
     status: 'DRAFT',

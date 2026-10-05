@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { AppError } from '../../middleware/error.middleware';
 import { ProjectModel, type IProject, type ProjectStatus } from '../../models/project.model';
 import { ProjectMemberModel, ProjectRole } from '../../models/project-member.model';
+import { seedProject } from '../../utils/seed-project';
 
 export interface ProjectSummary {
   id: string;
@@ -58,6 +59,7 @@ export const ProjectsService = {
 
   async create(input: { name: string; createdBy: string }): Promise<ProjectSummary> {
     const project = await ProjectModel.create({ name: input.name, createdBy: input.createdBy });
+    await seedProject(String(project._id));
     return toSummary(project);
   },
 

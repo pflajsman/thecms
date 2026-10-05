@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Media document interface for Mongoose
  */
-export interface IMedia extends Document {
+export interface IMedia extends Document, TenantFields {
   filename: string;
   originalName: string;
   mimeType: string;
@@ -187,4 +188,6 @@ MediaSchema.methods.isDocument = function (): boolean {
 /**
  * Media Model
  */
+MediaSchema.plugin(tenantScoped);
+
 export const MediaModel = mongoose.model<IMedia>('Media', MediaSchema);

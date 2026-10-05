@@ -2,6 +2,8 @@ import { OrderModel } from '../../models/order.model';
 import { AppError } from '../../middleware/error.middleware';
 import { SettingsService } from './settings.service';
 import { cancelOrder } from './order-actions';
+import { ProjectModel } from '../../models/project.model';
+import { runInProject } from '../../utils/project-context';
 
 /** Cancel unpaid bank transfer orders older than the shop's limit. Safe with several instances running it. */
 export async function cancelStaleUnpaidOrders(now = new Date()): Promise<number> {
@@ -23,8 +25,16 @@ export async function cancelStaleUnpaidOrders(now = new Date()): Promise<number>
   return cancelled;
 }
 
+/** cancelStaleUnpaidOrders in every active project, each with its own shop settings. */
+export async function cancelStaleUnpaidOrdersEverywhere(now = new Date()): Promise<number> {
+  const projects = await ProjectModel.find({ status: 'active' }).select('_id').lean();
+  let cancelled = 0;
+  for (const project of projects) cancelled += await runInProject(project._id, () => cancelStaleUnpaidOrders(now));
+  return cancelled;
+}
+
 export function startUnpaidJob(intervalMs = 3_600_000): () => void {
-  const run = () => cancelStaleUnpaidOrders().catch((err) => console.error('Unpaid order job failed:', err));
+  const run = () => cancelStaleUnpaidOrdersEverywhere().catch((err) => console.error('Unpaid order job failed:', err));
   const timer = setInterval(run, intervalMs);
   timer.unref();
   void run();

@@ -3,16 +3,23 @@ import { ContactFormModel, IContactForm, FormFieldType } from '../../models/cont
 import { FormSubmissionModel, IFormSubmission, SubmissionStatus } from '../../models/form-submission.model';
 import { EmailService } from '../../services/email.service';
 import { CreateContactFormInput, UpdateContactFormInput } from './contact-forms.schema';
+import { AppError } from '../../middleware/error.middleware';
 
 /**
  * Contact Forms Service
  * Business logic for contact form management
  */
+/** Form slugs are unique per project; the database cannot enforce that on Cosmos DB. */
+async function assertSlugFree(slug: string): Promise<void> {
+  if (await ContactFormModel.exists({ slug })) throw new AppError(`A form with slug '${slug}' already exists`, 409);
+}
+
 export class ContactFormsService {
   /**
    * Create a new contact form
    */
   static async createForm(data: CreateContactFormInput & { createdBy?: string }): Promise<IContactForm> {
+    await assertSlugFree(data.slug);
     const form = new ContactFormModel(data);
     await form.save();
     return form;
@@ -83,6 +90,7 @@ export class ContactFormsService {
     const form = await ContactFormModel.findById(id);
     if (!form) return null;
 
+    if (data.slug && data.slug !== form.slug) await assertSlugFree(data.slug);
     Object.assign(form, data);
     await form.save();
     return form;

@@ -4,14 +4,14 @@ jest.mock('../../services/webhook.service', () => ({
 
 import { useTestDb } from '../../test/db';
 import { connectMcp, result } from '../../test/mcp-client';
-import { User, UserRole } from '../../models/user.model';
+import { ProjectRole } from '../../models/project-member.model';
+import { memberWithToken } from '../../test/projects';
 import { LanguageModel } from '../../models/language.model';
 import { ContentTypeModel } from '../../models/content-type.model';
 import { MediaModel } from '../../models/media.model';
 import { FieldType } from '../../types/field-types';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
 import { createVersion } from '../content-entries/entry-versions.service';
-import { TokensService } from '../tokens/tokens.service';
 
 useTestDb();
 
@@ -34,8 +34,7 @@ async function setup() {
   const lake = await ContentEntriesService.createEntry({ contentTypeId: String(type._id), data: { title: 'By the lake', km: 4 } });
   const cs = await createVersion(String(hills._id), 'cs');
   await MediaModel.create({ filename: 'a.jpg', originalName: 'forest.jpg', mimeType: 'image/jpeg', size: 10, blobUrl: 'https://blob.test/a.jpg', altText: 'Forest' });
-  await User.create({ entraId: 'viewer', email: 'viewer@test.cz', role: UserRole.VIEWER });
-  const token = (await TokensService.create('viewer', { name: 'Read' })).token;
+  const token = await memberWithToken('viewer', ProjectRole.VIEWER, 'Read');
   return { type, hills, lake, cs, token };
 }
 

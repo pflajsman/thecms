@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Submission status
@@ -12,7 +13,7 @@ export enum SubmissionStatus {
 /**
  * Form Submission document interface
  */
-export interface IFormSubmission extends Document {
+export interface IFormSubmission extends Document, TenantFields {
   formId: mongoose.Types.ObjectId;
   data: Record<string, any>;
   status: SubmissionStatus;
@@ -67,5 +68,7 @@ FormSubmissionSchema.index({ formId: 1, status: 1 });
 FormSubmissionSchema.index({ formId: 1, createdAt: -1 });
 // The Inbox lists submissions across forms by date (Cosmos DB only sorts on indexed fields).
 FormSubmissionSchema.index({ createdAt: -1 });
+
+FormSubmissionSchema.plugin(tenantScoped);
 
 export const FormSubmissionModel = mongoose.model<IFormSubmission>('FormSubmission', FormSubmissionSchema);

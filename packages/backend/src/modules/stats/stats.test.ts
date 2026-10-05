@@ -15,6 +15,10 @@ import { FormSubmissionModel, SubmissionStatus } from '../../models/form-submiss
 import { FieldType } from '../../types/field-types';
 import { LanguageModel } from '../../models/language.model';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
+import { getTestDefaultProject } from '../../utils/project-context';
+
+// Raw driver inserts skip the tenant plugin, so they name the test project themselves.
+const TEST_PROJECT = getTestDefaultProject()!;
 
 useTestDb();
 
@@ -46,8 +50,8 @@ it('counts entries by status, types and unread submissions', async () => {
   ]);
   const formId = new mongoose.Types.ObjectId();
   await FormSubmissionModel.collection.insertMany([
-    { formId, data: {}, status: SubmissionStatus.UNREAD, emailSent: false },
-    { formId, data: {}, status: SubmissionStatus.READ, emailSent: false },
+    { projectId: TEST_PROJECT, formId, data: {}, status: SubmissionStatus.UNREAD, emailSent: false },
+    { projectId: TEST_PROJECT, formId, data: {}, status: SubmissionStatus.READ, emailSent: false },
   ]);
 
   const stats = await getDashboardStats();

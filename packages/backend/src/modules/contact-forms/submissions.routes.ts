@@ -1,10 +1,11 @@
 import { Router, type IRouter } from 'express';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { projectMiddleware } from '../../middleware/project.middleware';
 import { contactFormsController } from './contact-forms.controller';
 
 const router: IRouter = Router();
 
-router.use(authMiddleware);
+router.use(authMiddleware, projectMiddleware);
 
 /**
  * @swagger

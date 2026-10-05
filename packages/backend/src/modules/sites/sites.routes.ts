@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { sitesController } from './sites.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { projectMiddleware, writesNeed } from '../../middleware/project.middleware';
+import { ProjectRole } from '../../models/project-member.model';
 
 /**
  * Sites Routes
@@ -8,7 +10,7 @@ import { authMiddleware } from '../../middleware/auth.middleware';
 const router: IRouter = Router();
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(authMiddleware, projectMiddleware, writesNeed(ProjectRole.ADMIN));
 
 /**
  * @swagger

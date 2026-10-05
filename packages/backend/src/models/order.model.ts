@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import type { PaymentMethod } from './shipping.model';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 export type OrderStatus = 'PLACED' | 'COMPLETED' | 'CANCELLED';
 export type PaymentStatus = 'UNPAID' | 'PAID' | 'REFUNDED';
@@ -37,7 +38,7 @@ export interface OrderHistoryEntry {
   detail?: string;
 }
 
-export interface IOrder extends Document {
+export interface IOrder extends Document, TenantFields {
   number: string;
   accessToken: string;
   currency: string;
@@ -127,5 +128,7 @@ const OrderSchema = new Schema<IOrder>(
 // List sorts (Cosmos DB needs a single-field index per sort).
 OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ updatedAt: -1 });
+
+OrderSchema.plugin(tenantScoped);
 
 export const OrderModel = mongoose.model<IOrder>('Order', OrderSchema);

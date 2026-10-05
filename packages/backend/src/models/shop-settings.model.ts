@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 export interface ShopCurrency { code: string; decimals: number }
 export interface VatRate { id: string; name: string; rate: number }
 
 export interface BankAccount { currency: string; accountNumber?: string; iban?: string; bic?: string; holder: string }
 
-export interface IShopSettings extends Document {
+export interface IShopSettings extends Document, TenantFields {
   currencies: ShopCurrency[];
   defaultCurrency?: string;
   vatRates: VatRate[];
@@ -34,5 +35,7 @@ const ShopSettingsSchema = new Schema<IShopSettings>(
     toJSON: { transform: (_doc, ret) => { const { _id, __v, createdAt, updatedAt, ...rest } = ret; void _id; void __v; void createdAt; void updatedAt; return rest; } },
   }
 );
+
+ShopSettingsSchema.plugin(tenantScoped);
 
 export const ShopSettingsModel = mongoose.model<IShopSettings>('ShopSettings', ShopSettingsSchema);

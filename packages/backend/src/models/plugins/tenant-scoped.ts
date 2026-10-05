@@ -1,4 +1,9 @@
 import { Schema, Types } from 'mongoose';
+
+/** Fields the plugin adds; extend a model's interface with it. */
+export interface TenantFields {
+  projectId: Types.ObjectId;
+}
 import { scopeFor } from '../../utils/project-context';
 
 const QUERY_HOOKS = [

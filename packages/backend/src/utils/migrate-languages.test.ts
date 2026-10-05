@@ -3,6 +3,10 @@ import { useTestDb } from '../test/db';
 import { ContentEntryModel } from '../models/content-entry.model';
 import { LanguageModel } from '../models/language.model';
 import { migrateLanguages } from './migrate-languages';
+import { getTestDefaultProject } from './project-context';
+
+// Raw driver inserts skip the tenant plugin, so they name the test project themselves.
+const TEST_PROJECT = getTestDefaultProject()!;
 
 useTestDb();
 
@@ -10,8 +14,8 @@ it('creates English as default and assigns existing entries to it, keeping their
   const typeId = new mongoose.Types.ObjectId();
   // Pre-migration documents: no language, no itemId.
   const raw = await ContentEntryModel.collection.insertMany([
-    { contentTypeId: typeId, data: { title: 'Přes Šumavu' }, title: 'Přes Šumavu', status: 'PUBLISHED' },
-    { contentTypeId: typeId, data: { title: 'Krkonoše' }, title: 'Krkonoše', status: 'DRAFT' },
+    { projectId: TEST_PROJECT, contentTypeId: typeId, data: { title: 'Přes Šumavu' }, title: 'Přes Šumavu', status: 'PUBLISHED' },
+    { projectId: TEST_PROJECT, contentTypeId: typeId, data: { title: 'Krkonoše' }, title: 'Krkonoše', status: 'DRAFT' },
   ]);
   const ids = Object.values(raw.insertedIds).map(String);
 
@@ -31,6 +35,7 @@ it('creates English as default and assigns existing entries to it, keeping their
 it('uses the configured default when languages already exist', async () => {
   await LanguageModel.create({ code: 'cs', name: 'Čeština', isDefault: true, order: 0 });
   await ContentEntryModel.collection.insertOne({
+    projectId: TEST_PROJECT,
     contentTypeId: new mongoose.Types.ObjectId(),
     data: {},
     title: 'X',
@@ -47,6 +52,7 @@ it('rebuilds a text index so the entry language field is not read as a stemming 
   expect(text).toMatchObject({ language_override: 'textSearchLanguage', weights: { data: 1 } });
   await expect(
     ContentEntryModel.collection.insertOne({
+      projectId: TEST_PROJECT,
       contentTypeId: new mongoose.Types.ObjectId(),
       itemId: new mongoose.Types.ObjectId(),
       language: 'cs',
@@ -64,8 +70,10 @@ it('runs on a fresh database where no collections exist yet, and builds the lang
     if ((await db.listCollections({ name }).toArray()).length > 0) await db.dropCollection(name);
   }
   await expect(migrateLanguages()).resolves.toEqual({ createdDefault: true, migratedEntries: 0 });
+  // Codes are unique per project (checked in the service); the old global unique index is gone.
   const codeIndex = (await LanguageModel.collection.indexes()).find((i) => i.key.code === 1);
-  expect(codeIndex?.unique).toBe(true);
+  expect(codeIndex?.key).toEqual({ projectId: 1, code: 1 });
+  expect(codeIndex?.unique).toBeUndefined();
 });
 
 it('two instances starting at once both finish and create one default language', async () => {

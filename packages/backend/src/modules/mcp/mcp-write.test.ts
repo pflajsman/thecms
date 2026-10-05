@@ -4,18 +4,18 @@ jest.mock('../../services/webhook.service', () => ({
 
 import { useTestDb } from '../../test/db';
 import { connectMcp, result } from '../../test/mcp-client';
-import { User, UserRole } from '../../models/user.model';
+import { ProjectMemberModel, ProjectRole } from '../../models/project-member.model';
+import { memberWithToken } from '../../test/projects';
 import { LanguageModel } from '../../models/language.model';
 import { ContentTypeModel } from '../../models/content-type.model';
 import { ContentEntryModel, ContentStatus } from '../../models/content-entry.model';
 import { FieldType } from '../../types/field-types';
 import { ContentEntriesService } from '../content-entries/content-entries.service';
 import { createVersion } from '../content-entries/entry-versions.service';
-import { TokensService } from '../tokens/tokens.service';
 
 useTestDb();
 
-async function setup(role = UserRole.EDITOR) {
+async function setup(role = ProjectRole.EDITOR) {
   await LanguageModel.create([
     { code: 'en', name: 'English', isDefault: true, order: 0 },
     { code: 'cs', name: 'Čeština', isDefault: false, order: 1 },
@@ -30,8 +30,7 @@ async function setup(role = UserRole.EDITOR) {
       { name: 'km', label: 'Distance', type: FieldType.NUMBER, required: false },
     ],
   });
-  await User.create({ entraId: 'agent-owner', email: 'owner@test.cz', role });
-  const token = (await TokensService.create('agent-owner', { name: 'Agent' })).token;
+  const token = await memberWithToken('agent-owner', role, 'Agent');
   return { type, token };
 }
 
@@ -46,7 +45,7 @@ it('gives Editors the draft tools and never a publish or delete tool', async () 
 
 it('a Viewer gets read tools only, even with an older token', async () => {
   const { token } = await setup();
-  await User.updateOne({ entraId: 'agent-owner' }, { $set: { role: UserRole.VIEWER } });
+  await ProjectMemberModel.updateOne({ userId: 'agent-owner' }, { $set: { role: ProjectRole.VIEWER } });
   const { client, close } = await connectMcp(token);
   expect(await names(client)).toEqual(['get_entry', 'list_content_types', 'list_languages', 'list_media', 'search_entries']);
   const call = await client.callTool({ name: 'create_entry', arguments: { contentType: 'trip', data: { title: 'X' } } }).catch((e: unknown) => ({ isError: true, thrown: String(e) }));

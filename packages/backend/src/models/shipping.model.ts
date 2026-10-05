@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 export type PaymentMethod = 'BANK_TRANSFER' | 'CASH_ON_DELIVERY';
 export const PAYMENT_METHODS: PaymentMethod[] = ['BANK_TRANSFER', 'CASH_ON_DELIVERY'];
 
-export interface IShippingZone extends Document { name: string; countries: string[]; rest: boolean; order: number }
+export interface IShippingZone extends Document, TenantFields { name: string; countries: string[]; rest: boolean; order: number }
 export interface ShippingBand { upToGrams: number | null; prices: Record<string, number> }
 export interface ShippingRate { zoneId: mongoose.Types.ObjectId; bands: ShippingBand[] }
-export interface IShippingMethod extends Document {
+export interface IShippingMethod extends Document, TenantFields {
   labels: Record<string, string>;
   active: boolean;
   paymentMethods: PaymentMethod[];
@@ -35,6 +36,9 @@ const MethodSchema = new Schema<IShippingMethod>(
   },
   { timestamps: true, minimize: false, toJSON: json }
 );
+
+ZoneSchema.plugin(tenantScoped);
+MethodSchema.plugin(tenantScoped);
 
 export const ShippingZoneModel = mongoose.model<IShippingZone>('ShippingZone', ZoneSchema);
 export const ShippingMethodModel = mongoose.model<IShippingMethod>('ShippingMethod', MethodSchema);

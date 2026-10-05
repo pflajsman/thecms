@@ -8,6 +8,20 @@ interface ProjectContext {
 
 const storage = new AsyncLocalStorage<ProjectContext>();
 
+// Tests only (src/test/setup.ts): the project used when a test runs outside any context.
+let testDefaultProject: Types.ObjectId | null = null;
+
+/** Tests only: scope context-free code to this project, or null to keep the production rule (refuse). */
+export function setTestDefaultProject(projectId: Types.ObjectId | null): void {
+  if (process.env.NODE_ENV !== 'test') throw new Error('setTestDefaultProject is for tests only');
+  testDefaultProject = projectId;
+}
+
+/** Tests only: the default project, when set (only setTestDefaultProject can set it, and only in tests). */
+export function getTestDefaultProject(): Types.ObjectId | null {
+  return testDefaultProject;
+}
+
 /** Thrown when tenant data is touched outside runInProject or withoutProject. */
 export class NoProjectContextError extends Error {
   constructor(modelName: string) {
@@ -36,12 +50,17 @@ export function withoutProject<T>(fn: () => T): Executed<T> {
 
 /** The project of the running request or job, or undefined outside runInProject. */
 export function currentProjectId(): Types.ObjectId | undefined {
-  return storage.getStore()?.projectId ?? undefined;
+  const context = storage.getStore();
+  return (context ? context.projectId : getTestDefaultProject()) ?? undefined;
 }
 
 /** The project to scope a query by, null when scoping is lifted; throws when there is no context at all. */
 export function scopeFor(modelName: string): Types.ObjectId | null {
   const context = storage.getStore();
-  if (!context) throw new NoProjectContextError(modelName);
+  if (!context) {
+    const fallback = getTestDefaultProject();
+    if (fallback) return fallback;
+    throw new NoProjectContextError(modelName);
+  }
   return context.bypass ? null : context.projectId;
 }

@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /** A personal download link for one paid digital order line. */
-export interface IDownloadGrant extends Document {
+export interface IDownloadGrant extends Document, TenantFields {
   token: string;
   orderId: mongoose.Types.ObjectId;
   lineIndex: number;
@@ -25,5 +26,7 @@ const DownloadGrantSchema = new Schema<IDownloadGrant>(
   },
   { timestamps: true }
 );
+
+DownloadGrantSchema.plugin(tenantScoped);
 
 export const DownloadGrantModel = mongoose.model<IDownloadGrant>('DownloadGrant', DownloadGrantSchema);

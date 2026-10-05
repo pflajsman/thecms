@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 export enum ProductType { PHYSICAL = 'PHYSICAL', DIGITAL = 'DIGITAL' }
 export type Labels = Record<string, string>;
@@ -6,7 +7,7 @@ export interface ProductOptionValue { key: string; labels: Labels }
 export interface ProductOption { key: string; labels: Labels; values: ProductOptionValue[] }
 export interface DigitalFile { blobName: string; originalName: string; mimeType: string; size: number }
 
-export interface IProduct extends Document {
+export interface IProduct extends Document, TenantFields {
   itemId: mongoose.Types.ObjectId;
   type: ProductType;
   vatRateId: string;
@@ -42,5 +43,7 @@ const ProductSchema = new Schema<IProduct>(
 // Lists sort on one field each (Cosmos DB rule).
 ProductSchema.index({ createdAt: -1 });
 ProductSchema.index({ updatedAt: -1 });
+
+ProductSchema.plugin(tenantScoped);
 
 export const ProductModel = mongoose.model<IProduct>('Product', ProductSchema);

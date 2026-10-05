@@ -3,8 +3,7 @@ import { app } from './app';
 import { connectDatabase } from './config/database';
 import { storageService } from './config/storage';
 import { EmailService } from './services/email.service';
-import { migrateLanguages } from './utils/migrate-languages';
-import { ensureProductModel } from './modules/commerce/product-model';
+import { migrateProjects } from './utils/migrate-projects';
 import { startUnpaidJob } from './modules/commerce/unpaid-job';
 
 // Load environment variables
@@ -21,16 +20,14 @@ async function startServer() {
     await connectDatabase();
     console.log('✅ Database connected successfully');
 
-    // Content languages: create the default language and assign existing entries (idempotent).
-    const migration = await migrateLanguages();
-    if (migration.createdDefault || migration.migratedEntries > 0) {
+    // Projects: move data from before projects into "Default", then give every project its default
+    // language and the system product model (idempotent).
+    const migration = await migrateProjects();
+    if (migration.createdDefault || migration.backfilled > 0) {
       console.log(
-        `✅ Content languages migrated (default created: ${migration.createdDefault}, entries: ${migration.migratedEntries})`
+        `✅ Projects migrated (default created: ${migration.createdDefault}, documents: ${migration.backfilled}, memberships: ${migration.memberships})`
       );
     }
-
-    // The system content model that holds product text and images (idempotent).
-    await ensureProductModel();
 
     // Hourly: cancel unpaid bank transfer orders older than the shop's limit.
     if (process.env.NODE_ENV !== 'test') startUnpaidJob();

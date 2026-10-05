@@ -7,6 +7,7 @@ import type { ResolvedToken } from '../tokens/tokens.service';
 export interface McpContext {
   tokenPrefix: string;
   user: ResolvedToken['user'];
+  role: ResolvedToken['role'];
 }
 
 /** Said in every tool that returns entry text. */

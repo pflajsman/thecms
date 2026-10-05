@@ -10,6 +10,7 @@ jest.mock('../../middleware/auth.middleware', () => ({
 import express from 'express';
 import request from 'supertest';
 import { useTestDb } from '../../test/db';
+import { setTestDefaultProject } from '../../utils/project-context';
 import { apiRoutes } from '../../routes';
 import { errorMiddleware } from '../../middleware/error.middleware';
 import { InvitationModel } from '../../models/invitation.model';
@@ -17,6 +18,7 @@ import { ProjectMemberModel, ProjectRole } from '../../models/project-member.mod
 import { User } from '../../models/user.model';
 
 useTestDb();
+setTestDefaultProject(null);
 jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
 const app = express();

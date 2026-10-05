@@ -3,6 +3,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { mcpLimiter } from '../../middleware/rateLimit.middleware';
 import { mcpAuth, rpcError, type McpRequest } from './mcp-auth';
 import { createMcpServer } from './mcp-server';
+import { runInProject } from '../../utils/project-context';
 
 const router: IRouter = Router();
 
@@ -19,14 +20,15 @@ const refuseBatch: RequestHandler = (req, res, next) => {
 router.post('/', refuseBatch, mcpAuth, mcpLimiter, async (req, res, next) => {
   const { mcp } = req as McpRequest;
   try {
-    const server = createMcpServer({ tokenPrefix: mcp!.prefix, user: mcp!.user });
+    const server = createMcpServer({ tokenPrefix: mcp!.prefix, user: mcp!.user, role: mcp!.role });
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on('close', () => {
       void transport.close();
       void server.close();
     });
     await server.connect(transport);
-    await transport.handleRequest(req, res, req.body);
+    // Every tool call works in the token's project.
+    await runInProject(mcp!.projectId, () => transport.handleRequest(req, res, req.body));
   } catch (error) {
     next(error);
   }

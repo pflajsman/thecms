@@ -10,6 +10,10 @@ import { ContactFormModel, FormFieldType } from '../../models/contact-form.model
 import { FormSubmissionModel, SubmissionStatus } from '../../models/form-submission.model';
 import { ContactFormsService } from './contact-forms.service';
 import submissionsRoutes from './submissions.routes';
+import { getTestDefaultProject } from '../../utils/project-context';
+
+// Raw driver inserts skip the tenant plugin, so they name the test project themselves.
+const TEST_PROJECT = getTestDefaultProject()!;
 
 useTestDb();
 
@@ -25,9 +29,9 @@ async function seed() {
   const tour = await ContactFormModel.create({ name: 'Tour booking', slug: 'tour', recipientEmail: 'me@x.test', fields });
   const at = (m: number) => new Date(Date.UTC(2026, 8, 29, 10, m));
   await FormSubmissionModel.collection.insertMany([
-    { formId: contact._id, data: { email: 'a@x.test', message: 'One' }, status: SubmissionStatus.UNREAD, emailSent: true, createdAt: at(1), updatedAt: at(1) },
-    { formId: tour._id, data: { email: 'b@x.test', message: 'Two' }, status: SubmissionStatus.READ, emailSent: true, createdAt: at(2), updatedAt: at(2) },
-    { formId: contact._id, data: { email: 'c@x.test', message: 'Three' }, status: SubmissionStatus.UNREAD, emailSent: false, emailError: 'SMTP down', createdAt: at(3), updatedAt: at(3) },
+    { projectId: TEST_PROJECT, formId: contact._id, data: { email: 'a@x.test', message: 'One' }, status: SubmissionStatus.UNREAD, emailSent: true, createdAt: at(1), updatedAt: at(1) },
+    { projectId: TEST_PROJECT, formId: tour._id, data: { email: 'b@x.test', message: 'Two' }, status: SubmissionStatus.READ, emailSent: true, createdAt: at(2), updatedAt: at(2) },
+    { projectId: TEST_PROJECT, formId: contact._id, data: { email: 'c@x.test', message: 'Three' }, status: SubmissionStatus.UNREAD, emailSent: false, emailError: 'SMTP down', createdAt: at(3), updatedAt: at(3) },
   ]);
   return { contact, tour };
 }

@@ -1,5 +1,6 @@
 import { LanguageModel } from '../models/language.model';
 import { ContentEntryModel } from '../models/content-entry.model';
+import { currentProjectId } from './project-context';
 
 /**
  * MongoDB text indexes read a document field named `language` as its stemming language and reject
@@ -33,20 +34,28 @@ async function rebuildTextIndexes(): Promise<void> {
   }
 }
 
+/** Builds the language and entry indexes; once per startup, before any project is seeded. */
+export async function prepareLanguageIndexes(): Promise<void> {
+  await LanguageModel.createIndexes();
+  await rebuildTextIndexes();
+}
+
 /**
- * Idempotent: creates English as the default language when none exist and
+ * Idempotent, in the current project: creates English as the default language when none exist and
  * assigns entries without a language to the default, using their own id as item id.
  */
 export async function migrateLanguages(): Promise<{ createdDefault: boolean; migratedEntries: number }> {
-  // Build the unique code index before the first language is inserted: Cosmos DB only creates
-  // unique indexes on empty collections.
-  await LanguageModel.createIndexes();
-  await rebuildTextIndexes();
+  await prepareLanguageIndexes();
+  return seedLanguages();
+}
 
+/** migrateLanguages without the index work, for each project at startup and for a new project. */
+export async function seedLanguages(): Promise<{ createdDefault: boolean; migratedEntries: number }> {
   let createdDefault = false;
   if ((await LanguageModel.countDocuments()) === 0) {
     try {
-      await LanguageModel.create({ code: 'en', name: 'English', isDefault: true, order: 0 });
+      // The project id as document id: two instances starting at once cannot both create it.
+      await LanguageModel.create({ _id: currentProjectId(), code: 'en', name: 'English', isDefault: true, order: 0 });
       createdDefault = true;
     } catch (error) {
       // Another instance starting at the same time created it first.

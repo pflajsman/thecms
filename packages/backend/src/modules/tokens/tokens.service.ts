@@ -1,7 +1,9 @@
 import crypto from 'crypto';
 import mongoose from 'mongoose';
 import { AccessTokenModel, type IAccessToken } from '../../models/access-token.model';
-import { User, UserRole } from '../../models/user.model';
+import { User } from '../../models/user.model';
+import { ProjectModel } from '../../models/project.model';
+import { ProjectMemberModel, ProjectRole } from '../../models/project-member.model';
 import { AppError } from '../../middleware/error.middleware';
 
 export const TOKEN_PREFIX = 'tcms_pat_';
@@ -22,7 +24,10 @@ export interface TokenListItem {
 export interface ResolvedToken {
   tokenId: string;
   prefix: string;
-  user: { entraId: string; email: string; displayName?: string; role: UserRole };
+  /** The project the token works in, and the owner's current role there. */
+  projectId: string;
+  role: ProjectRole;
+  user: { entraId: string; email: string; displayName?: string };
 }
 
 export const hashToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
@@ -42,13 +47,14 @@ function toItem(t: IAccessToken): TokenListItem {
 }
 
 export const TokensService = {
-  /** The caller's tokens, newest first. Sorted here: a user has at most a few, and Cosmos DB needs an index for every sort. */
-  async list(userId: string): Promise<TokenListItem[]> {
-    const tokens = await AccessTokenModel.find({ userId });
+  /** The caller's tokens for the project, newest first. Sorted here: a user has at most a few, and Cosmos DB needs an index for every sort. */
+  async list(userId: string, projectId: string): Promise<TokenListItem[]> {
+    const tokens = await AccessTokenModel.find({ userId, projectId });
     return tokens.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).map(toItem);
   },
 
-  async create(userId: string, input: { name: string; expiresInDays?: number }): Promise<TokenListItem & { token: string }> {
+  /** A token for one project. The limit counts the user's tokens across all projects. */
+  async create(userId: string, projectId: string, input: { name: string; expiresInDays?: number }): Promise<TokenListItem & { token: string }> {
     const tokens = await AccessTokenModel.find({ userId }).select('expiresAt').lean();
     if (tokens.filter((t) => !isExpired(t)).length >= MAX_TOKENS) {
       throw new AppError(`You have ${MAX_TOKENS} tokens. Revoke one to create another.`, 409, { reason: 'TOKEN_LIMIT' });
@@ -56,6 +62,7 @@ export const TokensService = {
     const token = `${TOKEN_PREFIX}${crypto.randomBytes(32).toString('base64url')}`;
     const doc = await AccessTokenModel.create({
       userId,
+      projectId,
       name: input.name,
       hash: hashToken(token),
       prefix: token.slice(0, 12),
@@ -64,25 +71,36 @@ export const TokensService = {
     return { token, ...toItem(doc) };
   },
 
-  async revoke(userId: string, id: string): Promise<void> {
-    const found = mongoose.Types.ObjectId.isValid(id) ? await AccessTokenModel.deleteOne({ _id: id, userId }) : { deletedCount: 0 };
+  async revoke(userId: string, projectId: string, id: string): Promise<void> {
+    const found = mongoose.Types.ObjectId.isValid(id) ? await AccessTokenModel.deleteOne({ _id: id, userId, projectId }) : { deletedCount: 0 };
     if (!found.deletedCount) throw new AppError('Token not found', 404);
   },
 
-  /** The owner of a valid token, or null. Records the last use at most once a minute. */
+  /**
+   * The owner of a valid token and their current role in the token's project, or null when the token is unknown or
+   * expired, the owner is gone, or the owner is no longer in an active project. Records the last use at most once a minute.
+   */
   async resolve(token: string): Promise<ResolvedToken | null> {
     if (!token.startsWith(TOKEN_PREFIX)) return null;
     const doc = await AccessTokenModel.findOne({ hash: hashToken(token) });
-    if (!doc || isExpired(doc)) return null;
-    const user = await User.findOne({ entraId: doc.userId }).lean();
-    if (!user) return null;
+    if (!doc || isExpired(doc) || !doc.projectId) return null;
+    const [user, project, member] = await Promise.all([
+      User.findOne({ entraId: doc.userId }).lean(),
+      ProjectModel.findById(doc.projectId).lean(),
+      ProjectMemberModel.findOne({ projectId: doc.projectId, userId: doc.userId }).lean(),
+    ]);
+    if (!user || !project || project.status !== 'active') return null;
+    const role = user.isSuperadmin ? ProjectRole.OWNER : member?.role;
+    if (!role) return null;
     if (!doc.lastUsedAt || Date.now() - doc.lastUsedAt.getTime() > LAST_USED_EVERY_MS) {
       await AccessTokenModel.updateOne({ _id: doc._id }, { $set: { lastUsedAt: new Date() } });
     }
     return {
       tokenId: String(doc._id),
       prefix: doc.prefix,
-      user: { entraId: user.entraId, email: user.email, displayName: user.displayName, role: user.role },
+      projectId: String(doc.projectId),
+      role,
+      user: { entraId: user.entraId, email: user.email, displayName: user.displayName },
     };
   },
 };

@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { contentEntriesController } from './content-entries.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { projectMiddleware, writesNeed } from '../../middleware/project.middleware';
+import { ProjectRole } from '../../models/project-member.model';
 import { validate } from '../../middleware/validation.middleware';
 import { versionLanguageSchema } from './content-entries.schema';
 
@@ -10,7 +12,7 @@ import { versionLanguageSchema } from './content-entries.schema';
 const router: IRouter = Router();
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(authMiddleware, projectMiddleware, writesNeed(ProjectRole.EDITOR));
 
 /**
  * @swagger

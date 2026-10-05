@@ -6,14 +6,18 @@ import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 import { ContentTypeModel } from '../models/content-type.model';
 import { recomputeTitlesForType } from '../modules/content-entries/entry-titles.service';
+import { withoutProject } from '../utils/project-context';
 
+/** Every project at once: entries are found by their content type, which belongs to one project. */
 export async function backfillEntryTitles(): Promise<{ types: number; updated: number }> {
-  const types = await ContentTypeModel.find().select('_id fields titleField').lean();
-  let updated = 0;
-  for (const type of types) {
-    updated += await recomputeTitlesForType(type);
-  }
-  return { types: types.length, updated };
+  return withoutProject(async () => {
+    const types = await ContentTypeModel.find().select('_id fields titleField').lean();
+    let updated = 0;
+    for (const type of types) {
+      updated += await recomputeTitlesForType(type);
+    }
+    return { types: types.length, updated };
+  });
 }
 
 async function main(): Promise<void> {

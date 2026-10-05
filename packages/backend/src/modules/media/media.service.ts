@@ -8,6 +8,7 @@ import {
   validateFileMagicBytes,
   getFileCategory,
 } from '../../config/upload';
+import { currentProjectId } from '../../utils/project-context';
 
 /**
  * Image variant configurations
@@ -78,8 +79,9 @@ export class MediaService {
       throw new Error('File type validation failed. File content does not match MIME type.');
     }
 
-    // Generate unique filename
-    const filename = generateUniqueFilename(originalName);
+    // Generate unique filename, in a folder per project
+    const projectId = currentProjectId();
+    const filename = `${projectId ? `${projectId}/` : ''}${generateUniqueFilename(originalName)}`;
     const category = getFileCategory(mimeType);
 
     // Upload original file to blob storage

@@ -1,9 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Site Interface
  */
-export interface ISite extends Document {
+export interface ISite extends Document, TenantFields {
   name: string;
   domain: string;
   apiKey: string;
@@ -83,5 +84,7 @@ SiteSchema.set('toJSON', {
     };
   },
 });
+
+SiteSchema.plugin(tenantScoped);
 
 export const SiteModel = mongoose.model<ISite>('Site', SiteSchema);

@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Webhook event types
@@ -60,7 +61,7 @@ export interface IWebhookDeliveryLog {
 /**
  * Webhook document interface
  */
-export interface IWebhook extends Document {
+export interface IWebhook extends Document, TenantFields {
   _id: mongoose.Types.ObjectId;
   name: string;
   url: string;
@@ -222,5 +223,7 @@ WebhookSchema.pre('save', function (next) {
   }
   next();
 });
+
+WebhookSchema.plugin(tenantScoped);
 
 export const WebhookModel = mongoose.model<IWebhook>('Webhook', WebhookSchema);

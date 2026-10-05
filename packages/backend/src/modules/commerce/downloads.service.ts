@@ -5,6 +5,7 @@ import { DownloadGrantModel, type IDownloadGrant } from '../../models/download-g
 import { ProductModel } from '../../models/product.model';
 import { AppError } from '../../middleware/error.middleware';
 import { storageService } from '../../config/storage';
+import { runInProject, withoutProject } from '../../utils/project-context';
 
 /** Fresh grants for every digital line of a paid order; earlier grants of the order expire. */
 export async function issueGrants(order: IOrder, settings: Pick<IShopSettings, 'downloadDays' | 'downloadLimit'>): Promise<IDownloadGrant[]> {
@@ -34,6 +35,13 @@ export async function expireGrants(order: IOrder): Promise<void> {
 
 /** Count one download and return a short-lived private link; 404 unknown, 410 expired or used up. */
 export async function redeem(token: string): Promise<string> {
+  // The link carries no API key: the grant itself tells which project the file belongs to.
+  const found = await withoutProject(() => DownloadGrantModel.findOne({ token }).select('projectId').lean());
+  if (!found) throw new AppError('Download not found', 404);
+  return runInProject(found.projectId, () => redeemInProject(token));
+}
+
+async function redeemInProject(token: string): Promise<string> {
   const grant = await DownloadGrantModel.findOneAndUpdate(
     { token, expiresAt: { $gt: new Date() }, $expr: { $lt: ['$used', '$limit'] } },
     { $inc: { used: 1 } },

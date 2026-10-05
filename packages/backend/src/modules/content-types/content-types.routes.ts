@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
 import { contentTypesController } from './content-types.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
+import { projectMiddleware, requireProjectRole, writesNeed } from '../../middleware/project.middleware';
+import { ProjectRole } from '../../models/project-member.model';
 import { contentEntriesController } from '../content-entries/content-entries.controller';
 
 /**
@@ -9,7 +11,7 @@ import { contentEntriesController } from '../content-entries/content-entries.con
 const router: IRouter = Router();
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(authMiddleware, projectMiddleware, writesNeed(ProjectRole.EDITOR));
 
 /**
  * @swagger
@@ -69,7 +71,7 @@ router.use(authMiddleware);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', (req, res, next) => contentTypesController.createContentType(req, res, next));
+router.post('/', requireProjectRole(ProjectRole.ADMIN), (req, res, next) => contentTypesController.createContentType(req, res, next));
 
 /**
  * @swagger
@@ -293,8 +295,8 @@ router.get('/slug/:slug', (req, res, next) => contentTypesController.getContentT
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/:id', (req, res, next) => contentTypesController.getContentTypeById(req, res, next));
-router.put('/:id', (req, res, next) => contentTypesController.updateContentType(req, res, next));
-router.delete('/:id', (req, res, next) => contentTypesController.deleteContentType(req, res, next));
+router.put('/:id', requireProjectRole(ProjectRole.ADMIN), (req, res, next) => contentTypesController.updateContentType(req, res, next));
+router.delete('/:id', requireProjectRole(ProjectRole.ADMIN), (req, res, next) => contentTypesController.deleteContentType(req, res, next));
 
 /**
  * @swagger

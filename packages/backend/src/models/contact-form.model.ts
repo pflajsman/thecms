@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { tenantScoped, type TenantFields } from './plugins/tenant-scoped';
 
 /**
  * Form field types
@@ -35,7 +36,7 @@ export interface FormField {
 /**
  * Contact Form document interface
  */
-export interface IContactForm extends Document {
+export interface IContactForm extends Document, TenantFields {
   name: string;
   slug: string;
   description?: string;
@@ -80,7 +81,6 @@ const ContactFormSchema = new Schema<IContactForm>(
     slug: {
       type: String,
       required: [true, 'Slug is required'],
-      unique: true,
       trim: true,
       lowercase: true,
       match: [/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'],
@@ -137,7 +137,8 @@ const ContactFormSchema = new Schema<IContactForm>(
 );
 
 // Indexes
-ContactFormSchema.index({ slug: 1 }, { unique: true });
+// Unique per project, checked in the service: Cosmos DB cannot add a unique index to a filled collection.
+ContactFormSchema.index({ projectId: 1, slug: 1 });
 ContactFormSchema.index({ isActive: 1 });
 ContactFormSchema.index({ createdAt: -1 });
 
@@ -153,5 +154,7 @@ ContactFormSchema.pre('save', function (next) {
 
   next();
 });
+
+ContactFormSchema.plugin(tenantScoped);
 
 export const ContactFormModel = mongoose.model<IContactForm>('ContactForm', ContactFormSchema);
