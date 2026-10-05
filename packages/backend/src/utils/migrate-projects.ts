@@ -55,13 +55,25 @@ export interface ProjectsMigration {
   memberships: number;
 }
 
+/**
+ * Drops the old global unique indexes where they still exist. Never fatal: Cosmos DB refuses to change a unique index
+ * on a collection that has data, and the app must still start. Until the index is gone, that value (for example the
+ * slug "product" or the language code "en") cannot be reused in a second project; the log says which collection.
+ */
 async function dropOldUniqueIndexes(): Promise<void> {
   for (const [model, name] of OLD_UNIQUE_INDEXES) {
     try {
+      const indexes = await model.collection.indexes();
+      if (!indexes.some((i) => i.name === name && i.unique)) continue;
       await model.collection.dropIndex(name);
+      console.log(`✅ Dropped the old unique index ${model.collection.collectionName}.${name}`);
     } catch (error) {
       const code = (error as { code?: number }).code;
-      if (code !== NAMESPACE_NOT_FOUND && code !== INDEX_NOT_FOUND) throw error;
+      if (code === NAMESPACE_NOT_FOUND || code === INDEX_NOT_FOUND) continue;
+      console.error(
+        `⚠️  Could not drop the old unique index ${model.collection.collectionName}.${name}: ${(error as Error).message}. ` +
+          'Cosmos DB only changes unique indexes on empty collections; empty or drop the collection to finish.'
+      );
     }
   }
 }

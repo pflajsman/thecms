@@ -66,6 +66,18 @@ it('two instances starting at once create one Default', async () => {
   expect(await withoutProject(() => ContentTypeModel.countDocuments({ system: 'product' }))).toBe(1);
 });
 
+it('starts even when the database refuses to drop an old unique index', async () => {
+  await ContentTypeModel.collection.insertOne({ name: 'Trip', slug: 'trip', fields: [] });
+  await ContentTypeModel.collection.createIndex({ slug: 1 }, { unique: true, name: 'slug_1' });
+  const refused = Object.assign(new Error('Unique Index can be modified only if collection is empty'), { code: 13 });
+  const drop = jest.spyOn(ContentTypeModel.collection, 'dropIndex').mockRejectedValueOnce(refused as never);
+  const logged = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  await expect(migrateProjects()).resolves.toMatchObject({ createdDefault: true });
+  expect(logged).toHaveBeenCalledWith(expect.stringContaining('contenttypes.slug_1'));
+  drop.mockRestore();
+  logged.mockRestore();
+});
+
 it('refuses tenant queries outside a project in production code paths', async () => {
   await expect(ContentTypeModel.find()).rejects.toBeInstanceOf(NoProjectContextError);
 });
