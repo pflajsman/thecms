@@ -10,7 +10,8 @@
     "language": "Language",
     "signOut": "Sign out",
     "aiAssistant": "AI assistant",
-    "accessTokens": "Access tokens"
+    "accessTokens": "Access tokens",
+    "projects": "Projects"
   },
   "signIn": {
     "title": "Welcome to TheCMS",
@@ -30,7 +31,8 @@
     "products": "Products",
     "shopSettings": "Shop settings",
     "shipping": "Shipping",
-    "orders": "Orders"
+    "orders": "Orders",
+    "members": "Members"
   },
   "groups": {
     "workspace": "Workspace",

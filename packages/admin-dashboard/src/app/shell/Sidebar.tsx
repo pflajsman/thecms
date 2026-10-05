@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { Logo } from '@/components/common/Logo'
 import { useCommandPalette } from './command-palette-context'
 import { UserMenu } from './UserMenu'
+import { ProjectSwitcher } from '@/features/projects/components/ProjectSwitcher'
 
 interface SidebarProps {
   modules: AppModule[]
@@ -24,6 +25,7 @@ export function Sidebar({ modules }: SidebarProps) {
         <Logo />
         <span className="hidden font-serif text-lg font-semibold lg:inline">TheCMS</span>
       </Link>
+      <ProjectSwitcher variant="sidebar" />
       <button
         type="button"
         onClick={() => setOpen(true)}

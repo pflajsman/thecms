@@ -1,5 +1,6 @@
 import { i18n } from '@/i18n'
 import type { DashboardStats } from '@/types'
+import { getCurrentProjectId } from '@/lib/current-project'
 
 export interface SetupStep {
   id: 'signin' | 'model' | 'entry' | 'site'
@@ -31,11 +32,12 @@ export function publicApiBase(): string {
   return `${admin.replace(/\/$/, '')}/public`
 }
 
-const DISMISS_KEY = 'thecms-setup-dismissed'
+// Per project: each project has its own setup to finish.
+const dismissKey = () => `thecms-setup-dismissed:${getCurrentProjectId() ?? ''}`
 
 export function readSetupDismissed(): boolean {
   try {
-    return window.localStorage.getItem(DISMISS_KEY) === '1'
+    return window.localStorage.getItem(dismissKey()) === '1'
   } catch {
     return false
   }
@@ -43,7 +45,7 @@ export function readSetupDismissed(): boolean {
 
 export function writeSetupDismissed(): void {
   try {
-    window.localStorage.setItem(DISMISS_KEY, '1')
+    window.localStorage.setItem(dismissKey(), '1')
   } catch {
     // Storage unavailable: the guide simply stays hidden for this visit.
   }

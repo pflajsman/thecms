@@ -1,6 +1,7 @@
 import { isAxiosError } from 'axios'
 import apiClient from '@/lib/api'
 import { API_BASE_URL, authorizationHeader } from '@/lib/auth-header'
+import { projectHeaders } from '@/lib/current-project'
 import type { ApiResponse } from '@/types'
 
 export type AiProviderName = 'anthropic' | 'openai-compatible'
@@ -113,7 +114,7 @@ async function postStream(path: string, body: unknown, signal?: AbortSignal): Pr
     res = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
       signal,
-      headers: { 'Content-Type': 'application/json', ...(authorization ? { Authorization: authorization } : {}) },
+      headers: { 'Content-Type': 'application/json', ...projectHeaders(), ...(authorization ? { Authorization: authorization } : {}) },
       body: JSON.stringify(body),
     })
   } catch (error) {

@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { KeyRound, LogOut, Monitor, Moon, Sparkles, Sun } from 'lucide-react'
+import { FolderKanban, KeyRound, LogOut, Monitor, Moon, Sparkles, Sun } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiStatus } from '@/features/ai/ai-queries'
+import { useOptionalProject } from '@/features/projects/ProjectContext'
 import { useTheme } from '@/app/theme/useTheme'
 import type { ThemePreference } from '@/app/theme/theme-utils'
 import type { AppModule } from '@/modules/types'
@@ -40,6 +41,7 @@ export function UserMenu({ variant, setupModules }: UserMenuProps) {
   const { t } = useTranslation('shell')
   const { language, setLanguage } = useLanguage()
   const aiStatus = useAiStatus()
+  const isSuperadmin = useOptionalProject()?.me.isSuperadmin
   const name = user?.name || user?.email || t('userMenu.account')
 
   return (
@@ -82,6 +84,17 @@ export function UserMenu({ variant, setupModules }: UserMenuProps) {
               <Link to="/account/ai">
                 <Sparkles aria-hidden />
                 {t('userMenu.aiAssistant')}
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+        {isSuperadmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/admin/projects">
+                <FolderKanban aria-hidden />
+                {t('userMenu.projects')}
               </Link>
             </DropdownMenuItem>
           </>

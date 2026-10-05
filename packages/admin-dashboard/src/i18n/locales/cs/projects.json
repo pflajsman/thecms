@@ -1,0 +1,126 @@
+{
+  "roles": {
+    "OWNER": "Vlastník",
+    "ADMIN": "Správce",
+    "EDITOR": "Editor",
+    "VIEWER": "Čtenář"
+  },
+  "roleHints": {
+    "OWNER": "Vše včetně správců a názvu projektu",
+    "ADMIN": "Nastavení, modely, weby a zvaní lidí",
+    "EDITOR": "Obsah, média, objednávky a zprávy",
+    "VIEWER": "Může prohlížet, nic nemění"
+  },
+  "noAccess": {
+    "title": "Zatím žádný projekt",
+    "text": "Jste přihlášeni jako {{email}}, ale nejste členem žádného projektu. Požádejte vlastníka projektu o pozvánku.",
+    "loadError": "Projekty se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "manage": "Spravovat projekty",
+    "signOut": "Odhlásit se"
+  },
+  "members": {
+    "title": "Členové",
+    "description": "Lidé, kteří pracují v projektu {{project}}, a co mohou dělat.",
+    "invite": "Pozvat lidi",
+    "rename": "Přejmenovat projekt",
+    "tableLabel": "Členové",
+    "you": "Vy",
+    "roleFor": "Role uživatele {{name}}",
+    "remove": "Odebrat",
+    "removeLabel": "Odebrat uživatele {{name}}",
+    "leave": "Opustit projekt",
+    "loadError": "Členy se nepodařilo načíst.",
+    "invitations": "Pozvánky",
+    "invitationsLabel": "Otevřené pozvánky",
+    "expires": "Platí do {{date}}",
+    "expired": "Vypršela",
+    "resend": "Poslat znovu",
+    "copyLink": "Kopírovat odkaz",
+    "revoke": "Zrušit",
+    "actionsFor": "Akce pro {{name}}"
+  },
+  "confirm": {
+    "removeTitle": "Odebrat uživatele {{name}}?",
+    "removeText": "{{name}} okamžitě ztratí přístup k projektu {{project}}, včetně svých přístupových tokenů k němu.",
+    "removeConfirm": "Odebrat",
+    "leaveTitle": "Opustit projekt {{project}}?",
+    "leaveText": "Přístup ztratíte okamžitě. Pro návrat vás bude muset někdo znovu pozvat.",
+    "leaveConfirm": "Opustit projekt",
+    "revokeTitle": "Zrušit pozvánku pro {{email}}?",
+    "revokeText": "Odkaz okamžitě přestane fungovat.",
+    "revokeConfirm": "Zrušit pozvánku"
+  },
+  "inviteForm": {
+    "title": "Pozvat lidi",
+    "email": "E-mail",
+    "role": "Role",
+    "submit": "Poslat pozvánku",
+    "emailInvalid": "Zadejte e-mailovou adresu.",
+    "sentTitle": "Pozvánka je připravena",
+    "emailSent": "Odkaz jsme poslali na {{email}}.",
+    "emailNotSent": "E-mail se nepodařilo odeslat. Pošlete tento odkaz na {{email}} sami.",
+    "link": "Odkaz s pozvánkou",
+    "linkHint": "Odkaz funguje jednou a platí 7 dní.",
+    "done": "Hotovo"
+  },
+  "renameForm": {
+    "title": "Přejmenovat projekt",
+    "name": "Název",
+    "nameRequired": "Zadejte název o nejvýše 100 znacích.",
+    "save": "Uložit"
+  },
+  "toast": {
+    "roleChanged": "{{name}} má nyní roli {{role}}",
+    "removed": "Uživatel {{name}} byl odebrán",
+    "left": "Opustili jste projekt {{project}}",
+    "resent": "Pozvánka znovu odeslána na {{email}}",
+    "resentNoEmail": "Pro {{email}} je nový odkaz. Zkopírujte ho a pošlete sami.",
+    "revoked": "Pozvánka zrušena",
+    "copied": "Odkaz zkopírován",
+    "renamed": "Projekt přejmenován",
+    "created": "Projekt {{name}} vytvořen",
+    "archived": "Projekt {{name}} archivován",
+    "restored": "Projekt {{name}} obnoven"
+  },
+  "admin": {
+    "title": "Projekty",
+    "description": "Všechny projekty v tomto TheCMS. Stránku vidí jen superadministrátoři.",
+    "create": "Nový projekt",
+    "tableLabel": "Projekty",
+    "memberCount_one": "{{count}} člen",
+    "memberCount_few": "{{count}} členové",
+    "memberCount_other": "{{count}} členů",
+    "archived": "Archivován",
+    "current": "Aktuální",
+    "open": "Otevřít",
+    "rename": "Přejmenovat",
+    "archive": "Archivovat",
+    "restore": "Obnovit",
+    "actionsFor": "Akce pro {{name}}",
+    "loadError": "Projekty se nepodařilo načíst.",
+    "empty": "Zatím žádné projekty."
+  },
+  "createForm": {
+    "title": "Nový projekt",
+    "name": "Název projektu",
+    "ownerEmail": "E-mail vlastníka",
+    "ownerHint": "Dostane pozvánku, aby se stal vlastníkem projektu, a pak může pozvat svůj tým.",
+    "submit": "Vytvořit projekt"
+  },
+  "invite": {
+    "title": "Máte pozvánku",
+    "text": "{{inviter}} vás pozval(a) do projektu {{project}} s rolí {{role}}.",
+    "accept": "Přijmout pozvánku",
+    "invalidTitle": "Tato pozvánka už neplatí",
+    "invalidText": "Byla už použita, zrušena nebo vypršela. Požádejte o novou.",
+    "loadError": "Pozvánku se nepodařilo načíst.",
+    "home": "Přejít do TheCMS",
+    "accepted": "Vítejte v projektu {{project}}"
+  },
+  "switcher": {
+    "label": "Projekt",
+    "choose": "Přepnout projekt",
+    "manage": "Spravovat projekty"
+  }
+}

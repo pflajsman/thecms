@@ -1,6 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { isEntraConfigured } from '../config/msalConfig';
 import { API_BASE_URL, authorizationHeader, renewSession } from './auth-header';
+import { projectHeaders } from './current-project';
 
 export { setMsalInstance } from './auth-header';
 
@@ -17,6 +18,7 @@ apiClient.interceptors.request.use(
   async (config) => {
     const authorization = await authorizationHeader();
     if (authorization) config.headers.Authorization = authorization;
+    for (const [name, value] of Object.entries(projectHeaders())) config.headers[name] = value;
     return config;
   },
   (error) => {

@@ -12,7 +12,7 @@ describe('module registry', () => {
     const { workspace, commerce, setup } = groupModules(modules)
     expect(workspace.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Home', 'Content', 'Media', 'Inbox'])
     expect(commerce.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Orders', 'Products', 'Shipping', 'Shop settings'])
-    expect(setup.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Content models', 'Forms', 'Sites & API keys', 'Webhooks', 'Languages'])
+    expect(setup.map((m) => i18n.t(m.labelKey, { ns: 'shell' }))).toEqual(['Content models', 'Forms', 'Sites & API keys', 'Webhooks', 'Languages', 'Members'])
   })
 
   it('shows exactly Home, Content, Media and Inbox as mobile tabs', () => {

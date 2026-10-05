@@ -6,6 +6,7 @@ import { findActiveModule, groupModules } from '@/modules/nav'
 import { Button } from '@/components/ui/button'
 import { useCommandPalette } from './command-palette-context'
 import { UserMenu } from './UserMenu'
+import { ProjectSwitcher } from '@/features/projects/components/ProjectSwitcher'
 
 export function TopBar({ modules }: { modules: AppModule[] }) {
   const { pathname } = useLocation()
@@ -15,6 +16,7 @@ export function TopBar({ modules }: { modules: AppModule[] }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur md:hidden">
+      <ProjectSwitcher variant="compact" />
       <span className="flex-1 truncate font-serif text-lg font-semibold">{active ? t(active.labelKey) : 'TheCMS'}</span>
       <Button variant="ghost" size="icon" aria-label={t('search.button')} onClick={() => setOpen(true)}>
         <Search aria-hidden />

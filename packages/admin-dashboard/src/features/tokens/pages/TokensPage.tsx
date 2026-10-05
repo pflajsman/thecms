@@ -14,6 +14,7 @@ import { apiErrorMessage } from '@/lib/api-error'
 import { formatDate } from '@/lib/format'
 import { MAX_TOKENS, mcpCommand, type AccessToken, type CreatedToken, type TokenExpiry } from '../tokens-api'
 import { useTokenWrites, useTokens } from '../tokens-queries'
+import { useOptionalProject } from '@/features/projects/ProjectContext'
 
 const EXPIRY_OPTIONS = [
   { value: '30', key: 'create.days30' },
@@ -48,6 +49,7 @@ function CopyRow({ label, value, multiline }: { label: string; value: string; mu
 
 export function TokensPage() {
   const { t } = useTranslation('tokens')
+  const project = useOptionalProject()?.project
   const tokens = useTokens()
   const writes = useTokenWrites()
   const [name, setName] = useState('')
@@ -101,7 +103,10 @@ export function TokensPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader title={t('title')} description={t('description')} />
-      <p className="rounded-lg border bg-muted/40 p-3 text-sm">{t('allows')}</p>
+      <p className="rounded-lg border bg-muted/40 p-3 text-sm">
+        {t('allows')}
+        {project && <> {t('project', { project: project.name })}</>}
+      </p>
 
       {created && (
         <section aria-label={t('created.title')} className="space-y-3 rounded-lg border border-primary/40 bg-primary/5 p-4">

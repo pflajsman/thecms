@@ -10,7 +10,8 @@
     "language": "Jazyk",
     "signOut": "Odhlásit se",
     "aiAssistant": "AI asistent",
-    "accessTokens": "Přístupové tokeny"
+    "accessTokens": "Přístupové tokeny",
+    "projects": "Projekty"
   },
   "signIn": {
     "title": "Vítejte v TheCMS",
@@ -30,7 +31,8 @@
     "products": "Produkty",
     "shopSettings": "Nastavení obchodu",
     "shipping": "Doprava",
-    "orders": "Objednávky"
+    "orders": "Objednávky",
+    "members": "Členové"
   },
   "groups": {
     "workspace": "Práce",

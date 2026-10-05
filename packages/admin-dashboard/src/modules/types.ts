@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import type { RouteObject } from 'react-router-dom'
 import type shellEn from '@/i18n/locales/en/shell.json'
+import type { Capability } from '@/features/projects/project-roles'
 
 export type NavLabelKey = `nav.${keyof typeof shellEn.nav & string}`
 export type CreateLabelKey = `create.${keyof typeof shellEn.create & string}`
@@ -21,6 +22,8 @@ export interface AppModule {
   matches?: string[]
   /** Hook returning a badge count, e.g. unread messages. */
   useBadge?: () => number | undefined
+  /** Shown only to roles with this capability in the current project. */
+  capability?: Capability
 }
 
 export interface CreateAction {
@@ -28,4 +31,5 @@ export interface CreateAction {
   labelKey: CreateLabelKey
   to: string
   icon: LucideIcon
+  capability?: Capability
 }

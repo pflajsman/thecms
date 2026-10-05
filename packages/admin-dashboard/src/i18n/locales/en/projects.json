@@ -1,0 +1,125 @@
+{
+  "roles": {
+    "OWNER": "Owner",
+    "ADMIN": "Admin",
+    "EDITOR": "Editor",
+    "VIEWER": "Viewer"
+  },
+  "roleHints": {
+    "OWNER": "Everything, including Admins and the project name",
+    "ADMIN": "Settings, models, sites and inviting people",
+    "EDITOR": "Content, media, orders and messages",
+    "VIEWER": "Can look, cannot change anything"
+  },
+  "noAccess": {
+    "title": "No project yet",
+    "text": "You are signed in as {{email}}, but you are not a member of any project. Ask a project owner to send you an invitation.",
+    "loadError": "Could not load your projects.",
+    "retry": "Retry",
+    "manage": "Manage projects",
+    "signOut": "Sign out"
+  },
+  "members": {
+    "title": "Members",
+    "description": "People who work in {{project}} and what they can do.",
+    "invite": "Invite people",
+    "rename": "Rename project",
+    "tableLabel": "Members",
+    "you": "You",
+    "roleFor": "Role of {{name}}",
+    "remove": "Remove",
+    "removeLabel": "Remove {{name}}",
+    "leave": "Leave project",
+    "loadError": "Could not load the members.",
+    "invitations": "Invitations",
+    "invitationsLabel": "Open invitations",
+    "expires": "Expires {{date}}",
+    "expired": "Expired",
+    "resend": "Resend",
+    "copyLink": "Copy link",
+    "revoke": "Revoke",
+    "actionsFor": "Actions for {{name}}"
+  },
+  "confirm": {
+    "removeTitle": "Remove {{name}}?",
+    "removeText": "{{name}} loses access to {{project}} right away, including their access tokens for it.",
+    "removeConfirm": "Remove",
+    "leaveTitle": "Leave {{project}}?",
+    "leaveText": "You lose access right away. To come back, someone has to invite you again.",
+    "leaveConfirm": "Leave project",
+    "revokeTitle": "Revoke the invitation for {{email}}?",
+    "revokeText": "The link stops working right away.",
+    "revokeConfirm": "Revoke"
+  },
+  "inviteForm": {
+    "title": "Invite people",
+    "email": "Email",
+    "role": "Role",
+    "submit": "Send invitation",
+    "emailInvalid": "Enter an email address.",
+    "sentTitle": "Invitation ready",
+    "emailSent": "We emailed the link to {{email}}.",
+    "emailNotSent": "The email could not be sent. Send this link to {{email}} yourself.",
+    "link": "Invitation link",
+    "linkHint": "The link works once and expires in 7 days.",
+    "done": "Done"
+  },
+  "renameForm": {
+    "title": "Rename project",
+    "name": "Name",
+    "nameRequired": "Enter a name of at most 100 characters.",
+    "save": "Save"
+  },
+  "toast": {
+    "roleChanged": "{{name}} is now {{role}}",
+    "removed": "{{name}} was removed",
+    "left": "You left {{project}}",
+    "resent": "Invitation sent again to {{email}}",
+    "resentNoEmail": "New link created for {{email}}. Copy it and send it yourself.",
+    "revoked": "Invitation revoked",
+    "copied": "Link copied",
+    "renamed": "Project renamed",
+    "created": "Project {{name}} created",
+    "archived": "{{name}} archived",
+    "restored": "{{name}} restored"
+  },
+  "admin": {
+    "title": "Projects",
+    "description": "Every project on this TheCMS. Only superadmins see this page.",
+    "create": "New project",
+    "tableLabel": "Projects",
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "archived": "Archived",
+    "current": "Current",
+    "open": "Open",
+    "rename": "Rename",
+    "archive": "Archive",
+    "restore": "Restore",
+    "actionsFor": "Actions for {{name}}",
+    "loadError": "Could not load the projects.",
+    "empty": "No projects yet."
+  },
+  "createForm": {
+    "title": "New project",
+    "name": "Project name",
+    "ownerEmail": "Owner's email",
+    "ownerHint": "They get an invitation to become the project's Owner and can then invite their own team.",
+    "submit": "Create project"
+  },
+  "invite": {
+    "title": "You are invited",
+    "text": "{{inviter}} invited you to {{project}} as {{role}}.",
+    "accept": "Accept invitation",
+    "invalidTitle": "This invitation is no longer valid",
+    "invalidText": "It was already used, revoked or it expired. Ask for a new one.",
+    "loadError": "Could not load the invitation.",
+    "home": "Go to TheCMS",
+    "accepted": "Welcome to {{project}}"
+  },
+  "switcher": {
+    "label": "Project",
+    "choose": "Switch project",
+    "manage": "Manage projects"
+  }
+}

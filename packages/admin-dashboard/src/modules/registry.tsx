@@ -13,6 +13,7 @@ import {
   Store,
   Truck,
   Upload,
+  Users,
   Webhook,
 } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
@@ -42,6 +43,7 @@ import { OrdersListPage } from '@/features/commerce/pages/OrdersListPage'
 import { OrderPage } from '@/features/commerce/pages/OrderPage'
 import { useOrdersNeedingAction } from '@/features/commerce/orders-queries'
 import { ShippingMethodPage } from '@/features/commerce/pages/ShippingMethodPage'
+import { MembersPage } from '@/features/projects/pages/MembersPage'
 
 export const modules: AppModule[] = [
   {
@@ -196,9 +198,18 @@ export const modules: AppModule[] = [
     path: '/languages',
     routes: [{ path: 'languages', element: <LanguagesPage /> }],
   },
+  {
+    id: 'members',
+    labelKey: 'nav.members',
+    icon: Users,
+    group: 'setup',
+    path: '/members',
+    capability: 'manageMembers',
+    routes: [{ path: 'members', element: <MembersPage /> }],
+  },
 ]
 
 export const createActions: CreateAction[] = [
-  { id: 'new-entry', labelKey: 'create.newEntry', to: '/content/new', icon: Plus },
-  { id: 'upload-media', labelKey: 'create.uploadMedia', to: '/media', icon: Upload },
+  { id: 'new-entry', labelKey: 'create.newEntry', to: '/content/new', icon: Plus, capability: 'editContent' },
+  { id: 'upload-media', labelKey: 'create.uploadMedia', to: '/media', icon: Upload, capability: 'editContent' },
 ]

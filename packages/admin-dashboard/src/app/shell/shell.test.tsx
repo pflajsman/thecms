@@ -12,6 +12,15 @@ import { UserMenu } from './UserMenu'
 import * as contentApi from '@/features/content/content-api'
 import { makeListItem, page } from '@/features/content/test-fixtures'
 
+const me = vi.hoisted(() => ({ get: vi.fn() }))
+vi.mock('@/features/projects/projects-api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/projects/projects-api')>()
+  return { ...actual, getMe: me.get }
+})
+const member = (role: 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER', projects = [{ id: 'p1', name: 'Alpha', role }]) => ({
+  entraId: 'u1', email: 'pavel@example.com', isSuperadmin: false, projects,
+})
+
 vi.mock('@/features/content/content-api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/features/content/content-api')>()
   return { ...actual, listEntries: vi.fn() }
@@ -52,6 +61,8 @@ function withPalette(ui: React.ReactElement) {
 
 beforeEach(() => {
   auth.value = { ...auth.value, isAuthenticated: true, isLoading: false }
+  me.get.mockResolvedValue(member('OWNER'))
+  localStorage.removeItem('current_project')
 })
 
 describe('Sidebar', () => {
@@ -121,10 +132,46 @@ describe('Command palette', () => {
 })
 
 describe('AppShell', () => {
-  it('skip link target can take focus', () => {
+  it('skip link target can take focus', async () => {
     auth.value = { ...auth.value, isAuthenticated: true, isLoading: false }
     renderWithProviders(<AppShell />)
+    await screen.findAllByText('Alpha')
     expect(document.getElementById('main')).toHaveAttribute('tabindex', '-1')
+  })
+
+  it('tells a signed-in user without a project to ask for an invitation', async () => {
+    me.get.mockResolvedValue(member('VIEWER', []))
+    renderWithProviders(<AppShell />)
+    expect(await screen.findByRole('heading', { name: 'No project yet' })).toBeInTheDocument()
+    expect(screen.getByText(/pavel@example.com/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
+    expect(auth.value.logout).toHaveBeenCalled()
+  })
+
+  it('shows Members to Admins only', async () => {
+    renderWithProviders(<AppShell />)
+    const nav = await screen.findByRole('navigation', { name: 'Main navigation' })
+    expect(within(nav).getByRole('link', { name: /Members/ })).toBeInTheDocument()
+  })
+
+  it('hides Members and create actions from Editors and Viewers', async () => {
+    me.get.mockResolvedValue(member('VIEWER'))
+    renderWithProviders(<AppShell />)
+    const nav = await screen.findByRole('navigation', { name: 'Main navigation' })
+    expect(within(nav).queryByRole('link', { name: /Members/ })).not.toBeInTheDocument()
+    expect(within(nav).getByRole('link', { name: /Content models/ })).toBeInTheDocument()
+  })
+
+  it('opens the stored project and switches to another one', async () => {
+    me.get.mockResolvedValue(member('OWNER', [{ id: 'p1', name: 'Alpha', role: 'OWNER' }, { id: 'p2', name: 'Beta', role: 'EDITOR' }]))
+    localStorage.setItem('current_project', 'p2')
+    renderWithProviders(<AppShell />)
+    const switcher = (await screen.findAllByRole('button', { name: 'Switch project' }))[0]
+    expect(switcher).toHaveTextContent('Beta')
+    await userEvent.click(switcher)
+    await userEvent.click(await screen.findByRole('menuitem', { name: /Alpha/ }))
+    expect((await screen.findAllByRole('button', { name: 'Switch project' }))[0]).toHaveTextContent('Alpha')
+    expect(localStorage.getItem('current_project')).toBe('p1')
   })
 
   it('shows a skeleton while auth is loading', () => {
