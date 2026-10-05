@@ -1,5 +1,6 @@
 import { Router, type IRouter } from 'express';
 import { webhooksController } from './webhooks.controller';
+import { authMiddleware } from '../../middleware/auth.middleware';
 import { validate } from '../../middleware/validation.middleware';
 import {
   createWebhookSchema,
@@ -12,6 +13,8 @@ import {
 } from './webhooks.schema';
 
 const router: IRouter = Router();
+
+router.use(authMiddleware);
 
 /**
  * @swagger
