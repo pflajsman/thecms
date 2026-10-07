@@ -37,14 +37,8 @@
   --status-unread-bg: #f7dfd5;
   --status-unread-fg: #93391a;
 
-  /* Logo tiles: warm pastels with the ink colour on top */
-  --logo-ink: #2b2620;
-  --logo-1: #f7d9c4;
-  --logo-2: #f4e3a8;
-  --logo-3: #cfe5cf;
-  --logo-4: #cfe0ee;
-  --logo-5: #e3d6ef;
-  --logo-6: #f5d3d9;
+  /* The dot inside the logo's braces */
+  --logo-dot: #e9c75f;
 }
 
 .dark {
@@ -83,12 +77,5 @@
   --status-unread-bg: #45261b;
   --status-unread-fg: #f4ab8e;
 
-  /* Slightly deeper pastels, so the tiles do not glare on the dark sidebar */
-  --logo-ink: #2b2620;
-  --logo-1: #e8c2a8;
-  --logo-2: #e2cf8c;
-  --logo-3: #b5d1b5;
-  --logo-4: #b4cbde;
-  --logo-5: #cdbde0;
-  --logo-6: #e3b8c0;
+  --logo-dot: #e2cf8c;
 }

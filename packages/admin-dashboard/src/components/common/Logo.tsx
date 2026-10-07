@@ -1,45 +1,44 @@
-const LETTERS = ['T', 'h', 'e', 'C', 'M', 'S']
-
-// Each tile is placed a little crooked, like letters cut out and stuck on by hand.
-const TILT = [-6, 4, -3, 5, -4, 3]
-const LIFT = [0, -0.08, 0.05, -0.04, 0.07, -0.06]
-
 interface LogoProps {
-  /** Height of one tile in pixels. */
+  /** Height of the brace icon in pixels; the wordmark scales with it. */
   size?: number
-  /** `full` spells TheCMS; `mark` is the single T tile, for tight spaces. */
+  /** `full` is the icon with The{CMS}; `mark` is the icon alone, for tight spaces. */
   variant?: 'full' | 'mark'
 }
 
-function Tile({ letter, index, size }: { letter: string; index: number; size: number }) {
+/** Curly braces around a dot: content leaves TheCMS as JSON through its API. */
+function Mark({ size }: { size: number }) {
   return (
-    <span
-      className="inline-grid shrink-0 place-items-center font-hand font-bold leading-none"
-      style={{
-        width: size,
-        height: size,
-        fontSize: size * 0.78,
-        color: 'var(--logo-ink)',
-        background: `var(--logo-${index + 1})`,
-        // Uneven corners keep the tiles from looking machine-cut.
-        borderRadius: `${size * 0.22}px ${size * 0.3}px ${size * 0.2}px ${size * 0.28}px`,
-        transform: `translateY(${LIFT[index] * size}px) rotate(${TILT[index]}deg)`,
-        boxShadow: '0 1px 0 rgb(43 38 32 / 0.18)',
-      }}
-    >
-      <span style={{ transform: 'translateY(-0.04em)' }}>{letter}</span>
-    </span>
+    <svg width={size} height={size} viewBox="0 0 24 24" className="shrink-0">
+      <path
+        d="M8 4.5c-2.2 0-2.6 1-2.6 3v2.2c0 1.3-.7 2.1-2 2.3 1.3.2 2 1 2 2.3v2.2c0 2 .4 3 2.6 3M16 4.5c2.2 0 2.6 1 2.6 3v2.2c0 1.3.7 2.1 2 2.3-1.3.2-2 1-2 2.3v2.2c0 2-.4 3-2.6 3"
+        fill="none"
+        stroke="var(--primary)"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="12" r="3.1" fill="var(--logo-dot)" />
+    </svg>
   )
 }
 
-/** The TheCMS logo: its letters on pastel tiles. Decorative; the surrounding link or heading carries the name. */
+/** The TheCMS logo. Decorative; the surrounding link or heading carries the name. */
 export function Logo({ size = 32, variant = 'mark' }: LogoProps) {
-  const letters = variant === 'full' ? LETTERS : LETTERS.slice(0, 1)
+  if (variant === 'mark') {
+    return (
+      <span aria-hidden className="inline-flex">
+        <Mark size={size} />
+      </span>
+    )
+  }
   return (
-    <span aria-hidden className="inline-flex shrink-0 items-center" style={{ gap: size * 0.1 }}>
-      {letters.map((letter, i) => (
-        <Tile key={letter} letter={letter} index={i} size={size} />
-      ))}
+    <span aria-hidden className="inline-flex shrink-0 items-center" style={{ gap: size * 0.32 }}>
+      <Mark size={size} />
+      <span
+        className="whitespace-nowrap font-serif font-semibold leading-none tracking-tight text-foreground"
+        style={{ fontSize: size * 0.78 }}
+      >
+        The<span className="font-sans font-medium text-primary">{'{'}</span>CMS<span className="font-sans font-medium text-primary">{'}'}</span>
+      </span>
     </span>
   )
 }

@@ -26,7 +26,7 @@ export function Sidebar({ modules }: SidebarProps) {
           <Logo />
         </span>
         <span className="hidden lg:inline-flex">
-          <Logo variant="full" size={28} />
+          <Logo variant="full" size={26} />
         </span>
       </Link>
       <ProjectSwitcher variant="sidebar" />

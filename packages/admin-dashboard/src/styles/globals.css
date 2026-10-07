@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/newsreader";
-@import "@fontsource-variable/caveat";
 @import "./tokens.css";
 @import "./prose.css";
 
@@ -11,7 +10,6 @@
 @theme inline {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Newsreader Variable", Georgia, "Times New Roman", serif;
-  --font-hand: "Caveat Variable", "Comic Sans MS", cursive;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
