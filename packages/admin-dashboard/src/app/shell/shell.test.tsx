@@ -168,10 +168,12 @@ describe('AppShell', () => {
     renderWithProviders(<AppShell />)
     const switcher = (await screen.findAllByRole('button', { name: 'Switch project' }))[0]
     expect(switcher).toHaveTextContent('Beta')
+    expect(document.title).toBe('Beta – TheCMS')
     await userEvent.click(switcher)
     await userEvent.click(await screen.findByRole('menuitem', { name: /Alpha/ }))
     expect((await screen.findAllByRole('button', { name: 'Switch project' }))[0]).toHaveTextContent('Alpha')
     expect(localStorage.getItem('current_project')).toBe('p1')
+    expect(document.title).toBe('Alpha – TheCMS')
   })
 
   it('shows a skeleton while auth is loading', () => {

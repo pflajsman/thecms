@@ -1,4 +1,4 @@
-import { createContext, Fragment, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentProjectId, getStoredProjectId, setCurrentProjectId } from '@/lib/current-project'
@@ -51,6 +51,16 @@ export function ProjectProvider({ loading, noProject, children }: ProjectProvide
     },
     [navigate],
   )
+
+  // The tab shows the project, so several open admin tabs can be told apart; it follows switches and renames.
+  const projectName = project?.name
+  useEffect(() => {
+    if (!projectName) return
+    document.title = `${projectName} – TheCMS`
+    return () => {
+      document.title = 'TheCMS'
+    }
+  }, [projectName])
 
   const value = useMemo<ProjectContextValue | undefined>(
     () =>
