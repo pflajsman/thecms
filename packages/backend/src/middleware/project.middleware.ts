@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { Response, NextFunction, RequestHandler } from 'express';
 import { isValidObjectId } from 'mongoose';
 import { AppError } from './error.middleware';
 import { AuthRequest } from './auth.middleware';
@@ -63,3 +63,15 @@ const READS = new Set(['GET', 'HEAD', 'OPTIONS']);
 /** Router-wide: reads are open to every member, anything else needs minimum. */
 export const writesNeed = (minimum: ProjectRole) => (req: ProjectRequest, res: Response, next: NextFunction) =>
   READS.has(req.method) ? next() : requireProjectRole(minimum)(req, res, next);
+
+/**
+ * Wraps a middleware that calls next from stream events, such as multer: a large body arrives over several socket
+ * events, which run outside the project context, so the rest of the request is put back inside the project.
+ */
+export const inProject =
+  (middleware: RequestHandler) =>
+  (req: ProjectRequest, res: Response, next: NextFunction): void =>
+    middleware(req, res, (err?: unknown) => {
+      if (!req.project) return next(err);
+      runInProject(req.project.id, () => next(err));
+    });

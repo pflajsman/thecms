@@ -1,7 +1,7 @@
 import { Router, type IRouter } from 'express';
 import { mediaController } from './media.controller';
 import { authMiddleware } from '../../middleware/auth.middleware';
-import { projectMiddleware, writesNeed } from '../../middleware/project.middleware';
+import { inProject, projectMiddleware, writesNeed } from '../../middleware/project.middleware';
 import { ProjectRole } from '../../models/project-member.model';
 import { upload } from '../../config/upload';
 
@@ -66,7 +66,7 @@ router.use(authMiddleware, projectMiddleware, writesNeed(ProjectRole.EDITOR));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/upload', upload.single('file'), (req, res, next) =>
+router.post('/upload', inProject(upload.single('file')), (req, res, next) =>
   mediaController.uploadMedia(req, res, next)
 );
 

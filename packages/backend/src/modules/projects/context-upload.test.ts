@@ -16,6 +16,7 @@ jest.mock('../../services/webhook.service', () => ({
 }));
 
 import request from 'supertest';
+import sharp from 'sharp';
 import { app } from '../../app';
 import { useTestDb } from '../../test/db';
 import { ProjectMemberModel, ProjectRole } from '../../models/project-member.model';
@@ -39,4 +40,20 @@ it('keeps the project through a multipart upload', async () => {
   const media = await withoutProject(() => MediaModel.findOne().lean());
   expect(String(media?.projectId)).toBe(id);
   expect(media?.filename.startsWith(`${id}/`)).toBe(true);
+});
+
+it('keeps the project through a large upload that arrives in many chunks', async () => {
+  const { id } = await ProjectsService.create({ name: 'Beta', createdBy: 'root' });
+  await ProjectMemberModel.create({ projectId: id, userId: 'anna', role: ProjectRole.EDITOR });
+  // Noise does not compress, so the file arrives in many chunks, as a real screenshot does.
+  const noise = Buffer.from(Array.from({ length: 800 * 600 * 3 }, () => Math.floor(Math.random() * 256)));
+  const png = await sharp(noise, { raw: { width: 800, height: 600, channels: 3 } }).png().toBuffer();
+  expect(png.length).toBeGreaterThan(1_000_000);
+  const res = await request(app)
+    .post('/api/v1/media/upload')
+    .set('x-project-id', id)
+    .attach('file', png, { filename: 'cover.png', contentType: 'image/png' });
+  expect([res.status, res.body.error]).toEqual([201, undefined]);
+  const media = await withoutProject(() => MediaModel.findOne({ originalName: 'cover.png' }).lean());
+  expect(String(media?.projectId)).toBe(id);
 });

@@ -3,7 +3,7 @@ import multer from 'multer';
 import { digitalUpload } from '../../config/upload';
 import { AppError } from '../../middleware/error.middleware';
 import { authMiddleware } from '../../middleware/auth.middleware';
-import { projectMiddleware, requireProjectRole, writesNeed } from '../../middleware/project.middleware';
+import { inProject, projectMiddleware, requireProjectRole, writesNeed } from '../../middleware/project.middleware';
 import { ProjectRole } from '../../models/project-member.model';
 import { validate } from '../../middleware/validation.middleware';
 import { commerceController } from './commerce.controller';
@@ -24,12 +24,13 @@ router.delete('/products/:id', (req, res, next) => commerceController.deleteProd
 router.put('/products/:id/variants', validate(variantsSchema), (req, res, next) => commerceController.replaceVariants(req, res, next));
 router.post(
   '/products/:id/file',
-  (req: Request, res: Response, next: NextFunction) =>
+  inProject((req: Request, res: Response, next: NextFunction) =>
     digitalUpload.single('file')(req, res, (err: unknown) => {
       if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') return next(new AppError('Files up to 500 MB', 400));
       if (err) return next(err);
       next();
-    }),
+    })
+  ),
   (req, res, next) => commerceController.uploadFile(req, res, next)
 );
 
