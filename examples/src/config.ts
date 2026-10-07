@@ -7,18 +7,10 @@ export interface CmsConfig {
   apiUrl: string;
   apiKey: string;
   siteTitle: string;
-  /** slug of the content type used for blog posts */
-  postsSlug: string;
+  /** slug of the content type used for portfolio projects */
+  projectsSlug: string;
   /** slug of the content type used for static page text (home intro, about) */
   pagesSlug: string;
-  /** slug of the content type used for bike trips */
-  tripsSlug: string;
-  /** slug of the contact form */
-  contactFormSlug: string;
-  /** MapTiler API key for trip maps (free tier). Empty = fall back to OSM. */
-  mapTilerKey: string;
-  /** Content language code sent as ?language= (for example "cs"). Empty = the CMS default language. */
-  contentLanguage: string;
 }
 
 declare global {
@@ -32,13 +24,9 @@ const raw = window.__CMS_CONFIG__ ?? {};
 export const config: CmsConfig = {
   apiUrl: raw.apiUrl || 'YOUR_API_URL_HERE',
   apiKey: raw.apiKey || 'YOUR_API_KEY_HERE',
-  siteTitle: raw.siteTitle || 'flajsman.cz',
-  postsSlug: raw.postsSlug || 'blog-post',
+  siteTitle: raw.siteTitle || 'FlajsmanLab',
+  projectsSlug: raw.projectsSlug || 'project',
   pagesSlug: raw.pagesSlug || 'page',
-  tripsSlug: raw.tripsSlug || 'trip',
-  contactFormSlug: raw.contactFormSlug || 'contact-us',
-  mapTilerKey: raw.mapTilerKey || '',
-  contentLanguage: raw.contentLanguage || '',
 };
 
 /** True when the site hasn't been configured with a real API key yet. */

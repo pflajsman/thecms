@@ -5,7 +5,7 @@ export const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 min — blog content changes rarely
+      staleTime: 5 * 60 * 1000, // 5 min, portfolio content changes rarely
     },
   },
 });

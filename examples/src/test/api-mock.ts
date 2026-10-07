@@ -9,7 +9,8 @@ type Handler = (body: never, url: URL) => MockResult | Promise<MockResult>;
 export const ok = (data: unknown, status = 200): MockResult => ({ status, body: { success: true, data } });
 
 const defaults: Record<string, Handler> = {
-  'GET /shop/settings': () => ok({ currencies: [{ code: 'CZK', decimals: 2 }], defaultCurrency: 'CZK' }),
+  'GET /content/page': () => ({ body: { success: true, data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } } }),
+  'GET /media/:id': (_b, url) => ok({ id: url.pathname.split('/').pop(), url: 'http://cdn.test/img.png', originalName: 'img.png', width: 1600, height: 1000 }),
 };
 
 function matches(pattern: string, key: string): boolean {

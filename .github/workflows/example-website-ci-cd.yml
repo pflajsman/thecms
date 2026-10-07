@@ -26,10 +26,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Test blog
+      - name: Test portfolio
         run: pnpm --filter blog-flajsman test
 
-      - name: Build blog
+      - name: Build portfolio
         run: pnpm --filter blog-flajsman build
 
       - name: Generate config.js from secrets
@@ -39,12 +39,8 @@ jobs:
             apiUrl: "${{ secrets.EXAMPLE_CMS_API_URL }}",
             apiKey: "${{ secrets.EXAMPLE_CMS_API_KEY }}",
             siteTitle: "${{ secrets.EXAMPLE_CMS_SITE_TITLE }}",
-            postsSlug: "${{ secrets.EXAMPLE_CMS_POSTS_SLUG }}",
+            projectsSlug: "${{ secrets.EXAMPLE_CMS_PROJECTS_SLUG }}",
             pagesSlug: "${{ secrets.EXAMPLE_CMS_PAGES_SLUG }}",
-            tripsSlug: "${{ secrets.EXAMPLE_CMS_TRIPS_SLUG }}",
-            contactFormSlug: "${{ secrets.EXAMPLE_CMS_CONTACT_FORM_SLUG }}",
-            mapTilerKey: "${{ secrets.EXAMPLE_MAPTILER_KEY }}",
-            contentLanguage: "${{ secrets.EXAMPLE_CMS_CONTENT_LANGUAGE }}",
           };
           EOF
 

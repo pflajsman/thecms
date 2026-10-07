@@ -8,8 +8,12 @@ export interface Pagination {
 }
 
 export interface Entry {
+  /** Id of this language version. */
   id: string;
+  /** Id shared by all language versions of the entry. */
+  itemId?: string;
   contentTypeId: string;
+  language?: string;
   status: string;
   publishedAt?: string;
   createdAt: string;
@@ -23,39 +27,38 @@ export interface EntryList {
   pagination: Pagination;
 }
 
-export type FormFieldType =
-  | 'TEXT'
-  | 'EMAIL'
-  | 'TEXTAREA'
-  | 'SELECT'
-  | 'NUMBER'
-  | 'CHECKBOX'
-  | 'DATE';
-
-export interface FormField {
-  name: string;
-  type: FormFieldType;
-  label: string;
-  placeholder?: string;
-  required: boolean;
-  options?: string[];
+export interface Media {
+  id: string;
+  url: string;
+  originalName: string;
+  mimeType?: string;
+  width?: number;
+  height?: number;
 }
 
-export interface ContactForm {
-  name: string;
-  description?: string;
-  fields: FormField[];
-}
+export const TINTS = ['blue', 'lilac', 'blush', 'sun', 'mint'] as const;
+export type Tint = (typeof TINTS)[number];
 
-/** A blog post, normalised from an Entry's dynamic data. */
-export interface Post {
+/** A portfolio project, normalised from an Entry's dynamic data. */
+export interface Project {
+  /** The shared item id, so links work in both languages. */
   id: string;
   title: string;
-  excerpt: string;
+  summary: string;
   body: string;
-  coverImage?: string;
-  author?: string;
+  /** Media id of the cover image. */
+  cover?: string;
+  /** Media ids of further images. */
+  gallery: string[];
   tags: string[];
+  year?: number;
+  role?: string;
+  liveUrl?: string;
+  repoUrl?: string;
+  /** Lower comes first; projects without one follow, newest year first. */
+  order?: number;
+  /** Background of the project's plate; unset projects take turns. */
+  tint?: Tint;
   date: string;
 }
 
@@ -65,16 +68,6 @@ export interface Page {
   title: string;
   subtitle: string;
   body: string;
-}
-
-/** A bike trip, normalised from an Entry's dynamic data. */
-export interface Trip {
-  id: string;
-  title: string;
-  summary: string;
-  body: string;
-  /** URL of the uploaded .gpx track (from a MEDIA field). */
-  gpxUrl?: string;
-  distanceKm?: number;
-  date: string;
+  /** Media id of the page image (the portrait on About). */
+  image?: string;
 }

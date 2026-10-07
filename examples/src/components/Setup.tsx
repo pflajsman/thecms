@@ -3,23 +3,18 @@ export function Setup() {
   return (
     <div className="container">
       <div className="setup">
-        <h2 style={{ marginBottom: 12 }}>Nastavení</h2>
-        <p className="mono" style={{ fontSize: '0.85rem' }}>
-          Chybí <code>config.js</code> nebo API klíč.
-        </p>
-        <p style={{ marginTop: 12, color: 'var(--muted)' }}>
-          Pro lokální vývoj uprav <code>public/config.js</code>:
+        <h1>Setup</h1>
+        <p>
+          <code>config.js</code> or the API key is missing. For local development, edit <code>public/config.js</code>:
         </p>
         <pre>{`window.__CMS_CONFIG__ = {
   apiUrl: "https://your-backend.azurecontainerapps.io/api/v1/public",
-  apiKey: "cms_your_api_key_here",
-  siteTitle: "flajsman.cz",
-  postsSlug: "blog-post",
-  contactFormSlug: "contact-us",
+  apiKey: "cms_your_flajsmanlab_api_key",
+  siteTitle: "FlajsmanLab",
+  projectsSlug: "project",
+  pagesSlug: "page",
 };`}</pre>
-        <p style={{ marginTop: 16, color: 'var(--muted)' }}>
-          V produkci se hodnoty generují z GitHub secrets při nasazení.
-        </p>
+        <p>In production the values are generated from GitHub secrets at deploy time.</p>
       </div>
     </div>
   );

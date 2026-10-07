@@ -1,7 +1,8 @@
-# flajsman.cz — personal blog
+# FlajsmanLab: portfolio
 
-A static React (Vite) single-page app that renders blog content live from
-**TheCMS** public API. Black & white, lime accent, Space Grotesk typography.
+A static React (Vite) single-page app that renders Pavel Flajšman's portfolio
+live from the **TheCMS** public API, in Czech and English. Pastel plates, deep
+violet ink and one blue for actions, set in Onest (after the Pastel Webflow template).
 
 ## Architecture
 
@@ -9,38 +10,32 @@ A static React (Vite) single-page app that renders blog content live from
 examples/
 ├─ index.html              # entry; loads /config.js then the app, pulls in fonts
 ├─ public/
-│  └─ config.js            # runtime config (gitignored; placeholder for local dev)
+│  └─ config.js            # runtime config (gitignored; create it for local dev)
 ├─ src/
 │  ├─ main.tsx             # React + React Query providers
-│  ├─ App.tsx              # router + setup gate
+│  ├─ App.tsx              # routes and setup gate
 │  ├─ config.ts            # reads window.__CMS_CONFIG__
+│  ├─ i18n.ts              # languages, UI strings, localized paths
 │  ├─ types/               # API + domain types
-│  ├─ lib/
-│  │  ├─ cms.ts            # typed public-API client + Entry→Post normaliser
-│  │  ├─ queryClient.ts
-│  │  └─ format.ts
-│  ├─ hooks/usePosts.ts    # React Query hooks (posts, post, contact form)
-│  ├─ components/          # Header, Footer, Layout, PostRow, RichText, Setup, Spinner
-│  ├─ pages/               # Home, Post, About, Contact, NotFound
-│  └─ styles/global.css    # design system
-└─ staticwebapp.config.json
+│  ├─ lib/cms.ts           # typed public-API client + Entry→Project normaliser
+│  ├─ hooks/useContent.ts  # React Query hooks (projects, project, page, media)
+│  ├─ components/          # Header, Footer, Layout, ProjectCard, MediaImage, LabMark, ...
+│  ├─ pages/               # Projects, Project, About, NotFound
+│  └─ styles/global.css    # design tokens and styles
 ```
 
-**Data flow:** components → React Query hooks → `cms` client → TheCMS
-`/api/v1/public/*` endpoints. Posts come from a content type (slug `postsSlug`);
-each entry's dynamic `data` is normalised into a typed `Post` in `cms.ts`
-(`toPost`), tolerant of field-name variations (`title`/`name`, `body`/`content`,
-`excerpt`/`summary`, `coverImage`/`image`).
+**Routes:** `/` redirects to `/cs` for Czech or Slovak browsers and to `/en` otherwise.
 
-## Shop
+| Czech | English | Page |
+|---|---|---|
+| `/cs` | `/en` | Projects, with a technology filter (`?tag=React`) |
+| `/cs/projekty/:id` | `/en/projects/:id` | Project detail |
+| `/cs/o-mne` | `/en/about` | About |
 
-The shop lives in `src/shop/` and uses the TheCMS public shop API with the same API key:
-
-- `/obchod` products, `/obchod/:id` product detail, `/kosik` cart, `/pokladna` checkout
-- `/objednavka/:number?t=<token>` order status (the personal link shown after ordering)
-- `/obchodni-podminky` terms: a page entry with key `obchodni-podminky` in the pages content type; write the seller details, terms and withdrawal information there
-
-The cart is kept in the browser (`flajsman.cart.v1` in localStorage) and holds only variant ids and quantities; prices always come from the API.
+The header switch opens the same page in the other language. Project links use
+the entry's shared item id, so they work in both languages. Every content
+request sends `?language=cs|en`; an entry without a published version in that
+language comes in the CMS default language.
 
 Tests: `pnpm --filter blog-flajsman test`.
 
@@ -48,39 +43,52 @@ Tests: `pnpm --filter blog-flajsman test`.
 
 ```bash
 pnpm install
-cp examples/config.example.js examples/public/config.js   # fill in apiUrl + apiKey
+cat > examples/public/config.js <<'EOF'
+window.__CMS_CONFIG__ = {
+  apiUrl: "https://<backend>/api/v1/public",
+  apiKey: "<FlajsmanLab site API key>",
+  siteTitle: "FlajsmanLab",
+};
+EOF
 pnpm --filter blog-flajsman dev
 ```
 
-Without a real `config.js` the app shows a Setup screen.
+Without a real `config.js` the app shows a Setup screen. The site's allowed
+origins in the admin must include `http://localhost:5173`.
 
-## CMS setup (admin dashboard)
+## CMS setup (FlajsmanLab project in the admin)
 
-- **Content type** `blog-post` with fields: `title` (TEXT, required),
-  `excerpt` (TEXT), `coverImage` (TEXT/MEDIA url), `author` (TEXT),
-  `tags` (TEXT), `body` (RICH_TEXT, required). Publish entries.
-- **Content type** `page` for static page text, fields: `key` (TEXT, required —
-  e.g. `home` or `about`), `title` (TEXT), `subtitle` (TEXT, used for the home
-  tagline), `body` (RICH_TEXT, used for the about text). Create one published
-  entry with `key=home` and one with `key=about`. Pages fall back to built-in
-  copy if absent.
-- **Content type** `trip` for bike trips, fields: `title` (TEXT, required),
-  `summary` (TEXT), `gpxUrl` (TEXT — either a media **id** of a `.gpx` uploaded
-  to the Media Library, or a full public URL), `distanceKm` (NUMBER, optional —
-  auto-computed from the GPX if empty), `body` (RICH_TEXT). The route is drawn
-  with Leaflet from the GPX, and a "Stáhnout GPX" download button is shown.
-  Media ids are resolved to file URLs via `GET /api/v1/public/media/:id`.
-  The basemap uses MapTiler (monochrome "toner" style) when `mapTilerKey` is
-  set, otherwise falls back to OpenStreetMap. Get a free key at maptiler.com.
-- **Contact form** slug `contact-us` (any fields; the form renders itself).
-- **Content language** (optional): `contentLanguage: "cs"` in `config.js` asks the
-  CMS for Czech versions of entries (`?language=cs`). Entries without a published
-  Czech version come in the CMS default language. Empty or missing = the default language.
+1. **Languages:** add Czech (`cs`). English (`en`) is the default.
+2. **Content type `project`** (title field `title`):
+
+   | Field | Type | Localized | Notes |
+   |---|---|---|---|
+   | `title` | TEXT, required | yes | |
+   | `summary` | TEXT | yes | one or two sentences for the card |
+   | `body` | RICH_TEXT | yes | the project story |
+   | `role` | TEXT | yes | e.g. "Autor", "Frontend" |
+   | `cover` | MEDIA | no | card and detail image, ideally 16:10 |
+   | `gallery` | MEDIA, multiple | no | further screenshots |
+   | `tags` | TEXT | no | comma-separated: `React, Node, Azure`; feeds the filter |
+   | `year` | NUMBER | no | |
+   | `liveUrl` | TEXT | no | "Visit site" button |
+   | `repoUrl` | TEXT | no | "Source code" button |
+   | `order` | NUMBER | no | lower first; projects without it follow, newest year first |
+   | `tint` | TEXT | no | plate colour: `blue`, `lilac`, `blush`, `sun` or `mint`; empty takes turns |
+
+3. **Content type `page`** for page text: `key` (TEXT, required, not localized),
+   `title` (TEXT), `subtitle` (TEXT), `body` (RICH_TEXT), `image` (MEDIA, not localized).
+   - `key=home`: `title` and `subtitle` are the hero on the projects page.
+   - `key=about`: the About page; `image` is the portrait.
+
+   Both fall back to built-in copy if absent.
+4. Publish each entry in both languages.
 
 ## Deploy
 
-Push to `main` with changes under `examples/**`. CI builds the app and injects
-`config.js` from these GitHub secrets:
-`EXAMPLE_CMS_API_URL`, `EXAMPLE_CMS_API_KEY`, `EXAMPLE_CMS_SITE_TITLE`,
-`EXAMPLE_CMS_POSTS_SLUG`, `EXAMPLE_CMS_CONTACT_FORM_SLUG`,
-`EXAMPLE_CMS_CONTENT_LANGUAGE` (optional), plus `AZURE_EXAMPLE_WEB_APPS_API_TOKEN`.
+Push to `main` with changes under `examples/**`. CI tests and builds the app
+and injects `config.js` from these GitHub secrets:
+`EXAMPLE_CMS_API_URL`, `EXAMPLE_CMS_API_KEY` (the FlajsmanLab site key),
+`EXAMPLE_CMS_SITE_TITLE` (`FlajsmanLab`), `EXAMPLE_CMS_PROJECTS_SLUG` and
+`EXAMPLE_CMS_PAGES_SLUG` (optional, default `project` and `page`), plus
+`AZURE_EXAMPLE_WEB_APPS_API_TOKEN`.

@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom';
+import { paths, useLang } from '../i18n';
 
 export function NotFound() {
+  const { lang, t } = useLang();
   return (
-    <section className="article">
-      <div className="container" style={{ textAlign: 'center', padding: '96px 0' }}>
-        <h1 className="display" style={{ fontSize: 'clamp(3rem, 12vw, 7rem)' }}>
-          404
-        </h1>
-        <p style={{ color: 'var(--muted)', marginTop: 16 }}>Tahle stránka neexistuje.</p>
-        <Link to="/" className="btn" style={{ marginTop: 28 }}>
-          Domů
-        </Link>
-      </div>
+    <section className="container page not-found">
+      <p className="not-found-code" aria-hidden="true">
+        404
+      </p>
+      <h1>{t.notFound.title}</h1>
+      <Link to={paths.home(lang)} className="btn">
+        {t.notFound.home}
+      </Link>
     </section>
   );
 }

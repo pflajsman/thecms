@@ -1,54 +1,39 @@
 import { config } from '../config';
-import type { ContactForm, Entry, EntryList, Page, Post, Trip } from '../types';
+import type { Lang } from '../i18n';
+import { TINTS, type Entry, type EntryList, type Media, type Page, type Project, type Tint } from '../types';
 
-/** A non-2xx answer from the API, with the error body (for example `reason: 'PRICE_CHANGED'`). */
+/** A non-2xx answer from the API. */
 export class ApiError extends Error {
   status: number;
-  body: Record<string, unknown>;
 
-  constructor(message: string, status: number, body: Record<string, unknown>) {
+  constructor(message: string, status: number) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
-    this.body = body;
-  }
-
-  get reason(): string | undefined {
-    return typeof this.body.reason === 'string' ? this.body.reason : undefined;
   }
 }
 
-export interface RequestOptions {
-  method?: 'GET' | 'POST';
-  body?: unknown;
-  headers?: Record<string, string>;
-}
-
-/** Low-level fetch against the TheCMS public API. */
-export async function request<T>(endpoint: string, params: Record<string, unknown> = {}, options: RequestOptions = {}): Promise<T> {
+/** Low-level GET against the TheCMS public API. */
+export async function request<T>(endpoint: string, params: Record<string, unknown> = {}): Promise<T> {
   const url = new URL(`${config.apiUrl}${endpoint}`);
-  // Content requests ask for the configured language; the CMS falls back to its default language.
-  const all = endpoint.startsWith('/content/') ? { language: config.contentLanguage, ...params } : params;
-  for (const [k, v] of Object.entries(all)) {
+  for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
   }
-
-  const headers: Record<string, string> = { 'X-API-Key': config.apiKey, ...options.headers };
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  const res = await fetch(url, {
-    method: options.method ?? 'GET',
-    headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-  });
+  const res = await fetch(url, { headers: { 'X-API-Key': config.apiKey } });
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-    throw new ApiError(typeof body.error === 'string' ? body.error : `API error ${res.status}`, res.status, body);
+    const body = (await res.json().catch(() => ({}))) as { error?: unknown };
+    throw new ApiError(typeof body.error === 'string' ? body.error : `API error ${res.status}`, res.status);
   }
   return res.json() as Promise<T>;
 }
 
 function str(v: unknown): string {
-  return typeof v === 'string' ? v : v == null ? '' : String(v);
+  return typeof v === 'string' ? v.trim() : v == null ? '' : String(v);
+}
+
+function num(v: unknown): number | undefined {
+  const n = typeof v === 'number' ? v : parseFloat(str(v));
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function stripHtml(html: string): string {
@@ -57,83 +42,98 @@ function stripHtml(html: string): string {
   return div.textContent || '';
 }
 
-/**
- * Case-insensitive field lookup. The admin lowercases content-type field names
- * (e.g. `gpxUrl` is stored as `gpxurl`), so match keys ignoring case. Returns
- * the value of the first matching candidate.
- */
+/** Case-insensitive field lookup; returns the value of the first non-empty candidate. */
 function pick(data: Record<string, unknown>, ...candidates: string[]): unknown {
   const lower: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) lower[k.toLowerCase()] = v;
   for (const c of candidates) {
     const v = lower[c.toLowerCase()];
-    if (v !== undefined && v !== null && v !== '') return v;
+    if (v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)) return v;
   }
   return undefined;
 }
 
-/** Normalise a raw CMS entry into a typed Post, tolerant of field-name variations. */
-export function toPost(entry: Entry): Post {
-  const d = entry.data ?? {};
-  const body = str(pick(d, 'body', 'content'));
-  const excerptRaw = str(pick(d, 'excerpt', 'summary')) || stripHtml(body).slice(0, 200);
-  const tagsVal = pick(d, 'tags');
-  const tags = Array.isArray(tagsVal) ? tagsVal.map(str) : str(tagsVal) ? [str(tagsVal)] : [];
+/** A MEDIA field holds one id, or a list of ids when it allows several. */
+function ids(v: unknown): string[] {
+  return (Array.isArray(v) ? v : [v]).map(str).filter(Boolean);
+}
 
+/** Tags are a comma-separated text field ("React, TypeScript"). */
+export function splitTags(v: unknown): string[] {
+  const parts = Array.isArray(v) ? v.map(str) : str(v).split(',');
+  return [...new Set(parts.map((p) => p.trim()).filter(Boolean))];
+}
+
+function toTint(v: unknown): Tint | undefined {
+  const value = str(v).toLowerCase();
+  return (TINTS as readonly string[]).includes(value) ? (value as Tint) : undefined;
+}
+
+/** Normalise a raw CMS entry into a typed Project. */
+export function toProject(entry: Entry): Project {
+  const d = entry.data ?? {};
+  const body = str(pick(d, 'body', 'content', 'description'));
+  const [cover, ...rest] = ids(pick(d, 'cover', 'coverImage', 'image'));
   return {
-    id: entry.id,
-    title: str(pick(d, 'title', 'name')) || 'Bez názvu',
-    excerpt: excerptRaw,
+    id: entry.itemId || entry.id,
+    title: str(pick(d, 'title', 'name')),
+    summary: str(pick(d, 'summary', 'excerpt', 'perex')) || stripHtml(body).slice(0, 180),
     body,
-    coverImage: str(pick(d, 'coverImage', 'image')) || undefined,
-    author: str(pick(d, 'author')) || undefined,
-    tags,
+    cover,
+    gallery: [...rest, ...ids(pick(d, 'gallery', 'images'))],
+    tags: splitTags(pick(d, 'tags', 'stack', 'technologies')),
+    year: num(pick(d, 'year')),
+    role: str(pick(d, 'role')) || undefined,
+    liveUrl: str(pick(d, 'liveUrl', 'url', 'website')) || undefined,
+    repoUrl: str(pick(d, 'repoUrl', 'repo', 'github')) || undefined,
+    order: num(pick(d, 'order')),
+    tint: toTint(pick(d, 'tint', 'color')),
     date: entry.publishedAt || entry.createdAt,
   };
 }
 
-function toNum(v: unknown): number | undefined {
-  const n = typeof v === 'number' ? v : parseFloat(str(v));
-  return Number.isFinite(n) ? n : undefined;
+/** Projects with an order first (ascending), then the rest, newest year and publication first. */
+export function sortProjects(projects: Project[]): Project[] {
+  return [...projects].sort((a, b) => {
+    if (a.order !== undefined || b.order !== undefined) {
+      if (a.order === undefined) return 1;
+      if (b.order === undefined) return -1;
+      if (a.order !== b.order) return a.order - b.order;
+    }
+    if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
+    return b.date.localeCompare(a.date);
+  });
 }
 
-/** Normalise a raw CMS entry into a typed Trip. */
-export function toTrip(entry: Entry): Trip {
-  const d = entry.data ?? {};
-  const body = str(pick(d, 'body', 'content'));
-  return {
-    id: entry.id,
-    title: str(pick(d, 'title', 'name')) || 'Bez názvu',
-    summary: str(pick(d, 'summary', 'excerpt')) || stripHtml(body).slice(0, 160),
-    body,
-    gpxUrl: str(pick(d, 'gpxUrl', 'gpx', 'track')) || undefined,
-    distanceKm: toNum(pick(d, 'distanceKm', 'distance')),
-    date: entry.publishedAt || entry.createdAt,
-  };
+/** The plate colour of a project: its own tint, or the next one in turn. */
+export function tintFor(project: Project, index: number): Tint {
+  return project.tint ?? TINTS[index % TINTS.length];
 }
 
 export const cms = {
-  async listPosts(page = 1, limit = 10): Promise<{ posts: Post[]; total: number; totalPages: number }> {
-    const res = await request<EntryList>(`/content/${config.postsSlug}`, { page, limit });
-    return {
-      posts: (res.data ?? []).map(toPost),
-      total: res.pagination?.total ?? 0,
-      totalPages: res.pagination?.totalPages ?? 1,
-    };
+  async listProjects(lang: Lang): Promise<Project[]> {
+    const res = await request<EntryList>(`/content/${config.projectsSlug}`, { language: lang, limit: 200 });
+    return sortProjects((res.data ?? []).map(toProject));
   },
 
-  async getPost(id: string): Promise<Post> {
-    const res = await request<{ data: Entry }>(`/content/${config.postsSlug}/${id}`);
-    return toPost(res.data);
+  /** Accepts the shared item id or any language version id. */
+  async getProject(lang: Lang, id: string): Promise<Project> {
+    const res = await request<{ data: Entry }>(`/content/${config.projectsSlug}/${id}`, { language: lang });
+    return toProject(res.data);
   },
 
   /**
-   * Fetch a single static page by its `key` field (e.g. "home", "about").
-   * Returns null if the page content type or matching entry doesn't exist,
-   * so callers can fall back to built-in defaults.
+   * A static page by its `key` field (e.g. "home", "about"). Null when the page
+   * content type or the entry does not exist, so callers fall back to built-in copy.
    */
-  async getPageByKey(key: string): Promise<Page | null> {
-    const res = await request<EntryList>(`/content/${config.pagesSlug}`, { limit: 50 });
+  async getPageByKey(lang: Lang, key: string): Promise<Page | null> {
+    let res: EntryList;
+    try {
+      res = await request<EntryList>(`/content/${config.pagesSlug}`, { language: lang, limit: 50 });
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) return null;
+      throw err;
+    }
     const entry = (res.data ?? []).find((e) => str(pick(e.data ?? {}, 'key')) === key);
     if (!entry) return null;
     const d = entry.data ?? {};
@@ -142,58 +142,12 @@ export const cms = {
       title: str(pick(d, 'title')),
       subtitle: str(pick(d, 'subtitle', 'tagline')),
       body: str(pick(d, 'body', 'content')),
+      image: ids(pick(d, 'image', 'photo', 'portrait'))[0],
     };
   },
 
-  async listTrips(page = 1, limit = 20): Promise<{ trips: Trip[]; total: number; totalPages: number }> {
-    const res = await request<EntryList>(`/content/${config.tripsSlug}`, { page, limit });
-    return {
-      trips: (res.data ?? []).map(toTrip),
-      total: res.pagination?.total ?? 0,
-      totalPages: res.pagination?.totalPages ?? 1,
-    };
-  },
-
-  async getTrip(id: string): Promise<Trip> {
-    const res = await request<{ data: Entry }>(`/content/${config.tripsSlug}/${id}`);
-    return toTrip(res.data);
-  },
-
-  /**
-   * Resolve a media reference to a downloadable file URL + name.
-   * Accepts either a full URL (returned as-is) or a media id (resolved via the
-   * public media endpoint).
-   */
-  async resolveMedia(ref: string): Promise<{ url: string; filename: string } | null> {
-    const value = (ref || '').trim();
-    if (!value) return null;
-    if (/^https?:\/\//i.test(value)) {
-      return { url: value, filename: value.split('/').pop() || 'track.gpx' };
-    }
-    if (/^[a-f0-9]{24}$/i.test(value)) {
-      // Throws on failure so the UI can show a real error instead of silently
-      // pretending there's no track.
-      const res = await request<{ data: { url: string; originalName: string } }>(`/media/${value}`);
-      return { url: res.data.url, filename: res.data.originalName || 'track.gpx' };
-    }
-    // Unrecognised format (not a URL, not a 24-char id)
-    throw new Error(`Neplatná hodnota gpxUrl: "${value}" (očekává se ID média nebo URL).`);
-  },
-
-  async getContactForm(): Promise<ContactForm> {
-    const res = await request<{ data: ContactForm }>(`/forms/${config.contactFormSlug}`);
+  async getMedia(id: string): Promise<Media> {
+    const res = await request<{ data: Media }>(`/media/${id}`);
     return res.data;
-  },
-
-  async submitContactForm(values: Record<string, unknown>): Promise<void> {
-    const res = await fetch(`${config.apiUrl}/forms/${config.contactFormSlug}/submit`, {
-      method: 'POST',
-      headers: { 'X-API-Key': config.apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error((body as { error?: string }).error || `Odeslání selhalo (${res.status})`);
-    }
   },
 };

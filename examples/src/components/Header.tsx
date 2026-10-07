@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { CartLink } from '../shop/components/CartLink';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { LabMark } from './LabMark';
+import { LANGS, paths, translatePath, useLang } from '../i18n';
+import { config } from '../config';
 
 export function Header() {
+  const { lang, t } = useLang();
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
@@ -10,14 +13,6 @@ export function Header() {
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
-
-  // Lock body scroll while the mobile menu overlay is open.
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [open]);
 
   // Close on Escape for keyboard users.
   useEffect(() => {
@@ -31,38 +26,45 @@ export function Header() {
 
   return (
     <header className="site-header">
-      <div className="container-wide inner">
-        <NavLink to="/" className="logo">
-          flajsman<span className="dot">.cz</span>
-        </NavLink>
+      <div className="container inner">
+        <Link to={paths.home(lang)} className="logo">
+          <LabMark className="logo-mark" />
+          {config.siteTitle}
+        </Link>
 
         <nav className={`site-nav ${open ? 'is-open' : ''}`} id="site-nav">
-          <NavLink to="/" end>
-            psaní
+          <NavLink to={paths.home(lang)} end>
+            {t.nav.projects}
           </NavLink>
-          <NavLink to="/trips">na kole</NavLink>
-          <NavLink to="/obchod">obchod</NavLink>
-          <NavLink to="/about">o mně</NavLink>
-          <NavLink to="/contact">kontakt</NavLink>
+          <NavLink to={paths.about(lang)}>{t.nav.about}</NavLink>
+          <div className="lang-switch" role="group" aria-label={t.langName}>
+            {LANGS.map((l) => (
+              <Link
+                key={l}
+                to={translatePath(location.pathname, l) + location.search}
+                hrefLang={l}
+                lang={l}
+                aria-current={l === lang ? 'true' : undefined}
+                aria-label={l === lang ? undefined : t.nav.switchTo}
+              >
+                {l.toUpperCase()}
+              </Link>
+            ))}
+          </div>
         </nav>
-
-        <CartLink />
 
         <button
           type="button"
-          className={`nav-toggle ${open ? 'is-open' : ''}`}
-          aria-label={open ? 'Zavřít menu' : 'Otevřít menu'}
+          className="nav-toggle"
+          aria-label={open ? t.menuClose : t.menuOpen}
           aria-expanded={open}
           aria-controls="site-nav"
           onClick={() => setOpen((o) => !o)}
         >
-          <span className="nav-toggle-bar" />
-          <span className="nav-toggle-bar" />
-          <span className="nav-toggle-bar" />
+          <span />
+          <span />
         </button>
       </div>
-
-      {open && <div className="nav-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />}
     </header>
   );
 }
