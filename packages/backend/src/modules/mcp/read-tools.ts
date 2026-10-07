@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { ContentTypeModel } from '../../models/content-type.model';
+import { ContentTypeModel, type IContentType } from '../../models/content-type.model';
 import { ContentStatus, type IContentEntry } from '../../models/content-entry.model';
 import { AppError } from '../../middleware/error.middleware';
 import { LanguagesService } from '../languages/languages.service';
@@ -20,6 +20,17 @@ export async function resolveType(ref: string) {
   const type = byId ?? (await ContentTypeModel.findOne({ slug: ref }).lean());
   if (!type) throw new AppError(`Unknown content type '${ref}'. Use list_content_types to see the slugs.`, 404);
   return type;
+}
+
+/** A content type with its fields, as list_content_types shows it. */
+export function describeType(t: Pick<IContentType, '_id' | 'name' | 'slug' | 'titleField' | 'fields'>) {
+  return {
+    id: String(t._id),
+    name: t.name,
+    slug: t.slug,
+    titleField: t.titleField,
+    fields: t.fields.map((f) => ({ name: f.name, label: f.label, type: f.type, required: f.required, localized: isLocalized(f), validation: f.validation })),
+  };
 }
 
 export interface EntryDetails {
@@ -63,13 +74,7 @@ export function registerReadTools(server: McpServer, ctx: McpContext): void {
     async () => {
       const { data } = await contentTypesService.listContentTypes({ limit: 100 });
       return {
-        contentTypes: data.map((t) => ({
-          id: String(t._id),
-          name: t.name,
-          slug: t.slug,
-          titleField: t.titleField,
-          fields: t.fields.map((f) => ({ name: f.name, label: f.label, type: f.type, required: f.required, localized: isLocalized(f), validation: f.validation })),
-        })),
+        contentTypes: data.map(describeType),
       };
     }
   );
