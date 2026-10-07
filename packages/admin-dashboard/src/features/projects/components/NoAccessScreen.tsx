@@ -14,7 +14,7 @@ export function NoAccessScreen({ me, onRetry }: { me: Me | undefined; onRetry: (
     <main className="grid min-h-dvh place-items-center bg-background px-4">
       <div className="w-full max-w-md rounded-2xl border bg-card p-8 text-center shadow-sm">
         <div className="mb-4 flex justify-center">
-          <Logo size={56} />
+          <Logo variant="full" size={44} />
         </div>
         {me ? (
           <>

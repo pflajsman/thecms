@@ -11,7 +11,7 @@ export function SignInScreen() {
     <main className="grid min-h-dvh place-items-center bg-background px-4">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 text-center shadow-sm">
         <div className="mb-4 flex justify-center">
-          <Logo size={56} />
+          <Logo variant="full" size={44} />
         </div>
         <h1 className="font-serif text-3xl font-semibold">{t('signIn.title')}</h1>
         <p className="mt-2 text-muted-foreground">{t('signIn.subtitle')}</p>

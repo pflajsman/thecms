@@ -21,9 +21,13 @@ export function Sidebar({ modules }: SidebarProps) {
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-16 shrink-0 flex-col bg-sidebar px-2 py-4 text-sidebar-foreground md:flex lg:w-60 lg:px-3">
-      <Link to="/" className="mb-4 flex items-center gap-2 px-2 text-foreground">
-        <Logo />
-        <span className="hidden font-serif text-lg font-semibold lg:inline">TheCMS</span>
+      <Link to="/" aria-label="TheCMS" className="mb-4 flex items-center px-2 py-1 text-foreground">
+        <span className="lg:hidden">
+          <Logo />
+        </span>
+        <span className="hidden lg:inline-flex">
+          <Logo variant="full" size={28} />
+        </span>
       </Link>
       <ProjectSwitcher variant="sidebar" />
       <button
